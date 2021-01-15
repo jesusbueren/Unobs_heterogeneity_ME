@@ -63,8 +63,8 @@ subroutine estimation(params_MLE)
     !Change parameters to the (-Inf;Inf) real line
     do p_l=1,par+1
         p_g(p_l,1)=log(p_g(p_l,1))
-        p_g(p_l,2:3)=log(p_g(p_l,2:3)/(1.0d0-p_g(p_l,2:3)))
-        !p_g(p_l,3)=log(-p_g(p_l,3)+1.d0)
+        p_g(p_l,2)=log(p_g(p_l,2)/(1.0d0-p_g(p_l,2)))
+        p_g(p_l,3)=log(-p_g(p_l,3)+1.d0)
         !p_g(p_l,4)=log(p_g(p_l,4))
         y(p_l)=log_likelihood(p_g(p_l,:))
     end do 
@@ -75,8 +75,8 @@ subroutine estimation(params_MLE)
     call amoeba(p_g,y,ftol,log_likelihood,iter)
     
     p_g(:,1)=exp(p_g(:,1))
-    p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
-    !p_g(:,3)=-(exp(p_g(:,3))-1.0d0)
+    p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
+    p_g(:,3)=-(exp(p_g(:,3))-1.0d0)
     !p_g(:,4)=exp(p_g(:,4))
     print*,'estimated parameter',p_g(1,:)
     print*,'likelihood value',y(1)
@@ -136,8 +136,8 @@ function log_likelihood(params_MLE)
     
     
     params(1)=exp(params_MLE(1))
-    params(2:3)=1.0d0/(1.0d0 + exp(-params_MLE(2:3))) 
-    !params(3)=-(exp(params_MLE(3))-1.0d0) 
+    params(2)=1.0d0/(1.0d0 + exp(-params_MLE(2))) 
+    params(3)=-(exp(params_MLE(3))-1.0d0) 
     !params(4)=exp(params_MLE(4))
     rho=1.0d0
     print*,' parameters',params
