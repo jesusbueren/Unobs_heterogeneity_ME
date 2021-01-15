@@ -13,7 +13,7 @@ subroutine expected_productivity(params,a,Ef_v,v_l,u_l)
     theta_p=params(1)
     beta_p=params(2)
     gamma_p=params(3)
-    rho_p=params(4)
+    rho_p=1.0d0
     
     !y=theta (beta q^gamma + (1-beta) a^gamma)^(1/(1-gamma))
     Ef_v=sqrt(-1.0d0)
