@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.271
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "Unobs_heterogeneity_ME", "Unobs_heterogeneity\Unobs_heterogeneity_ME.vfproj", "{09926941-5E66-4DB9-9B3E-854E5E5C29D8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{09926941-5E66-4DB9-9B3E-854E5E5C29D8}.Debug|x86.ActiveCfg = Debug|Win32
+		{09926941-5E66-4DB9-9B3E-854E5E5C29D8}.Debug|x86.Build.0 = Debug|Win32
+		{09926941-5E66-4DB9-9B3E-854E5E5C29D8}.Release|x86.ActiveCfg = Release|Win32
+		{09926941-5E66-4DB9-9B3E-854E5E5C29D8}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {746D3E80-B64B-48E1-BA07-99521060E20A}
+	EndGlobalSection
+EndGlobal
