@@ -66,7 +66,7 @@ for i=[2 4]
     if i==5
 %         ylim([0 0.2])
     end 
-    set(gcf,'Position',[100 100 700 250])
+    set(gcf,'Position',[100 100 1000 500])
     print(strcat('model_fit',num2str(i)),'-depsc')
 end
 
@@ -92,7 +92,6 @@ for i=[3 5]
         xticklabels({'n=0',...
                      'n=1'})
          set(gca,'TickLabelInterpreter','latex')
-         ylim([0 0.15])
     elseif i==5
         if j==1
             title("Low Flow, High Failure")
@@ -101,14 +100,13 @@ for i=[3 5]
         elseif j==3
             title("High Flow, High Failure")
         elseif j==4
-            title("High Flow, Low Failure")
+            title("High Flow, High Failure")
         end
         data_gr=[data_uhe(j,:); modl_uhe(j,:)]'
         xticks([1:8])
         xticklabels({'n=0',...
                      'n=1'})
          set(gca,'TickLabelInterpreter','latex')
-         ylim([0 0.3])
     end
     hold on
     hB=bar(data_gr)
@@ -118,10 +116,11 @@ for i=[3 5]
     I.FontSize=FS
     set(gca,'FontName','Times New Roman','Fontsize',FS);
     set(gcf,'color','w')
+%     ylim([0 0.1])
     if i==5
 %         ylim([0 0.2])
     end 
-    set(gcf,'Position',[100 100 700 500])
+    set(gcf,'Position',[100 100 1000 500])
     print(strcat('model_fit',num2str(i)),'-depsc')
     end
 end
