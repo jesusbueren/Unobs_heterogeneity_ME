@@ -11,7 +11,7 @@
 		FUNCTION log_likelihood(p)
 		USE nrtype
 		IMPLICIT NONE
-		REAL(DP), DIMENSION(2), INTENT(IN) :: p
+		REAL(DP), DIMENSION(3), INTENT(IN) :: p
 		REAL(DP) :: log_likelihood
 		END FUNCTION log_likelihood
 	END INTERFACE
