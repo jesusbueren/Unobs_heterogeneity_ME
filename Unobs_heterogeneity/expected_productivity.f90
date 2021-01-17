@@ -40,6 +40,5 @@ subroutine expected_productivity(params,a,Ef_v,v_l,u_l)
     end do
     
     
-
 end subroutine
     
