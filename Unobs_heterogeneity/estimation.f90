@@ -47,12 +47,10 @@ subroutine estimation(params_MLE)
     
     !Fixing beliefs, estimate parameter
     print*,'Initial Conditions'
-    p_g(1,:)=(/27.23d0,0.13d0,0.0001d0,1.0d-3/)
-    p_g(2,:)=(/27.23d0,0.13d0,0.0001d0,1.0d-4/)
-    p_g(3,:)=(/27.23d0,0.14d0,0.0001d0,1.0d-4/)
-    p_g(4,:)=(/27.23d0,0.14d0,0.0001d0,1.0d-5/)
-    p_g(5,:)=(/20.7d0,0.36d0,0.1d0,1.2d0/) 
-    !p_g(5,:)=(/20.7d0,0.36d0,0.5d0,0.8d0/) 
+    p_g(1,:)=(/27.23d0,0.13d0,0.1d0/)
+    p_g(2,:)=(/28.23d0,0.5d0,0.3d0/)
+    p_g(3,:)=(/29.23d0,0.14d0,0.1d0/)
+    p_g(4,:)=(/30.23d0,0.14d0,0.1d0/) 
     
     !Initial Conditions
     !do p_l=1,par+1
@@ -65,9 +63,7 @@ subroutine estimation(params_MLE)
     !Change parameters to the (-Inf;Inf) real line
     do p_l=1,par+1
         p_g(p_l,1)=log(p_g(p_l,1))
-        p_g(p_l,2)=log(p_g(p_l,2)/(1.0d0-p_g(p_l,2)))
-        p_g(p_l,3)=log(-p_g(p_l,3)+1.d0)
-        p_g(p_l,4)=log(p_g(p_l,4))
+        p_g(p_l,2:3)=log(p_g(p_l,2:3)/(1.0d0-p_g(p_l,2:3)))
         y(p_l)=log_likelihood(p_g(p_l,:))
     end do 
     print*,'likelihood_ini',y(1)
@@ -77,9 +73,7 @@ subroutine estimation(params_MLE)
     call amoeba(p_g,y,ftol,log_likelihood,iter)
     
     p_g(:,1)=exp(p_g(:,1))
-    p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
-    p_g(:,3)=-(exp(p_g(:,3))-1.0d0)
-    p_g(:,4)=exp(p_g(:,4))
+    p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
     print*,'estimated parameter',p_g(1,:)
     print*,'likelihood value',y(1)
     
@@ -138,9 +132,7 @@ function log_likelihood(params_MLE)
     
     
     params(1)=exp(params_MLE(1))
-    params(2)=1.0d0/(1.0d0 + exp(-params_MLE(2))) 
-    params(3)=-(exp(params_MLE(3))-1.0d0) 
-    params(4)=exp(params_MLE(4))
+    params(2:3)=1.0d0/(1.0d0 + exp(-params_MLE(2:3))) 
     rho=1.0d0
     print*,' parameters',params
     
