@@ -128,6 +128,7 @@ function log_likelihood(params_MLE)
     character::end_k
     double precision,dimension(unobs_types)::av_CCP_uhe
     double precision,dimension(T_sim,plots_i)::av_CCP_it
+    double precision,dimension(plots_i)::likelihood_aux
     character::pause_k
     
     
@@ -199,6 +200,7 @@ function log_likelihood(params_MLE)
                 end if
             end do;
             log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type(:,i_l)))
+            likelihood_aux(i_l)=log(sum(likelihood_i*UHE_type(:,i_l)))
             !if (log(sum(likelihood_i*UHE_type(:,i_l)))==-1.0/0.0) then
             !    print*,CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)
             !    print*,'paused'
