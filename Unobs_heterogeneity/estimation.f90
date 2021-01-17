@@ -47,7 +47,7 @@ subroutine estimation(params_MLE)
     
     !Fixing beliefs, estimate parameter
     print*,'Initial Conditions'
-    p_g(1,:)=(/27.21d0,0.30d0,0.0001d0,2.22d-3/)
+    p_g(1,:)=(/27.23d0,0.56d0,1.0d-5,0.23d0/)
     p_g(2,:)=(/29.23d0,0.13d0,0.5d0,1.0d-4/)
     p_g(3,:)=(/30.23d0,0.14d0,-0.0001d0,1.0d-4/)
     p_g(4,:)=(/32.23d0,0.5d0,-1.0d0,1.0d-5/)
