@@ -131,6 +131,7 @@ function log_likelihood(params_MLE)
     double precision::log_likelihood
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types)::Ef_v !Ef_v: expected productivity
     double precision,dimension(unobs_types)::likelihood_i,likelihood_it
+    double precision,dimension(plots_i)::likelihood_aux
     character::end_k
     double precision,dimension(unobs_types)::av_CCP_uhe
     double precision,dimension(T_sim,plots_i)::av_CCP_it
@@ -202,10 +203,11 @@ function log_likelihood(params_MLE)
                 if (drilling_it(t_l,i_l,s_l)==1 .or. drilling_it(t_l,i_l,s_l)==0) then
                     av_CCP_it(t_l,i_l)=sum(av_CCP_uhe*UHE_type(:,i_l))
                 else
-                    av_CCP_it(t_l,i_l)=-9.0d0
+                    av_CCP_it(t_l,i_l)=-9.0d0 !av_CCP_it(:,i_l)
                 end if
             end do;
             log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type(:,i_l)))
+            likelihood_aux(i_l)=log(sum(likelihood_i*UHE_type(:,i_l)))
             !if (log(sum(likelihood_i*UHE_type(:,i_l)))==-1.0/0.0) then
             !    print*,CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)
             !    print*,'paused'
