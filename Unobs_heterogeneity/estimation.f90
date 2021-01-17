@@ -135,6 +135,7 @@ function log_likelihood(params_MLE)
     params(2:3)=1.0d0/(1.0d0 + exp(-params_MLE(2:3))) 
     rho=1.0d0
     print*,' parameters',params
+    print*,'for CES:',params(2)/(params(2)+params(3)),params(2)+params(3)
     
     log_likelihood=0.0d0
     
