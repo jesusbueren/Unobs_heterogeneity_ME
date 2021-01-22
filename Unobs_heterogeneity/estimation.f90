@@ -47,10 +47,11 @@ subroutine estimation(params_MLE)
     
     !Fixing beliefs, estimate parameter
     print*,'Initial Conditions'
-    p_g(1,:)=(/28.27d0,2.2d-2,3.3d-7/)
-    p_g(2,:)=(/28.23d0,0.5d0,0.3d0/)
-    p_g(3,:)=(/29.23d0,0.14d0,0.1d0/)
-    p_g(4,:)=(/30.23d0,0.14d0,0.1d0/) 
+    p_g(1,:)=(/4.4d0,0.2d0,0.98d0,14.7d0/)
+    p_g(2,:)=(/4.8d0,0.3d0,0.9d0,10.7d0/)
+    p_g(3,:)=(/4.86d0,0.05d0,0.84d0,14.01d0/)
+    p_g(4,:)=(/4.86d0,0.02d0,0.94d0,15.01d0/)
+    p_g(5,:)=(/5.86d0,0.1d0,0.9d0,12.01d0/)
     
     !Initial Conditions
     !do p_l=1,par+1
@@ -64,16 +65,18 @@ subroutine estimation(params_MLE)
     do p_l=1,par+1
         p_g(p_l,1)=log(p_g(p_l,1))
         p_g(p_l,2:3)=log(p_g(p_l,2:3)/(1.0d0-p_g(p_l,2:3)))
+        p_g(p_l,4)=log(p_g(p_l,4))
         y(p_l)=log_likelihood(p_g(p_l,:))
     end do 
     print*,'likelihood_ini',y(1)
     
     !Optimization of parameters given beliefs
-    ftol=1.0d-12
+    ftol=1.0d-9
     call amoeba(p_g,y,ftol,log_likelihood,iter)
     
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
+    p_g(:,4)=exp(p_g(:,4))
     print*,'estimated parameter',p_g(1,:)
     print*,'likelihood value',y(1)
     
@@ -83,7 +86,7 @@ subroutine estimation(params_MLE)
     CCP_old=CCP_est
     do v_l=1,villages
         do u_l=1,unobs_types;do a_l=1,types_a
-            call expected_productivity(params_MLE(1:par),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
+            call expected_productivity(params_MLE(1:3),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
         end do;end do
         do P_l=2,P_max; do a_l=1,types_a; do u_l=1,unobs_types 
             call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
@@ -134,14 +137,15 @@ function log_likelihood(params_MLE)
     
     params(1)=exp(params_MLE(1))
     params(2:3)=1.0d0/(1.0d0 + exp(-params_MLE(2:3))) 
-    rho=1.0d0
+    params(4)=exp(params_MLE(4))
+    rho=params(4)
     print*,' parameters',params
-    print*,'for CES:',params(2)/(params(2)+params(3)),params(2)+params(3)
+    !print*,'for CES:',params(2)/(params(2)+params(3)),params(2)+params(3)
     
     log_likelihood=0.0d0
     
     do a_l=1,types_a; do u_l=1,unobs_types;do v_l=1,villages 
-        call expected_productivity(params(1:par),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
+        call expected_productivity(params(1:3),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
     end do; end do;end do
 
     !$OMP PARALLEL default(private) private(v_l,a_l,u_l,P_l)  shared(Ef_v,F_est,CCP_est,CCP)

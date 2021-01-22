@@ -118,6 +118,8 @@ gen P_T2=Pflow_T1_e*Pfail2_T1_e
 gen P_T3=Pflow_T2_e*Pfail1_T2_e
 gen P_T4=Pflow_T2_e*Pfail2_T2_e
 
+*replace drill=-9 if IN_FF_SMPL!=1
+
 export delimited nb P_type a_type n f0_N - f10_N P_T1 P_T2 P_T3 P_T4 drill using "drill_export_r.csv",replace novarnames nolabel 
 
 *statistics by area en number of wells around
