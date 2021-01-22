@@ -55,6 +55,7 @@ for i=[2 4]
         xticks([1 2 3 4])
         xticklabels({'P=3','P=4','P=5','P=6'})
     end
+    ylim([0 0.12])
     hold on
     hB=bar(data_gr)
     set(hB,{'FaceColor'},{clrs(1,:),clrs(2,:)}.')

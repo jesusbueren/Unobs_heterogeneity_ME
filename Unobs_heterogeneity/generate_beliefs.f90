@@ -6,7 +6,7 @@ subroutine generate_beliefs(CCP,n_initial,F_new,v_l,iterations)
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max),intent(out)::F_new
     integer,intent(in)::v_l
     integer(8),dimension(2*P_max-1,3,3,P_max),intent(out)::iterations
-    integer,parameter::T=1000!00
+    integer,parameter::T=100000
     integer,dimension(plots_in_map,3)::state,state_old
     integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min
     double precision::u_d,u_s,u_f,u_m

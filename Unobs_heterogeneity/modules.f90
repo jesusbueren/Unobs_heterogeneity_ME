@@ -32,7 +32,7 @@ module primitives
     double precision,dimension(2*P_max,villages)::PI_s
     double precision,dimension(2*P_max-1,3,P_max,villages)::PI_s_v
     !c_d: fixed cost of failing to drill;c_s: fixed cost of succeeding to drill
-    double precision,parameter::c_s=66.4d0,beta=0.8d0,c_d=27.2d0
+    double precision,parameter::c_s=66.4d0,beta=0.95d0,c_d=27.2d0
     !extreme value distribution shocks
     double precision,parameter::gamma=0.577215664901533d0
     double precision::rho
@@ -42,7 +42,7 @@ module primitives
     double precision,dimension(unobs_types)::pr_unobs_t=(/0.216d0*0.168d0,0.216d0*0.832d0,0.784d0*0.168d0,0.784d0*0.832d0/)
     
 end
-    
+     
 module simulation
 use cadastral_maps
     implicit none
