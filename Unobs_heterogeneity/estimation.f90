@@ -77,6 +77,8 @@ subroutine estimation(params_MLE)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
     p_g(:,4)=exp(p_g(:,4))
+
+
     print*,'estimated parameter',p_g(1,:)
     print*,'likelihood value',y(1)
     
@@ -139,6 +141,7 @@ function log_likelihood(params_MLE)
     params(2:3)=1.0d0/(1.0d0 + exp(-params_MLE(2:3))) 
     params(4)=exp(params_MLE(4))
     rho=params(4)
+
     print*,' parameters',params
     !print*,'for CES:',params(2)/(params(2)+params(3)),params(2)+params(3)
     
