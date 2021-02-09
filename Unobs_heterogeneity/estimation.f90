@@ -143,7 +143,6 @@ function log_likelihood(params_MLE)
     rho=params(4)
 
     print*,' parameters',params
-    !print*,'for CES:',params(2)/(params(2)+params(3)),params(2)+params(3)
     
     log_likelihood=0.0d0
     
@@ -154,10 +153,14 @@ function log_likelihood(params_MLE)
     !$OMP PARALLEL default(private) private(v_l,a_l,u_l,P_l)  shared(Ef_v,F_est,CCP_est,CCP)
     !$OMP  DO
     do P_l=2,P_max; do a_l=1,types_a ; do u_l=1,unobs_types;do v_l=1,villages
-        call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
-                        ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
-                        ,P_l &
-                        ,CCP_est(1:2*P_l-1,:,P_l,a_l,v_l,u_l),CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l)
+        !call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
+        !                ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
+        !                ,P_l &
+        !                ,CCP_est(1:2*P_l-1,:,P_l,a_l,v_l,u_l),CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l)
+        call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
+                            ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
+                            ,P_l &
+                            ,CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l) 
     end do; end do;end do; end do
     
     !$OMP END DO  

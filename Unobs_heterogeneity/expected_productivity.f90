@@ -1,7 +1,7 @@
 subroutine expected_productivity(params,a,Ef_v,v_l,u_l)
     use dimensions;use primitives
     implicit none
-    double precision,dimension(par),intent(in)::params
+    double precision,dimension(3),intent(in)::params
     double precision,intent(in)::a
     double precision,dimension(2*P_max-1,3,P_max),intent(out)::Ef_v
     integer,intent(in)::v_l,u_l
