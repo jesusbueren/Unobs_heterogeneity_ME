@@ -20,7 +20,6 @@ subroutine generate_beliefs(CCP,n_initial,F_new,v_l,iterations)
     
     !Call seed number
     call random_seed(PUT=seed)
-    
     !Generate permanent unobserved heterogeneity type
     do i_l=1,plots_v(v_l)
         call RANDOM_NUMBER(u_m)
@@ -185,6 +184,7 @@ subroutine generate_beliefs(CCP,n_initial,F_new,v_l,iterations)
         F_new(ind,1:2*P_l-1,n_l,n_l2,P_l)=F_new(ind,1:2*P_l-1,n_l,n_l2,P_l)/sum(F_new(ind,1:2*P_l-1,n_l,n_l2,P_l))
         !print*,sum(F_new(ind,:,n_l,n_l2,P_l))
     end do;end do;end do;end do
+    
 
 !print*,'press key to continue'    
 !read*,continue_k

@@ -1,8 +1,9 @@
 !Estimate parameters
-subroutine estimation(params_MLE)
+subroutine estimation(params_MLE,log_likeli)
     use dimensions; use primitives; use simulation
     implicit none
     double precision,dimension(par),intent(out)::params_MLE
+    double precision,intent(out)::log_likeli
     double precision::log_L,ftol
     double precision,dimension(par+1,par)::p_g
     double precision,dimension(par+1)::y
@@ -21,22 +22,20 @@ subroutine estimation(params_MLE)
     integer::it
     integer(8),dimension(2*P_max-1,3,3,P_max,villages)::iterations_all
     double precision,dimension(par,par)::xi
+    integer,dimension(1)::seed_c
     
     it=1
     iterations_all=0.0d0
-    !Generate a random CCP
-    CCP_est=sqrt(-1.0d0)
-    do P_l=2,P_max
-        CCP_est(1:2*P_l-1,1:2,P_l,:,:,:)=0.06d0
-    end do
+    
     CCP_mid=CCP_est
     !Generate beliefs consitent with CCP
     F_est=1.0d0
     
-1   print*,'Generating beliefs'
+   print*,'Generating beliefs'
     !Generate an initial well endowment: everyone has zero wells
-    n_initial_all(1:plots_in_map,:)=1    
-    !$OMP PARALLEL default(private) private(v_l)  shared(CCP_est,n_initial_all,F_est,iterations_all)
+1   n_initial_all(1:plots_in_map,:)=1    
+    call random_seed(GET=seed_c)
+    !$OMP PARALLEL default(private) shared(CCP_est,n_initial_all,F_est,iterations_all)
     !$OMP  DO
     do v_l=1,villages
         print*,'village ',v_l,' out of ',villages
@@ -44,14 +43,13 @@ subroutine estimation(params_MLE)
     end do
     !$OMP END DO  
     !$OMP END PARALLEL        
-    
+    call random_seed(PUT=seed_c)
     !Fixing beliefs, estimate parameter
-    print*,'Initial Conditions'
-    p_g(1,:)=(/4.4d0,0.2d0,0.98d0,14.7d0/)
-    p_g(2,:)=(/4.8d0,0.3d0,0.9d0,10.7d0/)
-    p_g(3,:)=(/4.86d0,0.05d0,0.84d0,14.01d0/)
-    p_g(4,:)=(/4.86d0,0.02d0,0.94d0,15.01d0/)
-    p_g(5,:)=(/5.86d0,0.1d0,0.9d0,12.01d0/)
+    !print*,'Initial Conditions'
+    p_g(1,:)=(/4.49d0,0.04d0,14.01d0/)
+    p_g(2,:)=(/4.69d0,0.1d0,13.42d0/)
+    p_g(3,:)=(/4.86d0,0.05d0,10.01d0/)
+    p_g(4,:)=(/5.86d0,0.2d0,15.01d0/)
     
     !Initial Conditions
     !do p_l=1,par+1
@@ -64,23 +62,24 @@ subroutine estimation(params_MLE)
     !Change parameters to the (-Inf;Inf) real line
     do p_l=1,par+1
         p_g(p_l,1)=log(p_g(p_l,1))
-        p_g(p_l,2:3)=log(p_g(p_l,2:3)/(1.0d0-p_g(p_l,2:3)))
-        p_g(p_l,4)=log(p_g(p_l,4))
+        p_g(p_l,2)=log(p_g(p_l,2)/(1.0d0-p_g(p_l,2)))
+        p_g(p_l,3)=log(p_g(p_l,3))
         y(p_l)=log_likelihood(p_g(p_l,:))
     end do 
-    print*,'likelihood_ini',y(1)
+    !print*,'likelihood_ini',y(1)
     
     !Optimization of parameters given beliefs
     ftol=1.0d-9
     call amoeba(p_g,y,ftol,log_likelihood,iter)
-    
+    print*,'got out of amoeba'
+    log_likeli=y(1)
     p_g(:,1)=exp(p_g(:,1))
-    p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
-    p_g(:,4)=exp(p_g(:,4))
+    p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
+    p_g(:,3)=exp(p_g(:,3))
 
 
-    print*,'estimated parameter',p_g(1,:)
-    print*,'likelihood value',y(1)
+    !print*,'estimated parameter',p_g(1,:)
+    !print*,'likelihood value',y(1)
     
     !Compute CCP to check convergence
     params_MLE=p_g(1,:)
@@ -88,15 +87,21 @@ subroutine estimation(params_MLE)
     CCP_old=CCP_est
     do v_l=1,villages
         do u_l=1,unobs_types;do a_l=1,types_a
-            call expected_productivity(params_MLE(1:3),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
+            call expected_productivity(params_MLE(1:2),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
         end do;end do
         do P_l=2,P_max; do a_l=1,types_a; do u_l=1,unobs_types 
-            call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
-                                ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
-                                ,P_l &
-                                ,CCP_old(1:2*P_l-1,:,P_l,a_l,v_l,u_l),CCP_est(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l)
+            !call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
+            !                    ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
+            !                    ,P_l &
+            !                    ,CCP_old(1:2*P_l-1,:,P_l,a_l,v_l,u_l),CCP_est(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l)
+            call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
+                            ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
+                            ,P_l &
+                            ,CCP_est(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l) 
         end do; end do;end do
     end do
+    
+    !print*,'est CCP',CCP_est(1:2*P_max-1,:,P_max,:,:,:)
 
     
     dist=0.0
@@ -116,7 +121,6 @@ subroutine estimation(params_MLE)
         print*,'error in precision of iterations'   
     end if
 
-    print*,'est CCP',CCP_est(1:2*P_max-1,1,P_max,1,1,:)
    
 end subroutine
     
@@ -138,16 +142,16 @@ function log_likelihood(params_MLE)
     
     
     params(1)=exp(params_MLE(1))
-    params(2:3)=1.0d0/(1.0d0 + exp(-params_MLE(2:3))) 
-    params(4)=exp(params_MLE(4))
-    rho=params(4)
+    params(2)=1.0d0/(1.0d0 + exp(-params_MLE(2))) 
+    params(3)=exp(params_MLE(3))
+    rho=params(3)
 
     print*,' parameters',params
     
     log_likelihood=0.0d0
     
     do a_l=1,types_a; do u_l=1,unobs_types;do v_l=1,villages 
-        call expected_productivity(params(1:3),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
+        call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
     end do; end do;end do
 
     !$OMP PARALLEL default(private) private(v_l,a_l,u_l,P_l)  shared(Ef_v,F_est,CCP_est,CCP)
@@ -222,7 +226,9 @@ function log_likelihood(params_MLE)
         
     log_likelihood=-log_likelihood
     
-    call compute_moments(av_CCP_it,"modl")
+    if (bootstrap==0) then
+        call compute_moments(av_CCP_it,"modl")
+    end if
     
     print*,'likelihood',log_likelihood
     !print*,'paused'

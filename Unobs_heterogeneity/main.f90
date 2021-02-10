@@ -6,6 +6,7 @@ double precision,dimension(par)::params_true,params_MLE
 double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,villages)::F_true
 double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP_true
 integer,dimension(plots_in_map,villages)::n_dist
+double precision::log_likeli
 integer::v_l,p_l
 character::end_key
 
@@ -47,8 +48,17 @@ call load_estimation_data()
     
 call compute_moments(dble(drilling_it(:,:,1)),"data")
 
-print*,'Start estimation'
-call estimation(params_MLE)
+!print*,'Start estimation'
+!Generate a random CCP
+CCP_est=sqrt(-1.0d0)
+do P_l=2,P_max
+    CCP_est(1:2*P_l-1,1:2,P_l,:,:,:)=0.06d0
+end do
+call estimation(params_MLE,log_likeli)
+OPEN(UNIT=12, FILE=path_results//"bootstrapped_parameters.txt",status='replace')
+write(12,'(F20.12,F20.12,F20.12,F20.12)'),params_MLE(1),params_MLE(2),params_MLE(3),log_likeli
+close(12)
+call bootstrap_se()
 
 print*,'estimated parameters',params_MLE
 

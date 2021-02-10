@@ -17,7 +17,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,n_initial,v_l)
     rho=1.0d0
     !Compute expected productivity 
     do u_l=1,unobs_types;do a_l=1,types_a
-        call expected_productivity(params(1:3),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+        call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
     end do;end do
 
     !Generate beliefs consitent with CCP

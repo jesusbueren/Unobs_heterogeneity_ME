@@ -25,6 +25,7 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="fi;fd;h;inc">
+		<File RelativePath=".\bootstrap_se.f90"/>
 		<File RelativePath=".\compute_eq_F_CCP.f90"/>
 		<File RelativePath=".\compute_moments.f90"/>
 		<File RelativePath=".\estimation.f90"/>
