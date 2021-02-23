@@ -1,10 +1,7 @@
-/*stata file which reads cadastral maps from email of Aug 22 2020 and transform into input for fortran
+*stata file which reads cadastral maps from email of Aug 22 2020 and transform into input for fortran
 
 clear all
 cd "C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\cadastral_maps"
-
-*Select discretization of area types
-local q=4
 
 *Map
 forval m=1/14{
@@ -29,15 +26,12 @@ tempfile cal
 save `cal'
 }
 drop if pid==.
-gen area_`q'_=1 if area_ac>=0.0 & area_ac<=1.3
-replace area_`q'_=2 if area_ac>1.3 & area_ac<=2.3
-replace area_`q'_=3 if area_ac>2.3 & area_ac<=4
-replace area_`q'_=4 if area_ac>4 & area_ac<2000
 
-keep pid map area_`q'_
-reshape wide area_`q'_,i(pid) j(map)
+rename area_ac area_ac_
+keep pid map area_ac_
+reshape wide area_ac_,i(pid) j(map)
 
-foreach x of varlist area_`q'_1-area_`q'_14 {
+foreach x of varlist area_ac_1-area_ac_14 {
   replace `x' = -9 if (`x' >= .)
 }
 sort pid
@@ -45,7 +39,7 @@ export delimited area_* using "fortran_files\area_type.csv",replace novarnames
 
 *number of plots in each map
 forval m=1/14{
-count if area_4_`m'!=-9
+count if area_ac_`m'!=-9
 }
 */
 *Primitives on flow and failure by type and monsoon: I generate 4 different types of unobserved heterogeneity.
@@ -109,7 +103,7 @@ local q=4
 xtile a_type=area,n(`q')
 bys a_type: sum area,d
 
-gen P_type=min(Nplots_adj,6)
+gen P_type=min(Nplots_adj,7)
 
 sort RespondentID year
 

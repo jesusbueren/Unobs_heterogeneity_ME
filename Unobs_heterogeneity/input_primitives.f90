@@ -49,7 +49,7 @@ subroutine input_primitives()
         !Fill in the probability of success/failure in vector form of dimension 2*P-1
         PI_s_v(:,:,:,v_l)=sqrt(-1.0d0)
         PI_f_v(:,:,:,v_l,u_l)=sqrt(-1.0d0)
-        do P=2,P_max       
+        do P=1,P_max       
             do n_l=1,3
                 !No own wells
                 if (n_l==1) then

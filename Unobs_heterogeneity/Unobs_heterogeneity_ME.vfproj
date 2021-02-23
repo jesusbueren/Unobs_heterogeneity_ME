@@ -37,6 +37,7 @@
 		<File RelativePath=".\load_estimation_data.f90"/>
 		<File RelativePath=".\main.f90"/>
 		<File RelativePath=".\modules.f90"/>
+		<File RelativePath=".\counterfactuals.f90"/>
 		<File RelativePath=".\policy_fct_it.f90"/>
 		<File RelativePath=".\simulate_panel.f90"/>
 		<File RelativePath=".\update_CCP.f90"/>

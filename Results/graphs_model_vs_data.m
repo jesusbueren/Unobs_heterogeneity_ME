@@ -51,9 +51,9 @@ for i=[2 4]
         xticklabels({'N=0','N=1','N=2','N=3','N=4'})
     elseif i==4
         title("Plots in Adjacency")
-        data_gr=[data_P(3:6) modl_P(3:6)]
-        xticks([1 2 3 4])
-        xticklabels({'P=3','P=4','P=5','P=6'})
+        data_gr=[data_P(3:7) modl_P(3:7)]
+        xticks([1 2 3 4 5])
+        xticklabels({'P=3','P=4','P=5','P=6','P=7'})
     end
     ylim([0 0.12])
     hold on

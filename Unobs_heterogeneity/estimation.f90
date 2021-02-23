@@ -17,12 +17,14 @@ subroutine estimation(params_MLE,log_likeli)
     end interface
     integer,dimension(plots_in_map,villages)::n_initial_all
     double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP_old,CCP_mid
+    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::V_fct
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types)::Ef_v !Ef_v: expected productivity
     double precision::dist
     integer::it
     integer(8),dimension(2*P_max-1,3,3,P_max,villages)::iterations_all
     double precision,dimension(par,par)::xi
     integer,dimension(1)::seed_c
+    double precision, dimension(villages)::mean_N,mean_NPV
     
     it=1
     iterations_all=0.0d0
@@ -39,7 +41,7 @@ subroutine estimation(params_MLE,log_likeli)
     !$OMP  DO
     do v_l=1,villages
         print*,'village ',v_l,' out of ',villages
-        call generate_beliefs(CCP_mid(:,:,:,:,v_l,:),n_initial_all(:,v_l),F_est(:,:,:,:,:,v_l),v_l,iterations_all(:,:,:,:,v_l))
+        call generate_beliefs(CCP_mid(:,:,:,:,v_l,:),V_fct(:,:,:,:,v_l,:),n_initial_all(:,v_l),F_est(:,:,:,:,:,v_l),v_l,iterations_all(:,:,:,:,v_l),mean_N(v_l),mean_NPV(v_l))
     end do
     !$OMP END DO  
     !$OMP END PARALLEL        
@@ -97,7 +99,8 @@ subroutine estimation(params_MLE,log_likeli)
             call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
                             ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
                             ,P_l &
-                            ,CCP_est(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l) 
+                            ,CCP_est(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l &
+                            ,V_fct(1:2*P_l-1,:,P_l,a_l,v_l,u_l)) 
         end do; end do;end do
     end do
     
@@ -130,6 +133,7 @@ function log_likelihood(params_MLE)
     double precision,dimension(par),intent(in)::params_MLE
     double precision,dimension(par)::params
     double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP
+    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::V_fct
     integer::i_l,t_l,type_l,a_l,p_l,v_l,ind,u_l,j_l,s_l,t
     double precision::log_likelihood
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types)::Ef_v !Ef_v: expected productivity
@@ -164,7 +168,8 @@ function log_likelihood(params_MLE)
         call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
                             ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
                             ,P_l &
-                            ,CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l) 
+                            ,CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l &
+                            ,V_fct(1:2*P_l-1,:,P_l,a_l,v_l,u_l)) 
     end do; end do;end do; end do
     
     !$OMP END DO  

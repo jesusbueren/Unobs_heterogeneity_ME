@@ -1,8 +1,8 @@
 module dimensions
     implicit none
-    integer,parameter::P_max=6 ! Set the maximum number of plots in an adjacency
+    integer,parameter::P_max=7 ! Set the maximum number of plots in an adjacency
     integer,parameter::K=5,par=3,M=2,types_a=4 !K: points of support of flow; M:types of moonzoons; type_a: types of areas
-end  
+end
     
 module cadastral_maps
     use dimensions
@@ -13,6 +13,7 @@ module cadastral_maps
     integer,dimension(plots_in_map,2,villages)::PA_type !number of neighbors, a type for each plot in the map
     integer,dimension(plots_in_map,P_max,villages)::neighbors !identify neighbors for each plot in the map
     character(len=103)::file_map="C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\cadastral_maps\fortran_files\"
+    integer,dimension(plots_in_map,villages)::active_plots=1
 end
     
 module primitives
@@ -37,7 +38,8 @@ module primitives
     double precision,parameter::gamma=0.577215664901533d0
     double precision::rho
     !area of plots
-    double precision,dimension(types_a)::area=(/1.0d0,2.0d0,3.0d0,5.1d0/)!(/0.394d0,1.279d0,3.157d0,8.706d0/)
+    double precision,dimension(types_a)::area=(/1.0d0,2.0d0,3.0d0,5.1d0/)
+    double precision,dimension(types_a-1)::area_lims=(/1.3d0,2.3d0,4.0d0/)
     !pr of unobserved heterogeneity type
     double precision,dimension(unobs_types)::pr_unobs_t=(/0.216d0*0.168d0,0.216d0*0.832d0,0.784d0*0.168d0,0.784d0*0.832d0/)
     

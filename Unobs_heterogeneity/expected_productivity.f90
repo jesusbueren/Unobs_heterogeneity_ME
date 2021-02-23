@@ -17,7 +17,7 @@ subroutine expected_productivity(params,a,Ef_v,v_l,u_l)
     !y=theta*( q^beta * a^gamma)
     Ef_v=sqrt(-1.0d0)
     !Compute expected productivity and generate the vector of it with the from 2*P-1 form
-    do P=2,P_max  
+    do P=1,P_max  
         Ef=0.0d0
         do m_l=1,M
             Ef(1:2*P-1,m_l,2)=matmul(PI_k(1:2*P-1,:,m_l,u_l),theta_p*(q(:,1)**beta_p*a**gamma_p))

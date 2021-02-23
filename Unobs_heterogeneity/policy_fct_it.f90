@@ -1,4 +1,4 @@
-subroutine policy_fct_it(Ef_v,F,P,CCP_in,CCP_out,v_l,u_l)
+subroutine policy_fct_it(Ef_v,F,P,CCP_in,CCP_out,v_l,u_l,V_new)
     use dimensions
     implicit none
     integer,intent(in)::P
@@ -7,6 +7,7 @@ subroutine policy_fct_it(Ef_v,F,P,CCP_in,CCP_out,v_l,u_l)
     double precision,dimension(2*P-1,2),intent(in)::CCP_in
     integer,intent(in)::v_l,u_l
     double precision,dimension(2*P-1,2),intent(out)::CCP_out
+    double precision,dimension((2*P-1),3),intent(out)::V_new
     double precision,dimension(2*P-1,2)::CCP_old
     double precision,dimension((2*P-1)*3,(2*P-1)*3)::C
     double precision,dimension((2*P-1)*3,1)::V
@@ -53,5 +54,7 @@ subroutine policy_fct_it(Ef_v,F,P,CCP_in,CCP_out,v_l,u_l)
         CCP_old=CCP_out
         go to 1
     end if
+    
+    V_new=reshape(V,(/(2*P-1),3/))
 
 end subroutine
