@@ -1,7 +1,7 @@
 subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,mean_NPV,mean_budget)
     use cadastral_maps; use dimensions; use primitives
     implicit none
-    double precision,dimension(3),intent(in)::params
+    double precision,dimension(par),intent(in)::params
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max),intent(out)::F
     double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types),intent(inout)::CCP_mid
     integer,dimension(plots_in_map,1),intent(inout)::n_initial

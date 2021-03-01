@@ -14,7 +14,7 @@ subroutine load_estimation_data
     read(12,*),data_csv
     close(12)
     
-    V_type=1 !data_csv(1,1,:)
+    V_type=data_csv(1,1,:)
     P_type=data_csv(2,1,:)
     A_type=data_csv(3,1,:)
     n_data=data_csv(4,:,:)+1

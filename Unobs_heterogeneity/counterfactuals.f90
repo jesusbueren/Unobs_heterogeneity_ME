@@ -9,24 +9,23 @@ subroutine counterfactuals(params_MLE)
     double precision,dimension(villages)::mean_N,mean_NPV,mean_budget
     integer::v_l,p_l,it
     character::end_key
-    integer,parameter::nkk=15
+    integer,parameter::nkk=21
     double precision,dimension(nkk)::tau_grid
     
-    tau_grid(1)=0.0d0
+    tau_grid(1)=-0.5d0
     do p_l=2,nkk
         tau_grid(p_l)=tau_grid(p_l-1)+0.05d0
     end do
         
-    
     !I want to compute the optimal tax of production giving a subsidy as a lumpsum.
     !Set a tax to production, find the lumpsum transfer that makes government transfer to be in eq.
     !Look for the optimal tax that maximizes average NPV
     
-    do p_l=5,nkk;do v_l=1,1!villages
+    do p_l=1,nkk;do v_l=1,1!villages
         print*,'tau exp',p_l
         print*,'village,',v_l 
         tau=tau_grid(p_l)
-        if (p_l==5) then
+        if (p_l==1) then
             CCP_true(:,:,:,:,v_l,:)=0.07d0
             n_dist(:,v_l)=1
             V_fct=0.0d0
