@@ -1,14 +1,15 @@
-subroutine compute_eq_F_CCP(params,F,CCP_mid,n_initial,v_l,mean_N,mean_NPV)
+subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,mean_NPV,mean_budget)
     use cadastral_maps; use dimensions; use primitives
     implicit none
     double precision,dimension(3),intent(in)::params
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max),intent(out)::F
     double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types),intent(inout)::CCP_mid
     integer,dimension(plots_in_map,1),intent(inout)::n_initial
+    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(inout)::V_fct
     integer,intent(in)::v_l    
-    double precision,intent(out)::mean_N,mean_NPV
+    double precision,intent(out)::mean_N,mean_NPV,mean_budget
     double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types)::CCP_old,CCP
-    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types)::V_fct
+    
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
     double precision::dist
     integer::p_l,a_l,n_l,P_l2,ind,counter_all,counter_bad,u_l
@@ -25,29 +26,28 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,n_initial,v_l,mean_N,mean_NPV)
 
     !Generate beliefs consitent with CCP
     F=1.0d0
-    V_fct=0.0d0
     CCP=CCP_mid
-1   print*,'generating beliefs'
-    n_initial=1
-    call generate_beliefs(CCP_mid,V_fct,n_initial,F,v_l,iterations,mean_N,mean_NPV)
+!   print*,'generating beliefs'
+1    n_initial=1
+    call generate_beliefs(CCP_mid,V_fct,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,mean_NPV,mean_budget)
     
     !For each plot type obtain a new CCP given beliefs
-    print*,'policy step'
+    !print*,'policy step'
     CCP_old=CCP
     dist=0.0d0
     counter_bad=0
     counter_all=0
-    do P_l=1,P_max; do a_l=1,types_a; do u_l=1,unobs_types
-        !call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
-        !                    ,F(1:2*P_l-1,1:2*P_l-1,:,:,P_l) &
-        !                    ,P_l &
-        !                    ,CCP_old(1:2*P_l-1,:,P_l,a_l,u_l),CCP(1:2*P_l-1,:,P_l,a_l,u_l),v_l,u_l &
-        !                    ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l))
-        call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
+    do P_l=2,P_max; do a_l=1,types_a; do u_l=1,unobs_types
+        call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
                             ,F(1:2*P_l-1,1:2*P_l-1,:,:,P_l) &
                             ,P_l &
-                            ,CCP(1:2*P_l-1,:,P_l,a_l,u_l),v_l,u_l &
+                            ,CCP_old(1:2*P_l-1,:,P_l,a_l,u_l),CCP(1:2*P_l-1,:,P_l,a_l,u_l),v_l,u_l &
                             ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l))
+        !call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
+        !                    ,F(1:2*P_l-1,1:2*P_l-1,:,:,P_l) &
+        !                    ,P_l &
+        !                    ,CCP(1:2*P_l-1,:,P_l,a_l,u_l),v_l,u_l &
+        !                    ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l))
         V_fct(1:2*P_l-1,:,P_l,a_l,u_l)=V_fct(1:2*P_l-1,:,P_l,a_l,u_l)-(rho*gamma/(1.0d0-beta))
         
     end do; end do;end do
@@ -67,13 +67,13 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,n_initial,v_l,mean_N,mean_NPV)
     do P_l=2,P_max; do n_l=1,2;do ind=1,2*P_l-1; 
         dist=dist+dble(sum(iterations(ind,n_l,1:3,P_l)))/dble(sum(iterations(:,1:2,1:3,:)))*sum(abs(CCP_old(ind,n_l,P_l,:,:)-CCP(ind,n_l,P_l,:,:)))/dble(types_a)/dble(unobs_types)
     end do;end do; end do
-    print*,'village',v_l
-    print*,'dist CCP',dist
+    !print*,'village',v_l
+    print*,'dist CCP',dist,'mean_NPV',mean_NPV
     
     !New guess of the ccp is half way through
     CCP_mid=CCP*0.5d0+CCP_old*0.5d0
     
-    print*,'npv',mean_NPV,'mean wells',mean_N
+    !print*,'npv',mean_NPV,'mean wells',mean_N
     
     !print*,'press any key to continue'
     !read*,pause_k

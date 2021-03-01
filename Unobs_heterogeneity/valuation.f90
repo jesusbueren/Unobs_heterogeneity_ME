@@ -26,7 +26,7 @@ subroutine valuation(CCP,C,Ef_v,P,V,v_l)
              U_small(ind,n_l)=rho*gamma
         end if
     end do; end do
-    U_small=U_small+Ef_v 
+    U_small=U_small+(1.0d0-tau)*Ef_v+T_g
     
     do n_l=1,3
         ind=(2*P-1)*(n_l-1)+1
