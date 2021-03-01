@@ -12,7 +12,7 @@ subroutine counterfactuals(params_MLE)
     integer,parameter::nkk=21
     double precision,dimension(nkk)::tau_grid
     
-    tau_grid(1)=-0.5d0
+    tau_grid(1)=-0.05d0
     do p_l=2,nkk
         tau_grid(p_l)=tau_grid(p_l-1)+0.05d0
     end do
