@@ -55,7 +55,7 @@ for i=[2 4]
         xticks([1 2 3 4 5])
         xticklabels({'P=3','P=4','P=5','P=6','P=7'})
     end
-    ylim([0 0.12])
+    ylim([0 1])
     hold on
     hB=bar(data_gr)
     set(hB,{'FaceColor'},{clrs(1,:),clrs(2,:)}.')
@@ -84,8 +84,8 @@ for i=[3 5]
                 title("$a>4.0$",'Interpreter','latex')
             end
             data_gr=[data_own_n(j,:); modl_own_n(j,:)]'
-            ylim([0 0.2])
-            yticks([0:0.05:0.2])
+            ylim([0 1])
+%             yticks([0:0.05:0.2])
             set(gca,'TickLabelInterpreter','latex')
         elseif i==5
             if j==1
@@ -98,8 +98,8 @@ for i=[3 5]
                 title("High flow, Low Failure",'Interpreter','latex')
             end
             data_gr=[data_uhe(j,:); modl_uhe(j,:)]'
-            ylim([0 0.3])
-            yticks([0:0.1:0.3])
+            ylim([0 1])
+%             yticks([0:0.1:0.5])
              set(gca,'TickLabelInterpreter','latex')
         end
         xticks([1 2])

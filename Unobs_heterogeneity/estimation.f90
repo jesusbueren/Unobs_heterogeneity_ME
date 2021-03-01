@@ -18,13 +18,13 @@ subroutine estimation(params_MLE,log_likeli)
     integer,dimension(plots_in_map,villages)::n_initial_all
     double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP_old,CCP_mid
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::V_fct
-    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types)::Ef_v !Ef_v: expected productivity
+    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
     double precision::dist
     integer::it
     integer(8),dimension(2*P_max-1,3,3,P_max,villages)::iterations_all
     double precision,dimension(par,par)::xi
     integer,dimension(1)::seed_c
-    double precision, dimension(villages)::mean_N,mean_NPV
+    double precision, dimension(villages)::mean_N,mean_NPV,mean_budget
     
     it=1
     iterations_all=0.0d0
@@ -32,26 +32,26 @@ subroutine estimation(params_MLE,log_likeli)
     CCP_mid=CCP_est
     !Generate beliefs consitent with CCP
     F_est=1.0d0
-    
+    Ef_v=0.0d0
    print*,'Generating beliefs'
     !Generate an initial well endowment: everyone has zero wells
 1   n_initial_all(1:plots_in_map,:)=1    
     call random_seed(GET=seed_c)
     !$OMP PARALLEL default(private) shared(CCP_est,n_initial_all,F_est,iterations_all)
     !$OMP  DO
-    do v_l=1,villages
+    do v_l=1,1!villages
         print*,'village ',v_l,' out of ',villages
-        call generate_beliefs(CCP_mid(:,:,:,:,v_l,:),V_fct(:,:,:,:,v_l,:),n_initial_all(:,v_l),F_est(:,:,:,:,:,v_l),v_l,iterations_all(:,:,:,:,v_l),mean_N(v_l),mean_NPV(v_l))
+        call generate_beliefs(CCP_mid(:,:,:,:,v_l,:),V_fct(:,:,:,:,v_l,:),Ef_v(:,:,:,:,v_l,:),n_initial_all(:,v_l),F_est(:,:,:,:,:,v_l),v_l,iterations_all(:,:,:,:,v_l),mean_N(v_l),mean_NPV(v_l),mean_budget(v_l))
     end do
     !$OMP END DO  
     !$OMP END PARALLEL        
     call random_seed(PUT=seed_c)
     !Fixing beliefs, estimate parameter
     !print*,'Initial Conditions'
-    p_g(1,:)=(/4.49d0,0.04d0,14.01d0/)
-    p_g(2,:)=(/4.69d0,0.1d0,13.42d0/)
-    p_g(3,:)=(/4.86d0,0.05d0,10.01d0/)
-    p_g(4,:)=(/5.86d0,0.2d0,15.01d0/)
+    p_g(1,:)=(/30.1763d0,0.5d0,1.0d0/)
+    p_g(2,:)=(/21.1763d0,0.4d0,1.0d0/)
+    p_g(3,:)=(/25.1763d0,0.6d0,1.0d0/)
+    p_g(4,:)=(/30.1763d0,0.7d0,1.0d0/)
     
     !Initial Conditions
     !do p_l=1,par+1
@@ -87,20 +87,21 @@ subroutine estimation(params_MLE,log_likeli)
     params_MLE=p_g(1,:)
     rho=1.0d0
     CCP_old=CCP_est
-    do v_l=1,villages
+    do v_l=1,1!villages
         do u_l=1,unobs_types;do a_l=1,types_a
-            call expected_productivity(params_MLE(1:2),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
+            call expected_productivity(params_MLE(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         end do;end do
         do P_l=2,P_max; do a_l=1,types_a; do u_l=1,unobs_types 
-            !call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
-            !                    ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
-            !                    ,P_l &
-            !                    ,CCP_old(1:2*P_l-1,:,P_l,a_l,v_l,u_l),CCP_est(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l)
-            call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
-                            ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
-                            ,P_l &
-                            ,CCP_est(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l &
-                            ,V_fct(1:2*P_l-1,:,P_l,a_l,v_l,u_l)) 
+            call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
+                                ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
+                                ,P_l &
+                                ,CCP_old(1:2*P_l-1,:,P_l,a_l,v_l,u_l),CCP_est(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l &
+                                 ,V_fct(1:2*P_l-1,:,P_l,a_l,v_l,u_l))
+            !call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
+            !                ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
+            !                ,P_l &
+            !                ,CCP_est(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l &
+            !                ,V_fct(1:2*P_l-1,:,P_l,a_l,v_l,u_l)) 
         end do; end do;end do
     end do
     
@@ -108,7 +109,7 @@ subroutine estimation(params_MLE,log_likeli)
 
     
     dist=0.0
-    do P_l=2,P_max; do n_l=1,2;do ind=1,2*P_l-1; do v_l=1,villages
+    do P_l=2,P_max; do n_l=1,2;do ind=1,2*P_l-1; do v_l=1,1!villages
         dist=dist+dble(sum(iterations_all(ind,n_l,1:3,P_l,v_l)))/dble(sum(iterations_all(:,1:2,1:3,:,:)))*sum(abs(CCP_old(ind,n_l,P_l,:,v_l,:)-CCP_est(ind,n_l,P_l,:,v_l,:)))/dble(types_a)/dble(unobs_types)
     end do;end do; end do;end do
     print*,'dist',dist
@@ -154,22 +155,22 @@ function log_likelihood(params_MLE)
     
     log_likelihood=0.0d0
     
-    do a_l=1,types_a; do u_l=1,unobs_types;do v_l=1,villages 
+    do a_l=1,types_a; do u_l=1,unobs_types;do v_l=1,1!villages 
         call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
     end do; end do;end do
 
     !$OMP PARALLEL default(private) private(v_l,a_l,u_l,P_l)  shared(Ef_v,F_est,CCP_est,CCP)
     !$OMP  DO
-    do P_l=2,P_max; do a_l=1,types_a ; do u_l=1,unobs_types;do v_l=1,villages
-        !call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
-        !                ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
-        !                ,P_l &
-        !                ,CCP_est(1:2*P_l-1,:,P_l,a_l,v_l,u_l),CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l)
-        call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
-                            ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
-                            ,P_l &
-                            ,CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l &
-                            ,V_fct(1:2*P_l-1,:,P_l,a_l,v_l,u_l)) 
+    do P_l=2,P_max; do a_l=1,types_a ; do u_l=1,unobs_types;do v_l=1,1!villages
+        call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
+                        ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
+                        ,P_l &
+                        ,CCP_est(1:2*P_l-1,:,P_l,a_l,v_l,u_l),CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l,V_fct(1:2*P_l-1,:,P_l,a_l,v_l,u_l))
+        !call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
+        !                    ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
+        !                    ,P_l &
+        !                    ,CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l &
+        !                    ,V_fct(1:2*P_l-1,:,P_l,a_l,v_l,u_l)) 
     end do; end do;end do; end do
     
     !$OMP END DO  

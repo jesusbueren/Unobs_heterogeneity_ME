@@ -13,7 +13,6 @@ module cadastral_maps
     integer,dimension(plots_in_map,2,villages)::PA_type !number of neighbors, a type for each plot in the map
     integer,dimension(plots_in_map,P_max,villages)::neighbors !identify neighbors for each plot in the map
     character(len=103)::file_map="C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\cadastral_maps\fortran_files\"
-    integer,dimension(plots_in_map,villages)::active_plots=1
 end
     
 module primitives
@@ -42,7 +41,8 @@ module primitives
     double precision,dimension(types_a-1)::area_lims=(/1.3d0,2.3d0,4.0d0/)
     !pr of unobserved heterogeneity type
     double precision,dimension(unobs_types)::pr_unobs_t=(/0.216d0*0.168d0,0.216d0*0.832d0,0.784d0*0.168d0,0.784d0*0.832d0/)
-    
+    !Taxation parameters
+    double precision::T_g=0.0d0,tau=0.0d0
 end
      
 module simulation
