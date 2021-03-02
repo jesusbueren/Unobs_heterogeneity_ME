@@ -48,9 +48,9 @@ subroutine estimation(params_MLE,log_likeli)
     call random_seed(PUT=seed_c)
     !Fixing beliefs, estimate parameter
     !print*,'Initial Conditions'
-    p_g(1,:)=(/30.1763d0,0.5d0,1.2d0/)
-    p_g(2,:)=(/21.1763d0,0.4d0,0.8d0/)
-    p_g(3,:)=(/25.1763d0,0.6d0,1.1d0/)
+    p_g(1,:)=(/8.18d0,0.99d0,14.6d0/)
+    p_g(2,:)=(/8.8d0,0.33d0,12.9d0/)
+    p_g(3,:)=(/5.3d0,0.22d0,13.5d0/)
     p_g(4,:)=(/30.1763d0,0.7d0,1.0d0/)
     
     !Initial Conditions
