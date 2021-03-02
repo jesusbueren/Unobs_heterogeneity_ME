@@ -10,11 +10,14 @@ subroutine counterfactuals(params_MLE)
     integer::v_l,p_l,it
     character::end_key
     integer,parameter::nkk=21
-    double precision,dimension(nkk)::tau_grid
+    double precision,dimension(nkk)::pi_grid
     
-    tau_grid(1)=-0.05d0
+    c_s_or=c_s
+    c_d_or=c_d
+    
+    pi_grid(1)=0.0d0
     do p_l=2,nkk
-        tau_grid(p_l)=tau_grid(p_l-1)+0.05d0
+        pi_grid(p_l)=pi_grid(p_l-1)+0.05d0
     end do
         
     !I want to compute the optimal tax of production giving a subsidy as a lumpsum.
@@ -22,9 +25,11 @@ subroutine counterfactuals(params_MLE)
     !Look for the optimal tax that maximizes average NPV
     
     do p_l=1,nkk;do v_l=1,1!villages
-        print*,'tau exp',p_l
+        print*,'pi exp',p_l
         print*,'village,',v_l 
-        tau=tau_grid(p_l)
+        pi=pi_grid(p_l)
+        c_s=c_s_or+pi*c_d_or
+        c_d=c_d_or+pi*c_d_or
         if (p_l==1) then
             CCP_true(:,:,:,:,v_l,:)=0.07d0
             n_dist(:,v_l)=1
@@ -39,15 +44,15 @@ subroutine counterfactuals(params_MLE)
             print*,'T_g',T_g
             go to 1
         else
-            print*,'eq reached for tau=',tau,'and T_g=',T_g
+            print*,'eq reached for pi=',pi,'and T_g=',T_g
         end if
         if (p_l==1) then
             OPEN(UNIT=12, FILE=path_results//"counterfactuals.txt")
-            write(12,'(F20.3,F20.3,F20.3,F20.3)'),tau,T_g,mean_N(v_l),mean_NPV(v_l)
+            write(12,'(F20.3,F20.3,F20.3,F20.3)'),pi,T_g,mean_N(v_l),mean_NPV(v_l)
             close(12)
         else
             OPEN(UNIT=12, FILE=path_results//"counterfactuals.txt",access='append')
-            write(12,'(F20.3,F20.3,F20.3,F20.3)'),tau,T_g,mean_N(v_l),mean_NPV(v_l)
+            write(12,'(F20.3,F20.3,F20.3,F20.3)'),pi,T_g,mean_N(v_l),mean_NPV(v_l)
             close(12)
         end if        
     end do;end do

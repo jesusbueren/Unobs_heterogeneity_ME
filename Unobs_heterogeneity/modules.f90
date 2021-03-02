@@ -32,7 +32,7 @@ module primitives
     double precision,dimension(2*P_max,villages)::PI_s
     double precision,dimension(2*P_max-1,3,P_max,villages)::PI_s_v
     !c_d: fixed cost of failing to drill;c_s: fixed cost of succeeding to drill
-    double precision::c_s=66.4d0,beta=0.90d0,c_d=27.2d0
+    double precision::c_s=66.4d0,beta=0.95d0,c_d=27.2d0,c_d_or,c_s_or
     !extreme value distribution shocks
     double precision,parameter::gamma=0.577215664901533d0
     double precision::rho
@@ -42,7 +42,7 @@ module primitives
     !pr of unobserved heterogeneity type
     double precision,dimension(unobs_types)::pr_unobs_t=(/0.216d0*0.168d0,0.216d0*0.832d0,0.784d0*0.168d0,0.784d0*0.832d0/)
     !Taxation parameters
-    double precision::T_g=0.0d0,tau=0.0d0
+    double precision::T_g=0.0d0,tau=0.0d0,pi=0.0d0
 end
      
 module simulation

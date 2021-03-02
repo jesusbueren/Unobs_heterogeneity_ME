@@ -81,5 +81,6 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,mean_NPV
         go to 1 
     end if
     
+    call generate_beliefs(CCP_mid,V_fct,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,mean_NPV,mean_budget)
  
 end subroutine

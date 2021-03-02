@@ -99,10 +99,16 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
             !Compute NPV
             if (t_l>T-(its+1)) then 
                 NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*V_fct(ind,n_l,P,A,unobs_types_i(i_l))
-                budget(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*budget(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(tau*Ef_v(ind,n_l,P,A,unobs_types_i(i_l))-T_g)
                 if (n_l==1 .or. n_l==2)then
+                    if (n_l==1) then
+                        budget(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*budget(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(CCP(ind,n_l,P,A,unobs_types_i(i_l))*pi*c_d_or-T_g)
+                    else
+                        budget(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*budget(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(CCP(ind,n_l,P,A,unobs_types_i(i_l))*pi*c_d_or)
+                    end if                        
                     it2=it2+1.0d0
                     CCP_av(t_l-(T-(its+1)))=(it2-1.0d0)/it2*CCP_av(t_l-(T-(its+1)))+1.0d0/it2*CCP(ind,n_l,P,A,unobs_types_i(i_l))
+                else
+                    budget(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*budget(t_l-(T-(its+1)))+1.0d0/dble(i_l)*0.0d0
                 end if
             end if
             !Well drilling decision and failures/successes

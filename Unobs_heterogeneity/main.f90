@@ -52,23 +52,23 @@ call compute_moments(dble(drilling_it(:,:,1)),"data")
 
 print*,'Start estimation'
 !Generate a random CCP for computing initial beliefs
-!CCP_est=sqrt(-1.0d0)
-!do P_l=1,P_max
-!    CCP_est(1:2*P_l-1,1:2,P_l,:,:,:)=0.06d0
-!end do
-!call estimation(params_MLE,log_likeli)
-!print*,'end maximization'
+CCP_est=sqrt(-1.0d0)
+do P_l=1,P_max
+    CCP_est(1:2*P_l-1,1:2,P_l,:,:,:)=0.06d0
+end do
+call estimation(params_MLE,log_likeli)
+print*,'end maximization'
 
 !open(unit=12, file=path_results//"bootstrapped_parameters.txt",status='replace')
 !write(12,'(f20.12,f20.12,f20.12,f20.12)'),params_mle(1),params_mle(2),params_mle(3),log_likeli
 !close(12)
-!!call bootstrap_se()
+!call bootstrap_se()
 !open(unit=12, file=path_results//"bootstrapped_parameters.txt")
 !read(12,*),params_mle
 !close(12)
 !print*,'estimated parameters',params_MLE
-params_MLE=(/27.2d0,0.9999d0,1.0d0/)
-call counterfactuals(params_MLE)
+!params_MLE=(/8.8d0,0.33d0,12.9d0/)
+!call counterfactuals(params_MLE)
 
 
 read*,end_key

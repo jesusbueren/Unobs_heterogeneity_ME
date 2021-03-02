@@ -26,12 +26,12 @@ subroutine update_CCP(V,F,Ef_v,P,CCP,v_l,u_l)
         !!One well (n=2)
         !!!!!!!!!!!!!!!!!
             !No attempt
-            v_10=T_g+(1.0d0-tau)*Ef_v(:,2) &
+            v_10=(1.0d0-tau)*Ef_v(:,2) &
                 +beta*(1.0d0-PI_f_v(1:2*P-1,2,P,v_l,u_l))*matmul(F(:,:,2,2),V_t(:,2)) &
                 +beta*PI_f_v(1:2*P-1,2,P,v_l,u_l)*matmul(F(:,:,2,1),V_t(:,1))
                 
             !Attempt
-            v_1I=T_g+(1.0d0-tau)*Ef_v(:,2) &
+            v_1I=(1.0d0-tau)*Ef_v(:,2) &
                     -PI_s_v(1:2*P-1,2,P,v_l)*c_s-(1.0d0-PI_s_v(1:2*P-1,2,P,v_l))*c_d &
                     +beta*PI_s_v(1:2*P-1,2,P,v_l)*(1.0d0-PI_f_v(1:2*P-1,2,P,v_l,u_l))*matmul(F(:,:,2,3),V_t(:,3)) &
                     +beta*(PI_s_v(1:2*P-1,2,P,v_l)*PI_f_v(1:2*P-1,2,P,v_l,u_l)+(1.0d0-PI_s_v(1:2*P-1,2,P,v_l))*(1.0d0-PI_f_v(1:2*P-1,2,P,v_l,u_l)))*matmul(F(:,:,2,2),V_t(:,2)) &
