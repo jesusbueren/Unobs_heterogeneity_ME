@@ -48,10 +48,9 @@ subroutine estimation(params_MLE,log_likeli)
     call random_seed(PUT=seed_c)
     !Fixing beliefs, estimate parameter
     !print*,'Initial Conditions'
-    p_g(1,:)=(/30.1763d0,0.5d0,1.2d0/)
-    p_g(2,:)=(/21.1763d0,0.4d0,0.8d0/)
-    p_g(3,:)=(/25.1763d0,0.6d0,1.1d0/)
-    p_g(4,:)=(/30.1763d0,0.7d0,1.0d0/)
+    p_g(1,:)=(/27.2d0,0.99d0/)
+    p_g(2,:)=(/29.9d0,0.44d0/)
+    p_g(3,:)=(/25.1763d0,0.6d0/)
     
     !Initial Conditions
     !do p_l=1,par+1
@@ -65,7 +64,6 @@ subroutine estimation(params_MLE,log_likeli)
     do p_l=1,par+1
         p_g(p_l,1)=log(p_g(p_l,1))
         p_g(p_l,2)=log(p_g(p_l,2)/(1.0d0-p_g(p_l,2)))
-        p_g(p_l,3)=log(p_g(p_l,3))
         y(p_l)=log_likelihood(p_g(p_l,:))
     end do 
     !print*,'likelihood_ini',y(1)
@@ -77,14 +75,13 @@ subroutine estimation(params_MLE,log_likeli)
     log_likeli=y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
-    p_g(:,3)=exp(p_g(:,3))
     
     !print*,'estimated parameter',p_g(1,:)
     !print*,'likelihood value',y(1)
     
     !Compute CCP to check convergence
     params_MLE=p_g(1,:)
-    rho=params_MLE(3)
+    rho=1.0d0
     CCP_old=CCP_est
     do v_l=1,villages
         do u_l=1,unobs_types;do a_l=1,types_a
@@ -147,8 +144,7 @@ function log_likelihood(params_MLE)
     
     params(1)=exp(params_MLE(1))
     params(2)=1.0d0/(1.0d0 + exp(-params_MLE(2))) 
-    params(3)=exp(params_MLE(3))
-    rho=params(3)
+    rho=1.0d0
 
     print*,' parameters',params
     
