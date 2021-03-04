@@ -9,7 +9,7 @@ subroutine counterfactuals(params_MLE)
     double precision,dimension(villages)::mean_N,mean_NPV,mean_budget
     integer::v_l,p_l,it
     character::end_key
-    integer,parameter::nkk=21
+    integer,parameter::nkk=15
     double precision,dimension(nkk)::pi_grid
     
     c_s_or=c_s
@@ -17,19 +17,18 @@ subroutine counterfactuals(params_MLE)
     
     pi_grid(1)=0.0d0
     do p_l=2,nkk
-        pi_grid(p_l)=pi_grid(p_l-1)+0.05d0
+        pi_grid(p_l)=pi_grid(p_l-1)+0.001d0
     end do
         
     !I want to compute the optimal tax of production giving a subsidy as a lumpsum.
     !Set a tax to production, find the lumpsum transfer that makes government transfer to be in eq.
     !Look for the optimal tax that maximizes average NPV
-    
+    tau=0.0d0
     do p_l=1,nkk;do v_l=1,1!villages
         print*,'pi exp',p_l
         print*,'village,',v_l 
         pi=pi_grid(p_l)
-        c_s=c_s_or+pi*c_d_or
-        c_d=c_d_or+pi*c_d_or
+        tau=pi*c_s_or
         if (p_l==1) then
             CCP_true(:,:,:,:,v_l,:)=0.07d0
             n_dist(:,v_l)=1

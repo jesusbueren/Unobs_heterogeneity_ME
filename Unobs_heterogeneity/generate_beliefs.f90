@@ -8,11 +8,11 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max),intent(out)::F_new
     integer,intent(in)::v_l
     integer(8),dimension(2*P_max-1,3,3,P_max),intent(out)::iterations
-    integer,parameter::T=50000!100000
+    integer,parameter::T=100000
     integer,dimension(plots_in_map,3)::state,state_old
     integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min
     double precision::u_d,u_s,u_f,u_m,it2
-    integer,parameter:: its=1000
+    integer,parameter:: its=2000
     double precision,dimension(its)::NPV,total_N,budget,CCP_av
     double precision,intent(out)::mean_NPV,mean_N,mean_budget
     integer(8),dimension(2*P_max-1,2*P_max-1,3,3,P_max)::beliefs_c
@@ -45,7 +45,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     it=0
     
     !Store the state for each plot and simulate decision to drill
-    OPEN(UNIT=12, FILE="number_of_wells.txt")
+    
     do t_l=1,T-1;   
         !print*,t_l
         !simulate monsoon next period
@@ -99,16 +99,10 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
             !Compute NPV
             if (t_l>T-(its+1)) then 
                 NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*V_fct(ind,n_l,P,A,unobs_types_i(i_l))
-                if (n_l==1 .or. n_l==2)then
-                    if (n_l==1) then
-                        budget(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*budget(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(CCP(ind,n_l,P,A,unobs_types_i(i_l))*pi*c_d_or-T_g)
-                    else
-                        budget(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*budget(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(CCP(ind,n_l,P,A,unobs_types_i(i_l))*pi*c_d_or)
-                    end if                        
+                budget(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*budget(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(tau*dble(n_l-1)-T_g) 
+                if (n_l==1 .or. n_l==2)then                     
                     it2=it2+1.0d0
                     CCP_av(t_l-(T-(its+1)))=(it2-1.0d0)/it2*CCP_av(t_l-(T-(its+1)))+1.0d0/it2*CCP(ind,n_l,P,A,unobs_types_i(i_l))
-                else
-                    budget(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*budget(t_l-(T-(its+1)))+1.0d0/dble(i_l)*0.0d0
                 end if
             end if
             !Well drilling decision and failures/successes
@@ -191,7 +185,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
         end if
         it=it+1
     end do
-    !close(12)
+
     !close(13)
     
 

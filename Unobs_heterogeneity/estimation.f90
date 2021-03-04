@@ -52,15 +52,7 @@ subroutine estimation(params_MLE,log_likeli)
     p_g(2,:)=(/8.8d0,0.33d0,12.9d0/)
     p_g(3,:)=(/5.3d0,0.22d0,13.5d0/)
     p_g(4,:)=(/30.1763d0,0.7d0,1.0d0/)
-    
-    !Initial Conditions
-    !do p_l=1,par+1
-    !    if (p_l>1)then
-    !        p_g(p_l,:)=p_g(1,:)
-    !        p_g(p_l,p_l-1)=p_g(1,p_l-1)*0.9d0 !Move center of the simplex by decreasing the direction by 10%
-    !    end if
-    !end do
-    
+        
     !Change parameters to the (-Inf;Inf) real line
     do p_l=1,par+1
         p_g(p_l,1)=log(p_g(p_l,1))
