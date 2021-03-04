@@ -7,7 +7,7 @@ subroutine compute_moments(data_in,string_name)
     double precision,dimension(types_a,2)::counter_own_nxa,moment_own_nxa
     double precision,dimension(unobs_types,2)::counter_uhe,moment_uhe
     double precision,dimension(P_max)::counter_P,moment_P
-    integer::i_l,t_l
+    integer::i_l,t_l,u_l
     
     !Initialize to zero
     counter_N=0.0d0
@@ -30,9 +30,11 @@ subroutine compute_moments(data_in,string_name)
             moment_own_nxa(A_type(i_l),n_data(t_l,i_l))=(counter_own_nxa(A_type(i_l),n_data(t_l,i_l))-1.0)/counter_own_nxa(A_type(i_l),n_data(t_l,i_l))*moment_own_nxa(A_type(i_l),n_data(t_l,i_l))&
                                             +1.0d0/counter_own_nxa(A_type(i_l),n_data(t_l,i_l))*data_in(t_l,i_l)
             !Moments across number of unobserved heterogeneity types
-            counter_uhe(modal_UHE_type(i_l),n_data(t_l,i_l))=counter_uhe(modal_UHE_type(i_l),n_data(t_l,i_l))+1.0d0
-            moment_uhe(modal_UHE_type(i_l),n_data(t_l,i_l))=(counter_uhe(modal_UHE_type(i_l),n_data(t_l,i_l))-1.0)/counter_uhe(modal_UHE_type(i_l),n_data(t_l,i_l))*moment_uhe(modal_UHE_type(i_l),n_data(t_l,i_l))&
-                                            +1.0d0/counter_uhe(modal_UHE_type(i_l),n_data(t_l,i_l))*data_in(t_l,i_l)
+            do u_l=1,unobs_types
+                counter_uhe(u_l,n_data(t_l,i_l))=counter_uhe(u_l,n_data(t_l,i_l))+UHE_type(u_l,i_l)
+                moment_uhe(u_l,n_data(t_l,i_l))=moment_uhe(u_l,n_data(t_l,i_l))&
+                                                +data_in(t_l,i_l)*UHE_type(u_l,i_l)
+            end do
             !Moments across number of plots
             counter_P(P_type(i_l))=counter_P(P_type(i_l))+1.0d0
             moment_P(P_type(i_l))=(counter_P(P_type(i_l))-1.0)/counter_P(P_type(i_l))*moment_P(P_type(i_l))&
@@ -46,16 +48,32 @@ subroutine compute_moments(data_in,string_name)
         write(12,*),moment_N
     close(12)
     
+    OPEN(UNIT=12, FILE=path_results//"counter_N.txt")
+        write(12,*),counter_N
+    close(12)
+    
     OPEN(UNIT=12, FILE=path_results//string_name//"_own_nxa.txt")
         write(12,*),moment_own_nxa
     close(12)
     
+    OPEN(UNIT=12, FILE=path_results//"counter_own_nxa.txt")
+        write(12,*),counter_own_nxa
+    close(12)
+    
     OPEN(UNIT=12, FILE=path_results//string_name//"_uhe.txt")
-        write(12,*),moment_uhe
+        write(12,*),moment_uhe/counter_uhe
+    close(12)
+    
+    OPEN(UNIT=12, FILE=path_results//"counter_uhe.txt")
+        write(12,*),counter_uhe
     close(12)
     
     OPEN(UNIT=12, FILE=path_results//string_name//"_P.txt")
         write(12,*),moment_P
+    close(12)
+    
+    OPEN(UNIT=12, FILE=path_results//"counter_P.txt")
+        write(12,*),counter_P
     close(12)
     
     

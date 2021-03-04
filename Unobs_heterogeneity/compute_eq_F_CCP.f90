@@ -43,14 +43,19 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,mean_NPV
                             ,P_l &
                             ,CCP_old(1:2*P_l-1,:,P_l,a_l,u_l),CCP(1:2*P_l-1,:,P_l,a_l,u_l),v_l,u_l &
                             ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l))
+        !print*,''
+        !print*,'V_fct',V_fct(1:2*P_l-1,:,P_l,a_l,u_l)
+        !print*,'CCP',CCP(1:2*P_l-1,:,P_l,a_l,u_l)
         !call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
         !                    ,F(1:2*P_l-1,1:2*P_l-1,:,:,P_l) &
         !                    ,P_l &
         !                    ,CCP(1:2*P_l-1,:,P_l,a_l,u_l),v_l,u_l &
         !                    ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l))
-        V_fct(1:2*P_l-1,:,P_l,a_l,u_l)=V_fct(1:2*P_l-1,:,P_l,a_l,u_l)-(rho*gamma/(1.0d0-beta))
-        
+        !print*,''
+        !print*,'V_fct',V_fct(1:2*P_l-1,:,P_l,a_l,u_l)
+        !print*,'CCP',CCP(1:2*P_l-1,:,P_l,a_l,u_l)
     end do; end do;end do
+    !V_fct(1,3,2:7,1,1)
    
     !V_fct(1,3,1,:,4)
     !P_l2=P_max

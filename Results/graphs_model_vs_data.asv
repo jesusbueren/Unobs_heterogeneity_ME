@@ -17,10 +17,10 @@ fileID = fopen('data_own_nxa.txt','r');
 data_own_n = fscanf(fileID,'%f')
 fclose(fileID);
 data_own_n=reshape(data_own_n,4,2)
-fileID = fopen('counter_own_nxa.txt','r');
-counter_own_n = fscanf(fileID,'%f')
-fclose(fileID);
-counter_own_n=reshape(counter_own_n,4,2)
+% fileID = fopen('counter_own_nxa.txt','r');
+% counter_own_nxa = fscanf(fileID,'%f')
+% fclose(fileID);
+% counter_own_nxa=reshape(counter_own_nxa,4,2)
 fileID = fopen('modl_own_nxa.txt','r');
 modl_own_n = fscanf(fileID,'%f')
 fclose(fileID);
@@ -40,21 +40,21 @@ fileID = fopen('data_uhe.txt','r');
 data_uhe = fscanf(fileID,'%f')
 fclose(fileID);
 data_uhe=reshape(data_uhe,4,2)
-fileID = fopen('counter_uhe.txt','r');
-counter_uhe = fscanf(fileID,'%f')
-fclose(fileID);
-counter_uhe=reshape(counter_uhe,4,2)
+% fileID = fopen('counter_uhe.txt','r');
+% counter_uhe = fscanf(fileID,'%f')
+% fclose(fileID);
+% counter_uhe=reshape(counter_uhe,4,2)
 fileID = fopen('modl_uhe.txt','r');
 modl_uhe = fscanf(fileID,'%f')
 fclose(fileID);
 modl_uhe=reshape(modl_uhe,4,2)
 
 
-clrs = [0.9 0.9 0.9;0 0 0];
+clrs = [0 0 0; 0.9 0.9 0.9];
 
 FS=12
 set(groot,'defaultAxesTickLabelInterpreter','latex');  
-for i=[2 4]
+for i=[2 ]
     figure(i)
     if i==2
         title("Functioning Wells in Adjacency")
@@ -67,26 +67,24 @@ for i=[2 4]
         xticks([1 2 3 4 5 6])
         xticklabels({'P=2','P=3','P=4','P=5','P=6','P=7'})
     end
-    yticks([0:0.03:0.12])
-    ylim([0 .12])
+%     yticks([0:0.03:0.12])
+%     ylim([0 .12])
     hold on
     hB=bar(data_gr)
     ngroups = size(data_gr, 1);
     nbars = size(data_gr, 2);
+    if i==2
         groupwidth = min(0.8, nbars/(nbars + 1.5));
         % Set the position of each error bar in the centre of the main bar
         % Based on barweb.m by Bolu Ajiboye from MATLAB File Exchange
-        for i2 = 1:1
+        for i = 1:nbars
             % Calculate center of each bar
-            x = (1:ngroups) - groupwidth/2 + (2*i2-1) * groupwidth / (2*nbars);
-            if i==2
-                errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_N(1:5)) , 'k', 'linestyle', 'none');
-            elseif i==4
-                errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_P(2:7)) , 'k', 'linestyle', 'none');
-            end
+            x = (1:ngroups) - groupwidth/2 + (2*i-1) * groupwidth / (2*nbars);
+            errorbar(data_gr(:,i), sqrt((data_gr(:,i)).*(1-data_gr(:,i))./) , 'k', 'linestyle', 'none');
         end
+    end
     set(hB,{'FaceColor'},{clrs(1,:),clrs(2,:)}.')
-    I=legend('Data \pm 2 s.d.','Model')
+    I=legend('Data','Model')
     legend('boxoff')
     I.FontSize=FS
     set(gca,'FontName','Times New Roman','Fontsize',FS);
@@ -133,20 +131,8 @@ for i=[3 5]
         xticklabels({'$n=0$','$n=1$'})
         hold on
         hB=bar(data_gr)
-        ngroups = size(data_gr, 1);
-        nbars = size(data_gr, 2);
-        groupwidth = min(0.8, nbars/(nbars + 1.5));
-        for i2 = 1:1
-            % Calculate center of each bar
-            x = (1:ngroups) - groupwidth/2 + (2*i2-1) * groupwidth / (2*nbars);
-            if i==3
-                errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_own_n(j,:)') , 'k', 'linestyle', 'none');
-            elseif i==5
-                errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_uhe(j,:)') , 'k', 'linestyle', 'none');
-            end
-        end
         set(hB,{'FaceColor'},{clrs(1,:),clrs(2,:)}.')
-        I=legend('Data \pm 2 s.d.','Model')
+        I=legend('Data','Model')
         legend('boxoff')
         I.FontSize=FS
         set(gca,'FontName','Times New Roman','Fontsize',FS);

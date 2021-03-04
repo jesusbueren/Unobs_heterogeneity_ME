@@ -13,25 +13,24 @@ subroutine update_CCP(V,F,Ef_v,P,CCP,v_l,u_l)
     
     !Vector to tersor
     V_t=reshape(V,(/2*P-1,3/))
-    
 
         !No well (n=1)
         !!!!!!!!!!!!!!
             !No attempt
-            v_00=T_g+beta*matmul(F(:,:,1,1),V_t(:,1))
+            v_00=beta*matmul(F(:,:,1,1),V_t(:,1))
             !Attempt
-            v_0I=T_g+PI_s_v(1:2*P-1,1,P,v_l)*(-c_s+beta*matmul(F(:,:,1,2),V_t(:,2))) &
+            v_0I=PI_s_v(1:2*P-1,1,P,v_l)*(-c_s+beta*matmul(F(:,:,1,2),V_t(:,2))) &
                         +(1.0d0-PI_s_v(1:2*P-1,1,P,v_l))*(-c_d+beta*matmul(F(:,:,1,1),V_t(:,1))) 
             
         !!One well (n=2)
         !!!!!!!!!!!!!!!!!
             !No attempt
-            v_10=(1.0d0-tau)*Ef_v(:,2) &
+            v_10=Ef_v(:,2) &
                 +beta*(1.0d0-PI_f_v(1:2*P-1,2,P,v_l,u_l))*matmul(F(:,:,2,2),V_t(:,2)) &
                 +beta*PI_f_v(1:2*P-1,2,P,v_l,u_l)*matmul(F(:,:,2,1),V_t(:,1))
                 
             !Attempt
-            v_1I=(1.0d0-tau)*Ef_v(:,2) &
+            v_1I=Ef_v(:,2) &
                     -PI_s_v(1:2*P-1,2,P,v_l)*c_s-(1.0d0-PI_s_v(1:2*P-1,2,P,v_l))*c_d &
                     +beta*PI_s_v(1:2*P-1,2,P,v_l)*(1.0d0-PI_f_v(1:2*P-1,2,P,v_l,u_l))*matmul(F(:,:,2,3),V_t(:,3)) &
                     +beta*(PI_s_v(1:2*P-1,2,P,v_l)*PI_f_v(1:2*P-1,2,P,v_l,u_l)+(1.0d0-PI_s_v(1:2*P-1,2,P,v_l))*(1.0d0-PI_f_v(1:2*P-1,2,P,v_l,u_l)))*matmul(F(:,:,2,2),V_t(:,2)) &

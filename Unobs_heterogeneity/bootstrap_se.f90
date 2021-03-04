@@ -53,7 +53,7 @@ subroutine bootstrap_se()
     
         call estimation(params_bs(:,bs_l),likeli)
         OPEN(UNIT=12, FILE=path_results//"bootstrapped_parameters.txt",access='append')
-        write(12,'(F20.12,F20.12,F20.12,F20.12)'),params_bs(1,bs_l),params_bs(2,bs_l),likeli!,params_bs(3,bs_l)
+        write(12,'(F20.12,F20.12,F20.12,F20.12)'),params_bs(1,bs_l),params_bs(2,bs_l),params_bs(3,bs_l),likeli
         close(12)
     
     end do

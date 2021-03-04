@@ -42,7 +42,7 @@ module primitives
     !pr of unobserved heterogeneity type
     double precision,dimension(unobs_types)::pr_unobs_t=(/0.216d0*0.168d0,0.216d0*0.832d0,0.784d0*0.168d0,0.784d0*0.832d0/)
     !Taxation parameters
-    double precision::T_g=0.0d0,tau=0.0d0,pi=0.0d0
+    double precision::T_g=0.0d0,pi=0.0d0,tau=0.0d0
 end
      
 module simulation
