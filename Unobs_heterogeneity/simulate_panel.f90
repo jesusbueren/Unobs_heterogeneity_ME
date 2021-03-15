@@ -5,7 +5,7 @@ subroutine simulate_panel(CCP,n_initial)
     integer,dimension(plots_in_map,villages),intent(inout)::n_initial
     integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,v_l,m_l,max_Big_n,s_l,t
     double precision::u_d,u_s,u_f,u_m
-    integer,dimension(plots_i)::unobs_types_i
+    integer,dimension(plots_i)::unobs_types_i2
     integer,dimension(1)::seed=456
     double precision,dimension(P_max)::dist
     character::continue_k
@@ -25,11 +25,11 @@ subroutine simulate_panel(CCP,n_initial)
         do i_l=1,plots_i
             call RANDOM_NUMBER(u_m)
             if (u_m<UHE_type(1,i_l)) then !these numbers come from hanan's estimation_v3.pdf
-                unobs_types_i(i_l)=1
+                unobs_types_i2(i_l)=1
             elseif (u_m<sum(UHE_type(1:2,i_l))) then
-                unobs_types_i(i_l)=2
+                unobs_types_i2(i_l)=2
             else
-                unobs_types_i(i_l)=3
+                unobs_types_i2(i_l)=3
             end if
         end do
             
@@ -62,14 +62,14 @@ subroutine simulate_panel(CCP,n_initial)
                 !Well drilling decision and failures/successes
                 if (n_l==1) then !no well
                     call RANDOM_NUMBER(u_d)
-                    if (u_d<CCP(ind,n_l,P,A,v_l,unobs_types_i(i_l))) then !decides to drill
+                    if (u_d<CCP(ind,n_l,P,A,v_l,unobs_types_i2(i_l))) then !decides to drill
                         drilling_it(t_l,i_l,s_l)=1
                     else !decides not to drill
                         drilling_it(t_l,i_l,s_l)=0
                     end if
                 elseif (n_l==2) then !one well
                     call RANDOM_NUMBER(u_d)
-                    if (u_d<CCP(ind,n_l,P,A,v_l,unobs_types_i(i_l))) then !decides to drill
+                    if (u_d<CCP(ind,n_l,P,A,v_l,unobs_types_i2(i_l))) then !decides to drill
                         drilling_it(t_l,i_l,s_l)=1
                     else !decides not to drill
                         drilling_it(t_l,i_l,s_l)=0

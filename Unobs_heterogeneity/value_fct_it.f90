@@ -19,9 +19,8 @@ subroutine value_fct_it(Ef_v,F,P,CCP,v_l,u_l,V_new)
     !Define intial guess of value function
     V_old=0.0d0
     dist=1.0d0
-    crit=1.0d-15
-    
-    
+    crit=1.0d-10
+        
     do while (dist>crit)
             !No well (n=1)
             !!!!!!!!!!!!!!
@@ -31,7 +30,7 @@ subroutine value_fct_it(Ef_v,F,P,CCP,v_l,u_l,V_new)
                 v_0I(1:2*P-1)=T_g+PI_s_v(1:2*P-1,1,P,v_l)*(-c_s+beta*(matmul(F(1:2*P-1,1:2*P-1,1,2),V_old(1:2*P-1,2)))) & !success
                            +(1.0d0-PI_s_v(1:2*P-1,1,P,v_l))*(-c_d+beta*(matmul(F(1:2*P-1,1:2*P-1,1,1),V_old(1:2*P-1,1)))) !Failure
                 !Value function
-                V_new(1:2*P-1,1)=rho*log(1.0d0+exp((v_0I(1:2*P-1)-v_00(1:2*P-1))/rho))+v_00(1:2*P-1)
+                V_new(1:2*P-1,1)=rho*log(1.0d0+exp((v_0I(1:2*P-1)-v_00(1:2*P-1))/rho))+v_00(1:2*P-1)+rho*gamma
 
             !!One well (n=2)
             !!!!!!!!!!!!!!!!!
@@ -48,16 +47,18 @@ subroutine value_fct_it(Ef_v,F,P,CCP,v_l,u_l,V_new)
                         +beta*((1.0d0-PI_s_v(1:2*P-1,2,P,v_l))*PI_f_v(1:2*P-1,2,P,v_l,u_l)*matmul(F(1:2*P-1,1:2*P-1,2,1),V_old(1:2*P-1,1))) !failure in both
                 
                 !Value function
-                V_new(1:2*P-1,2)=rho*log(1.0d0+exp((v_1I(1:2*P-1)-v_10(1:2*P-1))/rho))+v_10(1:2*P-1)
+                V_new(1:2*P-1,2)=rho*log(1.0d0+exp((v_1I(1:2*P-1)-v_10(1:2*P-1))/rho))+v_10(1:2*P-1)+rho*gamma
             
             !!Two wells (n=3)
             !!!!!!!!!!!!!!!!!!
+                CCP(1:2*P-1,1)=1.0d0/(1.0d0+exp(v_00(1:2*P-1)/rho-v_0I(1:2*P-1)/rho))
+                CCP(1:2*P-1,2)=1.0d0/(1.0d0+exp(v_10(1:2*P-1)/rho-v_1I(1:2*P-1)/rho))
+                
                 V_new(1:2*P-1,3)=T_g+Ef_v(1:2*P-1,3) &
+                                +CCP(1:2*P-1,2)*(rho*gamma-rho*log(CCP(1:2*P-1,2)))+(1.0d0-CCP(1:2*P-1,2))*(rho*gamma-rho*log(1.0d0-CCP(1:2*P-1,2))) &
                                 + beta*(1.0d0-PI_f_v(1:2*P-1,3,P,v_l,u_l))**2.0d0*matmul(F(1:2*P-1,1:2*P-1,3,3),V_old(1:2*P-1,3)) & !none fails
                                 + 2.0d0*beta*(1.0d0-PI_f_v(1:2*P-1,3,P,v_l,u_l))*PI_f_v(1:2*P-1,3,P,v_l,u_l)*matmul(F(1:2*P-1,1:2*P-1,3,2),V_old(1:2*P-1,2)) & !one fails
                                 + beta*PI_f_v(1:2*P-1,3,P,v_l,u_l)**2.0d0*matmul(F(1:2*P-1,1:2*P-1,3,1),V_old(1:2*P-1,1))  !both fail
-
-
                 
         !Check contraction
         !!!!!!!!!!!!!!!!!!
@@ -81,8 +82,6 @@ subroutine value_fct_it(Ef_v,F,P,CCP,v_l,u_l,V_new)
         read*,pause_k
     end if
     
-    
-    V_new=V_new+(rho*gamma)/(1.0d0-beta)
     
     
 

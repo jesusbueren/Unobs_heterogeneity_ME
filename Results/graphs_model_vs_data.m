@@ -155,5 +155,24 @@ for i=[3 5]
         print(strcat('model_fit',num2str(i)),'-depsc')
     end 
 end
-    
+
+%% Counterfactuals
+
+close all
+clear all
+cd("C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\Results")
+
+fileID = fopen('counterfactuals.txt','r');
+counterfactuals = fscanf(fileID,'%f')
+fclose(fileID);
+villages=14
+variables=5
+nkk=50
+counterfactuals=reshape(counterfactuals,variables,nkk,villages)
+
+plot(mean(counterfactuals(4,:,:),3),'linewidth',2)
+hold on
+plot(mean(counterfactuals(5,:,:),3),'--','linewidth',2)
+I=legend('Social','Private')
+set(gcf,'color','w') 
         

@@ -1,4 +1,4 @@
-subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N,mean_NPV,mean_budget)
+subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N,social_output,private_output)
     use cadastral_maps; use primitives
     implicit none
     double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types),intent(in)::CCP
@@ -8,36 +8,23 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max),intent(out)::F_new
     integer,intent(in)::v_l
     integer(8),dimension(2*P_max-1,3,3,P_max),intent(out)::iterations
-    integer,parameter::T=100000
+    integer,parameter::T=5000!100000
     integer,dimension(plots_in_map,3)::state,state_old
     integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min
     double precision::u_d,u_s,u_f,u_m,it2
     integer,parameter:: its=2000
-    double precision,dimension(its)::NPV,total_N,budget,CCP_av
-    double precision,intent(out)::mean_NPV,mean_N,mean_budget
+    double precision,dimension(its)::NPV,total_N,NPV_PV,CCP_av
+    double precision,intent(out)::mean_N,social_output,private_output
     integer(8),dimension(2*P_max-1,2*P_max-1,3,3,P_max)::beliefs_c
-    integer,dimension(1)::seed=123
+    integer,dimension(1)::seed=123,seed2
     integer,parameter::burn_t=100
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max)::F
-    integer,dimension(plots_v(v_l))::unobs_types_i
     double precision,dimension(P_max)::dist
     character::continue_k
     
     !Call seed number
+    call random_seed(GET=seed2)
     call random_seed(PUT=seed)
-    !Generate permanent unobserved heterogeneity type
-    do i_l=1,plots_v(v_l)
-        call RANDOM_NUMBER(u_m)
-        if (u_m<pr_unobs_t(1)) then
-            unobs_types_i(i_l)=1
-        elseif (u_m<sum(pr_unobs_t(1:2))) then
-            unobs_types_i(i_l)=2
-        elseif (u_m<sum(pr_unobs_t(1:3))) then
-            unobs_types_i(i_l)=3
-        else
-            unobs_types_i(i_l)=4
-        end if
-    end do
     
     beliefs_c=0
     iterations=0
@@ -58,104 +45,116 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
         beliefs_c=0
         if (t_l>T-(its+1)) then
             NPV(t_l-(T-(its+1)))=0.0d0
-            budget(t_l-(T-(its+1)))=0.0d0
+            NPV_PV(t_l-(T-(its+1)))=0.0d0
             CCP_av(t_l-(T-(its+1)))=0.0d0
             it2=0.0d0
         end if
         state(:,1)=n_initial(:,1)
         !print*,'t_l',t_l,'av number of wells per plot',real(sum(n_initial(1:plots_v(v_l),1))-plots_v(v_l))/real(plots_v(v_l))
         do i_l=1,plots_v(v_l)
-            N_all=1 !Indicates the number of wells in the adjacency
-            !Loop over all neighbors
-            do j_l=1,PA_type(i_l,1,v_l) !PA_type(i_l,1) stores the number of plots in the adjacency
-                if (state(neighbors(i_l,j_l,v_l),1)==2)  then
-                    N_all=N_all+1 !number of wells (there is one well)
-                elseif (state(neighbors(i_l,j_l,v_l),1)==3)  then
-                    N_all=N_all+2 !number of wells (there is two wells)
-                end if
-            end do
-            state(i_l,2)=N_all !second column in state: number of plots with one well
-            n_l=state(i_l,1) !number of well in reference plot
+            if (active_plots(i_l,v_l)==1) then
+                N_all=1 !Indicates the number of wells in the adjacency
+                !Loop over all neighbors
+                do j_l=1,PA_type(i_l,1,v_l) !PA_type(i_l,1) stores the number of plots in the adjacency
+                    if (state(neighbors(i_l,j_l,v_l),1)==2)  then
+                        N_all=N_all+1 !number of wells (there is one well)
+                    elseif (state(neighbors(i_l,j_l,v_l),1)==3)  then
+                        N_all=N_all+2 !number of wells (there is two wells)
+                    end if
+                end do
+                state(i_l,2)=N_all !second column in state: number of plots with one well
+                n_l=state(i_l,1) !number of well in reference plot
 
-            P=PA_type(i_l,1,v_l) !number of plots in the adjacency
-            A=PA_type(i_l,2,v_l) !area of the reference plot
+                P=PA_type(i_l,1,v_l) !number of plots in the adjacency
+                A=PA_type(i_l,2,v_l) !area of the reference plot
             
-            !Locate position in the state space wrt to the CCP, PI_s_v and ,PI_f_v
-            if (n_l==1) then
-                ind=N_all 
-            elseif (n_l==2) then
-                ind=N_all-1
-            elseif (n_l==3) then
-                ind=N_all-2
-            else
-                print*,'error generating beliefs'
-            end if         
-            state(i_l,3)=ind
-            !Count transitions (in the first iteration state_old is undefined: no problem)
-            if (t_l>=burn_t) then
-                beliefs_c(state_old(i_l,3),state(i_l,3),state_old(i_l,1),state(i_l,1),P)=&
-                beliefs_c(state_old(i_l,3),state(i_l,3),state_old(i_l,1),state(i_l,1),P)+1
-            end if
-            !Compute NPV
-            if (t_l>T-(its+1)) then 
-                NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*V_fct(ind,n_l,P,A,unobs_types_i(i_l))
-                budget(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*budget(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(tau*dble(n_l-1)-T_g) 
-                if (n_l==1 .or. n_l==2)then                     
-                    it2=it2+1.0d0
-                    CCP_av(t_l-(T-(its+1)))=(it2-1.0d0)/it2*CCP_av(t_l-(T-(its+1)))+1.0d0/it2*CCP(ind,n_l,P,A,unobs_types_i(i_l))
+                !Locate position in the state space wrt to the CCP, PI_s_v and ,PI_f_v
+                if (n_l==1) then
+                    ind=N_all 
+                elseif (n_l==2) then
+                    ind=N_all-1
+                elseif (n_l==3) then
+                    ind=N_all-2
+                else
+                    print*,'error generating beliefs'
+                end if         
+                state(i_l,3)=ind
+                !Count transitions (in the first iteration state_old is undefined: no problem)
+                if (t_l>=burn_t) then
+                    beliefs_c(state_old(i_l,3),state(i_l,3),state_old(i_l,1),state(i_l,1),P)=&
+                    beliefs_c(state_old(i_l,3),state(i_l,3),state_old(i_l,1),state(i_l,1),P)+1
                 end if
-            end if
-            !Well drilling decision and failures/successes
-            if (n_l==1) then !no well
-                call RANDOM_NUMBER(u_d)
-                if (u_d<CCP(ind,n_l,P,A,unobs_types_i(i_l))) then !decides to drill
-                    call RANDOM_NUMBER(u_s)
-                    if (u_s<PI_s_v(ind,n_l,P,v_l)) then !successful attempt
-                        n_initial(i_l,1)=n_l+1
-                    else !unsuccessful attempt
+                !Compute NPV
+                if (t_l>T-(its+1)) then  
+                    if (n_l==1 .or. n_l==2)then                     
+                        it2=it2+1.0d0
+                        CCP_av(t_l-(T-(its+1)))=(it2-1.0d0)/it2*CCP_av(t_l-(T-(its+1)))+1.0d0/it2*CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))
+                        NPV_PV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV_PV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))- &
+                                             CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))*(PI_s_v(ind,n_l,P,v_l)*c_s+(1.0d0-PI_s_v(ind,n_l,P,v_l))*c_d))
+                        NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))- &
+                                             CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))*(PI_s_v(ind,n_l,P,v_l)*c_s+(1.0d0-PI_s_v(ind,n_l,P,v_l))*c_d)-c_e*dble(n_l-1))
+                    else
+                        NPV_PV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV_PV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l)))
+                        NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))-c_e*dble(n_l-1))
+                    end if
+                end if
+                !Well drilling decision and failures/successes
+                if (n_l==1) then !no well
+                    call RANDOM_NUMBER(u_d)
+                    if (u_d<CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))) then !decides to drill
+                        call RANDOM_NUMBER(u_s)
+                        if (u_s<PI_s_v(ind,n_l,P,v_l)) then !successful attempt
+                            n_initial(i_l,1)=n_l+1
+                        else !unsuccessful attempt
+                            n_initial(i_l,1)=n_l
+                        end if
+                    else !decides not to drill
                         n_initial(i_l,1)=n_l
                     end if
-                else !decides not to drill
-                    n_initial(i_l,1)=n_l
-                end if
-            elseif (n_l==2) then !one well
-                call RANDOM_NUMBER(u_d)
-                if (u_d<CCP(ind,n_l,P,A,unobs_types_i(i_l))) then !decides to drill
-                    call RANDOM_NUMBER(u_s)
-                    if (u_s<PI_s_v(ind,n_l,P,v_l)) then !successful attempt
-                        call RANDOM_NUMBER(u_f)
-                        if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l))) then !failure of the previous well
-                            n_initial(i_l,1)=n_l
-                        else
-                            n_initial(i_l,1)=n_l+1
+                elseif (n_l==2) then !one well
+                    call RANDOM_NUMBER(u_d)
+                    if (u_d<CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))) then !decides to drill
+                        call RANDOM_NUMBER(u_s)
+                        if (u_s<PI_s_v(ind,n_l,P,v_l)) then !successful attempt
+                            call RANDOM_NUMBER(u_f)
+                            if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l))) then !failure of the previous well
+                                n_initial(i_l,1)=n_l
+                            else
+                                n_initial(i_l,1)=n_l+1
+                            end if
+                        else !unsuccessful attempt
+                            call RANDOM_NUMBER(u_f)
+                            if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l))) then !failure of the previous well
+                                n_initial(i_l,1)=n_l-1
+                            else
+                                n_initial(i_l,1)=n_l
+                            end if
                         end if
-                    else !unsuccessful attempt
+                    else !decides not to drill
                         call RANDOM_NUMBER(u_f)
-                        if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l))) then !failure of the previous well
+                        if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l))) then !failure of the previous well
                             n_initial(i_l,1)=n_l-1
                         else
                             n_initial(i_l,1)=n_l
-                        end if
-                    end if
-                else !decides not to drill
-                    call RANDOM_NUMBER(u_f)
-                    if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l))) then !failure of the previous well
-                        n_initial(i_l,1)=n_l-1
-                    else
-                        n_initial(i_l,1)=n_l
+                        end if 
                     end if 
-                end if 
-            elseif(n_l==3) then !two wells
-                call RANDOM_NUMBER(u_f)
-                if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l))**2) then !failure of the two wells
-                    n_initial(i_l,1)=n_l-2
-                elseif (u_f>(1.0d0-PI_fm(N_all-1,m_l,unobs_types_i(i_l)))**2) then !failure of none
-                    n_initial(i_l,1)=n_l
-                else !failure of one
-                    n_initial(i_l,1)=n_l-1
-                end if 
+                elseif(n_l==3) then !two wells
+                    call RANDOM_NUMBER(u_f)
+                    if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l))**2) then !failure of the two wells
+                        n_initial(i_l,1)=n_l-2
+                    elseif (u_f>(1.0d0-PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l)))**2) then !failure of none
+                        n_initial(i_l,1)=n_l
+                    else !failure of one
+                        n_initial(i_l,1)=n_l-1
+                    end if 
+                else
+                    print*,'error in gen beliefs 2'
+                end if
             else
-                print*,'error in gen beliefs 2'
+                if (t_l>T-(its+1)) then  
+                    NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*0.0d0
+                    NPV_PV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV_PV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*0.0d0
+                end if
             end if
         end do
         !Store current state
@@ -210,11 +209,13 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
         F_new(ind,1:2*P_l-1,n_l,n_l2,P_l)=1.0d0
     end do;end do
     
-    mean_NPV=sum(NPV)/dble(its)
+    social_output=sum(NPV)/dble(its)/mean_area(v_l)
+    private_output=sum(NPV_PV)/dble(its)/mean_area(v_l)
     mean_N=sum(total_N)/(its)/dble(plots_v(v_l))
-    mean_budget=sum(budget)/dble(its)
     
     print*,'av drilling',sum(CCP_av)/dble(its)
+    
+    call random_seed(PUT=seed2)
 
 !print*,'press key to continue'    
 !read*,continue_k

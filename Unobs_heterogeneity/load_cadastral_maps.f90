@@ -3,11 +3,12 @@ subroutine load_cadastral_maps()
     implicit none
     character(LEN=1)::s_c1
     character(LEN=2)::s_c2
-    integer::v_l,i,j,ind,a_l!,x,y
-    double precision::u
+    integer::v_l,i,j,ind,a_l,i_l!,x,y
+    double precision::u,u_m
     double precision,dimension(villages,plots_in_map)::areas
     integer,dimension(villages,plots_in_map)::area_type
     integer,dimension(P_max,2)::PA_stat
+    integer,dimension(1)::seed=123
     
     PA_type=-9
     
@@ -47,11 +48,11 @@ subroutine load_cadastral_maps()
         end do
     
         !number of neighbors
-        PA_type(1:plots_v(v_l),1,v_l)=min(sum(neighbors_map(1:plots_v(v_l),1:plots_v(v_l),v_l),2),P_max)
-                
+        PA_type(1:plots_v(v_l),1,v_l)=min(sum(neighbors_map(1:plots_v(v_l),1:plots_v(v_l),v_l),2),P_max)        
     end do
     
     !Area Type
+    mean_area=0.0d0
     do v_l=1,villages
         do i=1,plots_v(v_l)
             do a_l=1,types_a-1
@@ -62,6 +63,7 @@ subroutine load_cadastral_maps()
                     area_type(v_l,i)=a_l+1
                 end if
             end do
+            mean_area(v_l)=dble(i-1)/dble(i)*mean_area(v_l)+1.0d0/dble(i)*area(area_type(v_l,i))
             PA_type(i,2,v_l)=area_type(v_l,i)
         end do 
     end do 
@@ -72,9 +74,26 @@ subroutine load_cadastral_maps()
         PA_stat(PA_type(i,1,v_l),1)=PA_stat(PA_type(i,1,v_l),1)+1
         PA_stat(PA_type(i,2,v_l),2)=PA_stat(PA_type(i,2,v_l),2)+1
     end do
-    print*,'distribution of number of neighbors'
-    print*,dble(PA_stat(1:P_max,1))/dble(plots_v(v_l))
-    print*,'distribution of area types'
-    print*,dble(PA_stat(1:types_a,2))/dble(plots_v(v_l))
+    !print*,'distribution of number of neighbors'
+    !print*,dble(PA_stat(1:P_max,1))/dble(plots_v(v_l))
+    !print*,'distribution of area types'
+    !print*,dble(PA_stat(1:types_a,2))/dble(plots_v(v_l))
+    
+    call random_seed(PUT=seed)
+    !Generate permanent unobserved heterogeneity type
+    do v_l=1,villages;do i_l=1,plots_v(v_l)
+        call RANDOM_NUMBER(u_m)
+        if (u_m<pr_unobs_t(1)) then
+            unobs_types_i(i_l,v_l)=1
+        elseif (u_m<sum(pr_unobs_t(1:2))) then
+            unobs_types_i(i_l,v_l)=2
+        elseif (u_m<sum(pr_unobs_t(1:3))) then
+            unobs_types_i(i_l,v_l)=3
+        else
+            unobs_types_i(i_l,v_l)=4
+        end if
+    end do;end do
+    
+    
 
 end subroutine

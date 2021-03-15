@@ -63,7 +63,7 @@ subroutine estimation(params_MLE,log_likeli)
     !print*,'likelihood_ini',y(1)
     
     !Optimization of parameters given beliefs
-    ftol=1.0d-7
+    ftol=1.0d-5
     call amoeba(p_g,y,ftol,log_likelihood,iter)
     print*,'got out of amoeba'
     log_likeli=y(1)

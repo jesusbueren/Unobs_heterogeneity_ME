@@ -28,7 +28,8 @@
 		<File RelativePath=".\bootstrap_se.f90"/>
 		<File RelativePath=".\compute_eq_F_CCP.f90"/>
 		<File RelativePath=".\compute_moments.f90"/>
-		<File RelativePath=".\counterfactuals.f90"/>
+		<File RelativePath=".\counterfactual_1.f90"/>
+		<File RelativePath=".\counterfactual_2.f90"/>
 		<File RelativePath=".\estimation.f90"/>
 		<File RelativePath=".\expected_productivity.f90"/>
 		<File RelativePath=".\generate_beliefs.f90"/>
@@ -40,6 +41,7 @@
 		<File RelativePath=".\modules.f90"/>
 		<File RelativePath=".\policy_fct_it.f90"/>
 		<File RelativePath=".\simulate_panel.f90"/>
+		<File RelativePath=".\transitional_dynamics.f90"/>
 		<File RelativePath=".\update_CCP.f90"/>
 		<File RelativePath=".\valuation.f90"/>
 		<File RelativePath=".\value_fct_it.f90"/></Filter>

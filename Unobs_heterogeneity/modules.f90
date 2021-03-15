@@ -9,9 +9,12 @@ module cadastral_maps
     implicit none
     integer,parameter::plots_in_map=1909,villages=14,unobs_types=4
     integer,parameter,dimension(villages)::plots_v=(/1794,302,912,517,292,535,939,637,405,837,973,1844,443,1909/) !plots in each village
+    double precision,dimension(villages):: mean_area
     integer,dimension(plots_in_map,plots_in_map,villages)::neighbors_map
     integer,dimension(plots_in_map,2,villages)::PA_type !number of neighbors, a type for each plot in the map
+    integer,dimension(plots_in_map,villages)::unobs_types_i
     integer,dimension(plots_in_map,P_max,villages)::neighbors !identify neighbors for each plot in the map
+    integer,dimension(plots_in_map,villages)::active_plots=1
     character(len=103)::file_map="C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\cadastral_maps\fortran_files\"
 end
     
@@ -31,8 +34,8 @@ module primitives
     !PI_s: Pr. of success (first position indicates no wells; last position indicates all plots 2 wells but one with one well)
     double precision,dimension(2*P_max,villages)::PI_s
     double precision,dimension(2*P_max-1,3,P_max,villages)::PI_s_v
-    !c_d: fixed cost of failing to drill;c_s: fixed cost of succeeding to drill
-    double precision::c_s=66.4d0,beta=0.95d0,c_d=27.2d0,c_d_or,c_s_or
+    !c_d: fixed cost of failing to drill;c_s: fixed cost of succeeding to drill; c_e: cost of electricity by well
+    double precision::c_s=72.3d0,beta=0.9d0,c_d=35.2d0, c_e=11.7d0
     !extreme value distribution shocks
     double precision,parameter::gamma=0.577215664901533d0
     double precision::rho
@@ -42,7 +45,7 @@ module primitives
     !pr of unobserved heterogeneity type
     double precision,dimension(unobs_types)::pr_unobs_t=(/0.216d0*0.168d0,0.216d0*0.832d0,0.784d0*0.168d0,0.784d0*0.832d0/)
     !Taxation parameters
-    double precision::T_g=0.0d0,pi=0.0d0,tau=0.0d0
+    double precision::T_g=0.0d0,tau=0.0d0
 end
      
 module simulation
