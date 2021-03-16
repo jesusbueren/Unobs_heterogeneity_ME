@@ -16,6 +16,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     integer(8),dimension(2*P_max-1,3,3,P_max)::iterations
     character::pause_k
     
+    
     !Set scale parameter Gumbel distribution of shocks
     rho=params(3)
 
@@ -82,10 +83,10 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     
     !print*,'press any key to continue'
     !read*,pause_k
-    if (dist>1d-3 ) then !.and. dble(counter_bad)/dble(counter_all)>0.05d0
+    if (dist>1.0d-4 ) then !dist>1d-3 
         go to 1 
     end if
     
     call generate_beliefs(CCP_mid,V_fct,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,social_output,private_output)
- 
+    !print*,'dist CCP',dist,'social_output',social_output
 end subroutine

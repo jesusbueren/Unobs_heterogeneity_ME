@@ -27,7 +27,7 @@ subroutine valuation(CCP,C,Ef_v,P,V,v_l)
                 U_small(ind,n_l)=rho*gamma
             else   
                  U_small(ind,n_l)=CCP(ind,2)*(rho*gamma-rho*log(CCP(ind,2)))+&
-                                    (1.0d0-CCP(ind,2))*(rho*gamma-rho*log(1.0d0-CCP(ind,2))) !rho*gamma
+                                    (1.0d0-CCP(ind,2))*(rho*gamma-rho*log(1.0d0-CCP(ind,2))) !rho*gamma 
              end if
         end if
     end do; end do

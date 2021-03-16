@@ -1,14 +1,14 @@
 subroutine transitional_dynamics(params_MLE)
     use dimensions; use cadastral_maps; use simulation; use primitives
     implicit none
-    integer,parameter::T=30
+    integer,parameter::T=500
     double precision,dimension(par)::params_true,params_MLE
-    double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,villages,T)::F_true
+    double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,T)::F_in,F_out
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max)::slope,intercept
     double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types,T)::CCP_true
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,T)::V_fct
-    integer,dimension(plots_in_map,villages,T)::n_dist
-    double precision,dimension(villages,T)::mean_N,social_output,private_output
+    integer,dimension(plots_in_map,T)::n_dist
+    double precision,dimension(T)::mean_N,social_output,private_output
     integer::v_l,p_l,it,t_l
     character::end_key
     
@@ -17,63 +17,110 @@ subroutine transitional_dynamics(params_MLE)
     tau=0.0d0
     t_l=1
     CCP_true(:,:,:,:,v_l,:,t_l)=0.07d0
-    call compute_eq_F_CCP(params_MLE,F_true(:,:,:,:,:,v_l,t_l),CCP_true(:,:,:,:,v_l,:,t_l),V_fct(:,:,:,:,:,t_l),n_dist(:,v_l,t_l),v_l,&
-                                                mean_N(v_l,t_l),social_output(v_l,t_l),private_output(v_l,t_l))
+    call compute_eq_F_CCP(params_MLE,F_in(:,:,:,:,:,t_l),CCP_true(:,:,:,:,v_l,:,t_l),V_fct(:,:,:,:,:,t_l),n_dist(:,t_l),v_l,&
+                                                mean_N(t_l),social_output(t_l),private_output(t_l))
+    print*,'NPV at begining',social_output(t_l)
     
     tau=20.0d0
     t_l=T
     CCP_true(:,:,:,:,v_l,:,t_l)=0.07d0
-    call compute_eq_F_CCP(params_MLE,F_true(:,:,:,:,:,v_l,t_l),CCP_true(:,:,:,:,v_l,:,t_l),V_fct(:,:,:,:,:,t_l),n_dist(:,v_l,t_l),v_l,&
-                                                mean_N(v_l,t_l),social_output(v_l,t_l),private_output(v_l,t_l))
+    call compute_eq_F_CCP(params_MLE,F_in(:,:,:,:,:,t_l),CCP_true(:,:,:,:,v_l,:,t_l),V_fct(:,:,:,:,:,t_l),n_dist(:,t_l),v_l,&
+                                                mean_N(t_l),social_output(t_l),private_output(t_l))
+    print*,'NPV at end',social_output(t_l)
     
     !Initial guess of beliefs
-    slope=(F_true(:,:,:,:,:,v_l,T)-F_true(:,:,:,:,:,v_l,1))/(dble(T)-1.0d0)
-    intercept=F_true(:,:,:,:,:,v_l,1)-slope
+    slope=(F_in(:,:,:,:,:,T)-F_in(:,:,:,:,:,1))/(dble(T)-1.0d0)
+    intercept=F_in(:,:,:,:,:,1)-slope
     do t_l=2,T-1
-        F_true(:,:,:,:,:,v_l,t_l)=slope*dble(t_l)+intercept
+        F_in(:,:,:,:,:,t_l)=slope*dble(t_l)+intercept
     end do
-    
-    
-    
 
- 
-!    !I want to compute the optimal tax of production giving a subsidy as a lumpsum.
-!    !Set a tax to production, find the lumpsum transfer that makes government transfer to be in eq.
-!    !Look for the optimal tax that maximizes average NPV
-!    tau=0.0d0
-!    do v_l=1,villages;do p_l=1,nkk
-!        print*,'exp',p_l
-!        print*,'village,',v_l 
-!        tau=tau_grid(p_l)
-!        if (p_l==1) then
-!            CCP_true(:,:,:,:,v_l,:)=0.07d0
-!            n_dist(:,v_l)=1
-!            V_fct=0.0d0
-!            !T_g=0.0d0
-!        end if
-!!        !If needed to compute the equilibrium tax
-!!1       call compute_eq_F_CCP(params_MLE,F_true(:,:,:,:,:,v_l),CCP_true(:,:,:,:,v_l,:),V_fct,n_dist(:,v_l),v_l,mean_N(v_l),mean_NPV(v_l),mean_budget(v_l))
-!!        print*,'mean_NPV',mean_NPV(v_l)
-!!        if (abs(mean_budget(v_l))>1.0d-2) then
-!!            T_g=T_g+mean_budget(v_l)*0.5d0
-!!            print*,'mean_budget(v_l)',mean_budget(v_l)
-!!            print*,'T_g',T_g
-!!            go to 1
-!!        else
-!!            print*,'eq reached for tau=',tau,'and T_g=',T_g
-!!        end if
-!        call compute_eq_F_CCP(params_MLE,F_true(:,:,:,:,:,v_l),CCP_true(:,:,:,:,v_l,:),V_fct,n_dist(:,v_l),v_l,mean_N(v_l),social_output(v_l),private_output(v_l))
-!        if (p_l==1 .and. v_l==1) then
-!            OPEN(UNIT=12, FILE=path_results//"counterfactuals.txt")
-!            write(12,'(F10.3,I4,F10.3,F10.3,F10.3)'),tau,v_l,mean_N(v_l),social_output(v_l),private_output(v_l)
-!            close(12)
-!        else
-!            OPEN(UNIT=12, FILE=path_results//"counterfactuals.txt",access='append')
-!            write(12,'(F10.3,I4,F10.3,F10.3,F10.3)'),tau,v_l,mean_N(v_l),social_output(v_l),private_output(v_l)
-!            close(12)
-!        end if        
-!    end do;end do
-
+    call solve_path(params_MLE,T,n_dist(:,1),F_in,v_l,V_fct,mean_N,social_output)    
+    
+    
 
     
 end subroutine
+    
+subroutine solve_path(params,T_path,n_ini,F_in,v_l,V_fct,mean_N,social_output)
+    use cadastral_maps; use dimensions; use primitives
+    implicit none
+    integer,intent(in)::T_path
+    double precision,dimension(par),intent(in)::params
+    integer,dimension(plots_in_map),intent(in)::n_ini
+    double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,T_path),intent(inout)::F_in
+    integer,intent(in)::v_l  
+    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,T_path),intent(inout)::V_fct
+    double precision,dimension(T_path),intent(out)::mean_N,social_output
+    
+    double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types,T_path)::CCP_old,CCP,CCP_mid
+    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
+    double precision::dist
+    integer::p_l,a_l,n_l,P_l2,ind,counter_all,counter_bad,u_l,t_l
+    integer(8),dimension(2*P_max-1,3,3,P_max,T_path)::iterations
+    
+    !Set scale parameter Gumbel distribution of shocks
+    rho=params(3)
+
+    !Compute expected productivity 
+    do u_l=1,unobs_types;do a_l=1,types_a
+        call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+    end do;end do
+    
+    !Taking as given the value function of the next period compute the value function and CCP of the next period
+    CCP_old=0.0d0
+1   do P_l=2,P_max; do a_l=1,types_a; do u_l=1,unobs_types;do t_l=T_path,1,-1
+        if (t_l>20) then
+            tau=20.0d0
+        else
+            tau=0.0d0
+        end if        
+        if (t_l==T_path) then
+            call one_step_value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
+                            ,F_in(1:2*P_l-1,1:2*P_l-1,:,:,P_l,t_l) &
+                            ,P_l &
+                            ,CCP(1:2*P_l-1,:,P_l,a_l,u_l,t_l),v_l,u_l &
+                            ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l,t_l) &
+                            ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l,t_l))
+        elseif (t_l<=20) then
+            call one_step_value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
+                                ,F_in(1:2*P_l-1,1:2*P_l-1,:,:,P_l,t_l) &
+                                ,P_l &
+                                ,CCP(1:2*P_l-1,:,P_l,a_l,u_l,t_l),v_l,u_l &
+                                ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l,1) &
+                                ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l,t_l))
+        else           
+            call one_step_value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
+                                ,F_in(1:2*P_l-1,1:2*P_l-1,:,:,P_l,t_l) &
+                                ,P_l &
+                                ,CCP(1:2*P_l-1,:,P_l,a_l,u_l,t_l),v_l,u_l &
+                                ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l,t_l+1) &
+                                ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l,t_l))
+        end if
+     end do; end do;end do;end do
+    
+    call generate_transition_beliefs(T_path,CCP,Ef_v(:,:,:,:,v_l,:),n_ini,F_in,v_l,iterations,mean_N,social_output)
+    F_in(:,:,:,:,:,20)=F_in(:,:,:,:,:,1)
+    print*,'NPV at begining',social_output(1)
+    print*,'NPV at end',social_output(T_path)
+    dist=0.0
+    t_l=1
+    do P_l=2,P_max; do n_l=1,2;do ind=1,2*P_l-1; do t_l=1,T_path;
+        dist=dist+dble(sum(iterations(ind,n_l,1:3,P_l,t_l)))/dble(sum(iterations(:,1:2,1:3,:,:)))*sum(abs(CCP_old(ind,n_l,P_l,:,:,t_l)-CCP(ind,n_l,P_l,:,:,t_l)))/dble(types_a)/dble(unobs_types)
+    end do;end do; end do;end do
+    
+    OPEN(UNIT=12, FILE="transitional_dynamics.txt")
+    do t_l=1,T_path
+        write(12,'(F10.3,I4,F10.3,F10.3)'),tau,v_l,mean_N(t_l),social_output(t_l)
+    end do
+    close(12)
+    
+    print*,'dist CCP',dist
+    !Compute beliefs over the transition path given ccps
+    if (dist>1.0d-4) then
+        CCP_old=CCP
+        go to 1
+    end if
+
+end subroutine
+    

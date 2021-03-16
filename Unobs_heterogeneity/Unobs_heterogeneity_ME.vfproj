@@ -34,6 +34,7 @@
 		<File RelativePath=".\expected_productivity.f90"/>
 		<File RelativePath=".\generate_beliefs.f90"/>
 		<File RelativePath=".\generate_C.f90"/>
+		<File RelativePath=".\generate_transition_beliefs.f90"/>
 		<File RelativePath=".\input_primitives.f90"/>
 		<File RelativePath=".\load_cadastral_maps.f90"/>
 		<File RelativePath=".\load_estimation_data.f90"/>
