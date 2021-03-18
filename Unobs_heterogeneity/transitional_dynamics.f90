@@ -8,7 +8,7 @@ subroutine transitional_dynamics(params_MLE)
     double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types,T)::CCP_true
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,T)::V_fct
     integer,dimension(plots_in_map,T)::n_dist
-    double precision,dimension(T)::mean_N,social_output,private_output
+    double precision,dimension(T)::mean_N,social_output,private_output,av_CCP
     integer::v_l,p_l,it,t_l
     character::end_key
     
@@ -35,14 +35,14 @@ subroutine transitional_dynamics(params_MLE)
         F_in(:,:,:,:,:,t_l)=slope*dble(t_l)+intercept
     end do
 
-    call solve_path(params_MLE,T,n_dist(:,1),F_in,v_l,V_fct,mean_N,social_output)    
+    call solve_path(params_MLE,T,n_dist(:,1),F_in,v_l,V_fct,mean_N,social_output,av_CCP)    
     
     
 
     
 end subroutine
     
-subroutine solve_path(params,T_path,n_ini,F_in,v_l,V_fct,mean_N,social_output)
+subroutine solve_path(params,T_path,n_ini,F_in,v_l,V_fct,mean_N,social_output,av_CCP)
     use cadastral_maps; use dimensions; use primitives
     implicit none
     integer,intent(in)::T_path
@@ -51,7 +51,7 @@ subroutine solve_path(params,T_path,n_ini,F_in,v_l,V_fct,mean_N,social_output)
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,T_path),intent(inout)::F_in
     integer,intent(in)::v_l  
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,T_path),intent(inout)::V_fct
-    double precision,dimension(T_path),intent(out)::mean_N,social_output
+    double precision,dimension(T_path),intent(out)::mean_N,social_output,av_CCP
     
     double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types,T_path)::CCP_old,CCP,CCP_mid
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
@@ -60,11 +60,11 @@ subroutine solve_path(params,T_path,n_ini,F_in,v_l,V_fct,mean_N,social_output)
     integer(8),dimension(2*P_max-1,3,3,P_max,T_path)::iterations
     
     !Set scale parameter Gumbel distribution of shocks
-    rho=params(3)
+    rho=params(4)
 
     !Compute expected productivity 
     do u_l=1,unobs_types;do a_l=1,types_a
-        call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+        call expected_productivity(params(1:3),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
     end do;end do
     
     !Taking as given the value function of the next period compute the value function and CCP of the next period
@@ -99,7 +99,7 @@ subroutine solve_path(params,T_path,n_ini,F_in,v_l,V_fct,mean_N,social_output)
         end if
      end do; end do;end do;end do
     
-    call generate_transition_beliefs(T_path,CCP,Ef_v(:,:,:,:,v_l,:),n_ini,F_in,v_l,iterations,mean_N,social_output)
+    call generate_transition_beliefs(T_path,CCP,Ef_v(:,:,:,:,v_l,:),n_ini,F_in,v_l,iterations,mean_N,social_output,av_CCP)
     F_in(:,:,:,:,:,20)=F_in(:,:,:,:,:,1)
     print*,'NPV at begining',social_output(1)
     print*,'NPV at end',social_output(T_path)
@@ -111,7 +111,7 @@ subroutine solve_path(params,T_path,n_ini,F_in,v_l,V_fct,mean_N,social_output)
     
     OPEN(UNIT=12, FILE="transitional_dynamics.txt")
     do t_l=1,T_path
-        write(12,'(F10.3,I4,F10.3,F10.3)'),tau,v_l,mean_N(t_l),social_output(t_l)
+        write(12,'(F10.3,I4,F10.3,F10.3,F10.3)'),tau,v_l,mean_N(t_l),social_output(t_l),av_CCP(t_l)
     end do
     close(12)
     

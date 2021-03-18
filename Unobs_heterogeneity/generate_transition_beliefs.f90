@@ -1,4 +1,4 @@
-subroutine generate_transition_beliefs(T_path,CCP,Ef_v,n_ini,F_new,v_l,iterations,mean_N,social_output)
+subroutine generate_transition_beliefs(T_path,CCP,Ef_v,n_ini,F_new,v_l,iterations,mean_N,social_output,mean_CCP)
     use cadastral_maps; use primitives
     implicit none
     integer,intent(in)::T_path
@@ -14,7 +14,7 @@ subroutine generate_transition_beliefs(T_path,CCP,Ef_v,n_ini,F_new,v_l,iteration
     integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min,s_l
     double precision::u_d,u_s,u_f,u_m,it2
     double precision,dimension(Sims,T_path)::NPV,total_N,CCP_av
-    double precision,dimension(T_path),intent(out)::mean_N,social_output
+    double precision,dimension(T_path),intent(out)::mean_N,social_output,mean_CCP
     integer(8),dimension(2*P_max-1,2*P_max-1,3,3,P_max)::beliefs_c
     integer,dimension(1)::seed=123,seed2
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max)::F
@@ -207,6 +207,7 @@ subroutine generate_transition_beliefs(T_path,CCP,Ef_v,n_ini,F_new,v_l,iteration
     social_output=sum(NPV,1)/dble(Sims)/mean_area(v_l)
     mean_N=sum(total_N,1)/dble(Sims)/dble(plots_v(v_l))
     
+    mean_CCP=sum(CCP_av,1)/dble(Sims)
     !print*,'av drilling',sum(CCP_av,1)/dble(Sims)
     
     call random_seed(PUT=seed2)
