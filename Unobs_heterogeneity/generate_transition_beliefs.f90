@@ -1,25 +1,25 @@
-subroutine generate_transition_beliefs(T_path,CCP,Ef_v,n_ini,F_new,v_l,iterations,mean_N,social_output)
+subroutine generate_transition_beliefs(T_path,Sims,CCP,Ef_v,n_ini,F_new,v_l,iterations,mean_N,social_output,ccp_mean)
     use cadastral_maps; use primitives
     implicit none
-    integer,intent(in)::T_path
+    integer,intent(in)::T_path,Sims
     double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types,T_path),intent(in)::CCP
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(in)::Ef_v 
-    integer,dimension(plots_in_map,1),intent(inout)::n_ini
+    integer,dimension(plots_in_map,Sims),intent(inout)::n_ini
     integer,dimension(plots_in_map,T_path+1)::n_initial
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,T_path),intent(out)::F_new
     integer,intent(in)::v_l
     integer(8),dimension(2*P_max-1,3,3,P_max,T_path),intent(out)::iterations
-    integer,parameter::Sims=1000
     integer,dimension(plots_in_map,3)::state,state_old
     integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min,s_l
     double precision::u_d,u_s,u_f,u_m,it2
     double precision,dimension(Sims,T_path)::NPV,total_N,CCP_av
-    double precision,dimension(T_path),intent(out)::mean_N,social_output
+    double precision,dimension(T_path),intent(out)::mean_N,social_output,ccp_mean
     integer(8),dimension(2*P_max-1,2*P_max-1,3,3,P_max)::beliefs_c
     integer,dimension(1)::seed=123,seed2
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max)::F
     character::continue_k
     
+    print*,'got into trans beliefs'
     !Call seed number
     call random_seed(GET=seed2)
     call random_seed(PUT=seed)
@@ -37,7 +37,7 @@ subroutine generate_transition_beliefs(T_path,CCP,Ef_v,n_ini,F_new,v_l,iteration
     do t_l=1,T_path+1;  
         it2=0.0d0
         if (t_l==1) then
-            n_initial(:,t_l)=n_ini(:,1)
+            n_initial(:,t_l)=n_ini(:,s_l)
         end if
         !print*,t_l
         !simulate monsoon next period
@@ -178,7 +178,9 @@ subroutine generate_transition_beliefs(T_path,CCP,Ef_v,n_ini,F_new,v_l,iteration
         end if
         it=0
         it=it+1
-    end do;end do
+    end do
+    n_ini(:,s_l)=n_initial(:,19)
+    end do
 
     !close(13)
     
@@ -206,11 +208,11 @@ subroutine generate_transition_beliefs(T_path,CCP,Ef_v,n_ini,F_new,v_l,iteration
     
     social_output=sum(NPV,1)/dble(Sims)/mean_area(v_l)
     mean_N=sum(total_N,1)/dble(Sims)/dble(plots_v(v_l))
-    
-    !print*,'av drilling',sum(CCP_av,1)/dble(Sims)
+    ccp_mean=sum(CCP_av,1)/dble(Sims)
+    !print*,'av drilling',ccp_mean
     
     call random_seed(PUT=seed2)
-    n_ini(:,1)=n_initial(:,19)
+    
 
 !print*,'press key to continue'    
 !read*,continue_k

@@ -1,15 +1,16 @@
 subroutine transitional_dynamics(params_MLE)
     use dimensions; use cadastral_maps; use simulation; use primitives
     implicit none
-    integer,parameter::T=500
+    integer,parameter::T=100,Sims=1000
     double precision,dimension(par)::params_true,params_MLE
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,T)::F_in,F_out
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max)::slope,intercept
     double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types,T)::CCP_true
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,T)::V_fct
     integer,dimension(plots_in_map,T)::n_dist
-    double precision,dimension(T)::mean_N,social_output,private_output
-    integer::v_l,p_l,it,t_l
+    integer,dimension(plots_in_map,Sims)::n_ini
+    double precision,dimension(T)::mean_N,social_output,private_output,ccp_mean
+    integer::v_l,p_l,it,t_l,s_l
     character::end_key
     
     !Compute the value functions, beliefs and ditribution of wells for the two steady states
@@ -34,24 +35,24 @@ subroutine transitional_dynamics(params_MLE)
     do t_l=2,T-1
         F_in(:,:,:,:,:,t_l)=slope*dble(t_l)+intercept
     end do
+    do s_l=1,Sims
+        n_ini(:,s_l)=n_dist(:,1)
+    end do
+    call solve_path(params_MLE,T,Sims,n_ini,F_in,v_l,V_fct,mean_N,social_output,ccp_mean)    
 
-    call solve_path(params_MLE,T,n_dist(:,1),F_in,v_l,V_fct,mean_N,social_output)    
-    
-    
-
-    
 end subroutine
     
-subroutine solve_path(params,T_path,n_ini,F_in,v_l,V_fct,mean_N,social_output)
+subroutine solve_path(params,T_path,Sims,n_ini,F_in,v_l,V_in,mean_N,social_output,ccp_mean)
     use cadastral_maps; use dimensions; use primitives
     implicit none
-    integer,intent(in)::T_path
+    integer,intent(in)::T_path,Sims
     double precision,dimension(par),intent(in)::params
-    integer,dimension(plots_in_map),intent(in)::n_ini
+    integer,dimension(plots_in_map,Sims),intent(inout)::n_ini
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,T_path),intent(inout)::F_in
     integer,intent(in)::v_l  
-    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,T_path),intent(inout)::V_fct
-    double precision,dimension(T_path),intent(out)::mean_N,social_output
+    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,T_path),intent(in)::V_in
+    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,T_path)::V_fct
+    double precision,dimension(T_path),intent(out)::mean_N,social_output,ccp_mean
     
     double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types,T_path)::CCP_old,CCP,CCP_mid
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
@@ -59,6 +60,7 @@ subroutine solve_path(params,T_path,n_ini,F_in,v_l,V_fct,mean_N,social_output)
     integer::p_l,a_l,n_l,P_l2,ind,counter_all,counter_bad,u_l,t_l
     integer(8),dimension(2*P_max-1,3,3,P_max,T_path)::iterations
     
+    print*,'got into solve path'
     !Set scale parameter Gumbel distribution of shocks
     rho=params(3)
 
@@ -80,14 +82,14 @@ subroutine solve_path(params,T_path,n_ini,F_in,v_l,V_fct,mean_N,social_output)
                             ,F_in(1:2*P_l-1,1:2*P_l-1,:,:,P_l,t_l) &
                             ,P_l &
                             ,CCP(1:2*P_l-1,:,P_l,a_l,u_l,t_l),v_l,u_l &
-                            ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l,t_l) &
+                            ,V_in(1:2*P_l-1,:,P_l,a_l,u_l,t_l) &
                             ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l,t_l))
         elseif (t_l<=20) then
             call one_step_value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
                                 ,F_in(1:2*P_l-1,1:2*P_l-1,:,:,P_l,t_l) &
                                 ,P_l &
                                 ,CCP(1:2*P_l-1,:,P_l,a_l,u_l,t_l),v_l,u_l &
-                                ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l,1) &
+                                ,V_in(1:2*P_l-1,:,P_l,a_l,u_l,1) &
                                 ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l,t_l))
         else           
             call one_step_value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
@@ -99,7 +101,7 @@ subroutine solve_path(params,T_path,n_ini,F_in,v_l,V_fct,mean_N,social_output)
         end if
      end do; end do;end do;end do
     
-    call generate_transition_beliefs(T_path,CCP,Ef_v(:,:,:,:,v_l,:),n_ini,F_in,v_l,iterations,mean_N,social_output)
+    call generate_transition_beliefs(T_path,Sims,CCP,Ef_v(:,:,:,:,v_l,:),n_ini,F_in,v_l,iterations,mean_N,social_output,ccp_mean)
     F_in(:,:,:,:,:,20)=F_in(:,:,:,:,:,1)
     print*,'NPV at begining',social_output(1)
     print*,'NPV at end',social_output(T_path)
@@ -111,7 +113,7 @@ subroutine solve_path(params,T_path,n_ini,F_in,v_l,V_fct,mean_N,social_output)
     
     OPEN(UNIT=12, FILE="transitional_dynamics.txt")
     do t_l=1,T_path
-        write(12,'(F10.3,I4,F10.3,F10.3)'),tau,v_l,mean_N(t_l),social_output(t_l)
+        write(12,'(F10.4,I4,F10.4,F10.4,F10.4)'),tau,v_l,mean_N(t_l),social_output(t_l),ccp_mean(t_l)
     end do
     close(12)
     
