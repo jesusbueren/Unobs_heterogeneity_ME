@@ -1,7 +1,7 @@
 subroutine transitional_dynamics(params_MLE)
     use dimensions; use cadastral_maps; use simulation; use primitives
     implicit none
-    integer,parameter::T=100,Sims=1000
+    integer,parameter::T=500,Sims=1000
     double precision,dimension(par)::params_true,params_MLE
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,T)::F_in,F_out
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max)::slope,intercept
@@ -101,7 +101,7 @@ subroutine solve_path(params,T_path,Sims,n_ini,F_in,v_l,V_in,mean_N,social_outpu
         end if
      end do; end do;end do;end do
     
-    call generate_transition_beliefs(T_path,Sims,CCP,Ef_v(:,:,:,:,v_l,:),n_ini,F_in,v_l,iterations,mean_N,social_output,ccp_mean)
+    call generate_transition_beliefs(T_path,Sims,CCP,Ef_v(:,:,:,:,v_l,:),n_ini,F_in,v_l,V_fct,iterations,mean_N,social_output,ccp_mean)
     F_in(:,:,:,:,:,20)=F_in(:,:,:,:,:,1)
     print*,'NPV at begining',social_output(1)
     print*,'NPV at end',social_output(T_path)

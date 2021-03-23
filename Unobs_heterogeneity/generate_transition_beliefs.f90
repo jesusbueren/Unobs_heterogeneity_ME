@@ -1,4 +1,4 @@
-subroutine generate_transition_beliefs(T_path,Sims,CCP,Ef_v,n_ini,F_new,v_l,iterations,mean_N,social_output,ccp_mean)
+subroutine generate_transition_beliefs(T_path,Sims,CCP,Ef_v,n_ini,F_new,v_l,V_fct,iterations,mean_N,social_output,ccp_mean)
     use cadastral_maps; use primitives
     implicit none
     integer,intent(in)::T_path,Sims
@@ -8,6 +8,7 @@ subroutine generate_transition_beliefs(T_path,Sims,CCP,Ef_v,n_ini,F_new,v_l,iter
     integer,dimension(plots_in_map,T_path+1)::n_initial
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,T_path),intent(out)::F_new
     integer,intent(in)::v_l
+    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,T_path),intent(in)::V_fct
     integer(8),dimension(2*P_max-1,3,3,P_max,T_path),intent(out)::iterations
     integer,dimension(plots_in_map,3)::state,state_old
     integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min,s_l
@@ -94,9 +95,17 @@ subroutine generate_transition_beliefs(T_path,Sims,CCP,Ef_v,n_ini,F_new,v_l,iter
                     else
                         NPV(s_l,t_l)=dble(i_l-1)/dble(i_l)*NPV(s_l,t_l)+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))-c_e*dble(n_l-1))
                     end if
-
+                    
+                    !Decision to dismantle well
+                    if (n_l==2 .and. V_fct(ind,n_l,P,A,unobs_types_i(i_l,v_l),t_l)<V_fct(ind,1,P,A,unobs_types_i(i_l,v_l),t_l)) then
+                        n_initial(i_l,t_l+1)=1
+                    elseif (n_l==3 .and. V_fct(ind,n_l,P,A,unobs_types_i(i_l,v_l),t_l)<V_fct(ind,2,P,A,unobs_types_i(i_l,v_l),t_l)) then
+                        n_initial(i_l,t_l+1)=2
+                        if (V_fct(ind,2,P,A,unobs_types_i(i_l,v_l),t_l)<V_fct(ind,1,P,A,unobs_types_i(i_l,v_l),t_l)) then
+                            n_initial(i_l,t_l+1)=1
+                        end if
                     !Well drilling decision and failures/successes
-                    if (n_l==1) then !no well
+                    elseif (n_l==1) then !no well
                         call RANDOM_NUMBER(u_d)
                         if (u_d<CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l),t_l)) then !decides to drill
                             call RANDOM_NUMBER(u_s)
