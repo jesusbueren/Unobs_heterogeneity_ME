@@ -53,7 +53,7 @@
 		<File RelativePath=".\mnbrack.f90"/>
 		<File RelativePath=".\nr.f90"/>
 		<File RelativePath=".\nrtype.f90"/>
-		<File RelativePath=".\nrutile.f90"/>
+		<File RelativePath=".\nrutil.f90"/>
 		<File RelativePath=".\powell.f90"/></Filter>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl"/></Files>
 	<Globals/></VisualStudioProject>

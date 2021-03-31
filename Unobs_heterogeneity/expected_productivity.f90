@@ -1,18 +1,19 @@
 subroutine expected_productivity(params,a,Ef_v,v_l,u_l)
     use dimensions;use primitives
     implicit none
-    double precision,dimension(2),intent(in)::params
+    double precision,dimension(3),intent(in)::params
     double precision,intent(in)::a
     double precision,dimension(2*P_max-1,3,P_max),intent(out)::Ef_v
     integer,intent(in)::v_l,u_l
     double precision,dimension(2*P_max,M,3)::Ef
     integer::m_l,k_l,k_l2,n_l,P1_l,P2_l,ind,N,P
-    double precision::theta_p, gamma_p, beta_p,rho_p
+    double precision::theta_p, gamma_p, beta_p,rho_p,c
     
     !Define parameter
     theta_p=params(1)
     beta_p=params(2)
     gamma_p=1.0d0-params(2)
+    c=params(3)
     
     !y=theta*( q^beta * a^gamma)
     Ef_v=sqrt(-1.0d0)
@@ -20,9 +21,9 @@ subroutine expected_productivity(params,a,Ef_v,v_l,u_l)
     do P=1,P_max  
         Ef=0.0d0
         do m_l=1,M
-            Ef(1:2*P-1,m_l,2)=matmul(PI_k(1:2*P-1,:,m_l,u_l),theta_p*(q(:,1)**beta_p*a**gamma_p))
+            Ef(1:2*P-1,m_l,2)=matmul(PI_k(1:2*P-1,:,m_l,u_l),theta_p*(q(:,1)**beta_p*a**gamma_p)-c*a)
             do k_l=1,K;do k_l2=1,K
-                Ef(2:2*P,m_l,3)=Ef(2:2*P,m_l,3)+theta_p*(q(k_l,1)**(beta_p/(1.0d0-gamma_p))+q(k_l2,1)**(beta_p/(1.0d0-gamma_p)))**(1.0d0-gamma_p)*a**gamma_p &
+                Ef(2:2*P,m_l,3)=Ef(2:2*P,m_l,3)+(theta_p*(q(k_l,1)**(beta_p/(1.0d0-gamma_p))+q(k_l2,1)**(beta_p/(1.0d0-gamma_p)))**(1.0d0-gamma_p)*a**gamma_p-c*a) &
                     *PI_k(2:2*P,k_l,m_l,u_l)*PI_k(2:2*P,k_l2,m_l,u_l)
             end do; end do
         end do 

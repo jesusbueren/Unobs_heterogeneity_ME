@@ -11,7 +11,7 @@ CONTAINS
 	INTERFACE
 		FUNCTION log_likelihood(x)
 		USE nrtype
-		REAL(DP), DIMENSION(2), INTENT(IN) :: x
+		REAL(DP), DIMENSION(4), INTENT(IN) :: x
 		REAL(DP) :: log_likelihood
 		END FUNCTION log_likelihood
 	END INTERFACE
