@@ -8,7 +8,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max),intent(out)::F_new
     integer,intent(in)::v_l
     integer(8),dimension(2*P_max-1,3,3,P_max),intent(out)::iterations
-    integer,parameter::T=50000!100000
+    integer,parameter::T=9120 !100000
     integer,dimension(plots_in_map,3)::state,state_old
     integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min
     double precision::u_d,u_s,u_f,u_m,it2
@@ -21,7 +21,8 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max)::F
     double precision,dimension(P_max)::dist
     character::continue_k
-    
+        
+
     !Call seed number
     call random_seed(GET=seed2)
     call random_seed(PUT=seed)
@@ -30,10 +31,10 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     iterations=0
     F_new=-9.0d0
     it=0
-    
+    !print*,''
     !Store the state for each plot and simulate decision to drill
     
-    do t_l=1,T-1;   
+    do t_l=1,T-1
         !print*,t_l
         !simulate monsoon next period
         call RANDOM_NUMBER(u_m)
