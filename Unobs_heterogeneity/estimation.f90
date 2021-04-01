@@ -65,13 +65,13 @@ subroutine estimation(params_MLE,log_likeli)
     
     !Optimization of parameters given beliefs
     ftol=1.0d-5
-    !call amoeba(p_g,y,ftol,log_likelihood,iter)
+    call amoeba(p_g,y,ftol,log_likelihood,iter)
     xi=0.0d0
     do p_l=1,par
         xi(p_l,p_l)=1.0d0
     end do
     ftol=1.0d-3
-    call powell(p_g(1,:),xi,ftol,iter,fret)
+    call powell(p_g(1,:),xi,ftol,iter,y(1))
     print*,'got out of amoeba'
     log_likeli=y(1)
     p_g(:,1)=exp(p_g(:,1))
