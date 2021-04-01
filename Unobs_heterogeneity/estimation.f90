@@ -80,10 +80,10 @@ subroutine estimation(params_MLE,log_likeli)
     rho=params_MLE(3)
     CCP_old=CCP_est
     do v_l=1,villages
-        do u_l=1,unobs_types;do a_l=1,types_a
+        do a_l=1,types_a;do u_l=1,1
             call expected_productivity(params_MLE(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         end do;end do
-        do P_l=2,P_max; do a_l=1,types_a; do u_l=1,unobs_types 
+        do P_l=2,P_max; do a_l=1,types_a; do u_l=1,1 
             call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
                                 ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
                                 ,P_l &
@@ -147,13 +147,14 @@ function log_likelihood(params_MLE)
     
     log_likelihood=0.0d0
     
-    do a_l=1,types_a; do u_l=1,unobs_types;do v_l=1,villages 
+    do a_l=1,types_a;do v_l=1,villages; do u_l=1,1 
         call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
     end do; end do;end do
 
+    CCP=0.0d0
     !$OMP PARALLEL default(private) private(v_l,a_l,u_l,P_l)  shared(Ef_v,F_est,CCP_est,CCP)
     !$OMP  DO
-    do P_l=2,P_max; do a_l=1,types_a ; do u_l=1,unobs_types;do v_l=1,villages
+    do P_l=2,P_max; do a_l=1,types_a ;do v_l=1,villages; do u_l=1,1
         !print*,P_l,a_l,u_l,v_l
         call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
                         ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
