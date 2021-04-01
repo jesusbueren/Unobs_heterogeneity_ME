@@ -20,9 +20,6 @@ subroutine load_estimation_data
     n_data=data_csv(4,:,:)+1
     Pr_N_data=data_csv(5:15,:,:)
     UHE_type=data_csv(16:19,1,:)
-    !make all type one
-    UHE_type(1,:)=1.0d0
-    UHE_type(2:4,:)=0.0d0
 
     drilling_it(:,:,1)=data_csv(20,:,:)    
     

@@ -19,7 +19,7 @@ subroutine estimation(params_MLE,log_likeli)
     double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP_old,CCP_mid
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::V_fct
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
-    double precision::dist
+    double precision::dist,fret
     integer::it
     integer(8),dimension(2*P_max-1,3,3,P_max,villages)::iterations_all
     double precision,dimension(par,par)::xi
@@ -65,7 +65,13 @@ subroutine estimation(params_MLE,log_likeli)
     
     !Optimization of parameters given beliefs
     ftol=1.0d-5
-    call amoeba(p_g,y,ftol,log_likelihood,iter)
+    !call amoeba(p_g,y,ftol,log_likelihood,iter)
+    xi=0.0d0
+    do p_l=1,par
+        xi(p_l,p_l)=1.0d0
+    end do
+    ftol=1.0d-3
+    call powell(p_g(1,:),xi,ftol,iter,fret)
     print*,'got out of amoeba'
     log_likeli=y(1)
     p_g(:,1)=exp(p_g(:,1))
@@ -80,10 +86,10 @@ subroutine estimation(params_MLE,log_likeli)
     rho=params_MLE(3)
     CCP_old=CCP_est
     do v_l=1,villages
-        do a_l=1,types_a;do u_l=1,1
+        do a_l=1,types_a;do u_l=1,3
             call expected_productivity(params_MLE(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         end do;end do
-        do P_l=2,P_max; do a_l=1,types_a; do u_l=1,1 
+        do P_l=2,P_max; do a_l=1,types_a; do u_l=1,unobs_types 
             call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
                                 ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
                                 ,P_l &
@@ -147,14 +153,14 @@ function log_likelihood(params_MLE)
     
     log_likelihood=0.0d0
     
-    do a_l=1,types_a;do v_l=1,villages; do u_l=1,1 
+    do a_l=1,types_a;do v_l=1,villages; do u_l=1,unobs_types 
         call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
     end do; end do;end do
 
     CCP=0.0d0
     !$OMP PARALLEL default(private) private(v_l,a_l,u_l,P_l)  shared(Ef_v,F_est,CCP_est,CCP)
     !$OMP  DO
-    do P_l=2,P_max; do a_l=1,types_a ;do v_l=1,villages; do u_l=1,1
+    do P_l=2,P_max; do a_l=1,types_a ;do v_l=1,villages; do u_l=1,unobs_types 
         !print*,P_l,a_l,u_l,v_l
         call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
                         ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
