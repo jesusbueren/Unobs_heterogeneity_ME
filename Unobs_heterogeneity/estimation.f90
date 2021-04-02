@@ -37,7 +37,7 @@ subroutine estimation(params_MLE,log_likeli)
     !Generate an initial well endowment: everyone has zero wells
 1   n_initial_all(1:plots_in_map,:)=1    
     call random_seed(GET=seed_c)
-    !$OMP PARALLEL default(private) shared(CCP_mid,n_initial_all,F_est,iterations_all)
+    !$OMP PARALLEL default(private) shared(CCP_mid,n_initial_all,F_est,iterations_all,V_fct,Ef_v,mean_N,mean_NPV,mean_budget)
     !$OMP  DO
     do v_l=1,villages
         print*,'village ',v_l,' out of ',villages
