@@ -15,7 +15,7 @@ subroutine estimation(params_MLE,log_likeli)
             double precision::log_likelihood
         end function log_likelihood
     end interface
-    integer,dimension(plots_in_map,villages)::n_initial_all
+    integer,dimension(plots_in_map,villages)::n_all
     double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP_old,CCP_mid
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::V_fct
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
@@ -35,13 +35,13 @@ subroutine estimation(params_MLE,log_likeli)
     Ef_v=0.0d0
    print*,'Generating beliefs'
     !Generate an initial well endowment: everyone has zero wells
-1   n_initial_all(1:plots_in_map,:)=1    
+1   n_all=1    
     call random_seed(GET=seed_c)
-    !$OMP PARALLEL default(private) shared(CCP_mid,n_initial_all,F_est,iterations_all,V_fct,mean_N,mean_NPV,mean_budget)
+    !$OMP PARALLEL default(private) shared(n_all,CCP_mid,V_fct,Ef_v,F_est,iterations_all,mean_N,mean_NPV,mean_budget)
     !$OMP  DO
     do v_l=1,villages
         print*,'village ',v_l,' out of ',villages
-        call generate_beliefs(CCP_mid(:,:,:,:,v_l,:),V_fct(:,:,:,:,v_l,:),Ef_v(:,:,:,:,v_l,:),n_initial_all(:,v_l),F_est(:,:,:,:,:,v_l),v_l,iterations_all(:,:,:,:,v_l),mean_N(v_l),mean_NPV(v_l),mean_budget(v_l))
+        call generate_beliefs(CCP_mid(:,:,:,:,v_l,:),V_fct(:,:,:,:,v_l,:),Ef_v(:,:,:,:,v_l,:),n_all(:,v_l),F_est(:,:,:,:,:,v_l),v_l,iterations_all(:,:,:,:,v_l),mean_N(v_l),mean_NPV(v_l),mean_budget(v_l))
     end do
     !$OMP END DO  
     !$OMP END PARALLEL        
@@ -68,14 +68,33 @@ subroutine estimation(params_MLE,log_likeli)
     !Optimization of parameters given beliefs
     ftol=1.0d-5
     call amoeba(p_g,y,ftol,log_likelihood,iter)
-    print*,'got out of amoeba'
+    print*,'likelihood amoeba',y(1)
     log_likeli=y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
     p_g(:,3)=exp(p_g(:,3))
     p_g(:,4)=exp(p_g(:,4))
-    
-    !print*,'estimated parameter',p_g(1,:)
+    print*,'estimated parameter',p_g(1,:)
+    do p_l=1,par+1
+        p_g(p_l,1)=log(p_g(p_l,1))
+        p_g(p_l,2)=log(p_g(p_l,2)/(1.0d0-p_g(p_l,2)))
+        p_g(p_l,3)=log(p_g(p_l,3))
+        p_g(p_l,4)=log(p_g(p_l,4))
+        y(p_l)=log_likelihood(p_g(p_l,:))
+    end do 
+    xi=0.0d0
+    do p_l=1,par
+        xi(p_l,p_l)=1.0d0
+    end do
+    ftol=1.0d-3
+    call powell(p_g(1,:),xi,ftol,iter,y(1))
+    print*,'likelihood powell',y(1)
+    log_likeli=y(1)
+    p_g(:,1)=exp(p_g(:,1))
+    p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
+    p_g(:,3)=exp(p_g(:,3))
+    p_g(:,4)=exp(p_g(:,4))
+    print*,'estimated parameter',p_g(1,:)
     !print*,'likelihood value',y(1)
     
     !Compute CCP to check convergence
@@ -147,7 +166,7 @@ function log_likelihood(params_MLE)
     params(4)=exp(params_MLE(4))
     rho=params(4)
 
-    print*,' parameters',params
+    !print*,' parameters',params
     
     log_likelihood=0.0d0
     
@@ -233,7 +252,7 @@ function log_likelihood(params_MLE)
         call compute_moments(av_CCP_it,"modl")
     end if
     
-    print*,'likelihood',log_likelihood
+    !print*,'likelihood',log_likelihood
     !print*,'paused'
     !read*,pause_k
 end function

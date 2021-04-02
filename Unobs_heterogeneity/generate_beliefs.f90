@@ -4,11 +4,11 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types),intent(in)::CCP
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(in)::V_fct
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(in)::Ef_v 
-    integer,dimension(plots_in_map,1),intent(inout)::n_initial
+    integer,dimension(plots_in_map,1),intent(out)::n_initial
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max),intent(out)::F_new
     integer,intent(in)::v_l
     integer(8),dimension(2*P_max-1,3,3,P_max),intent(out)::iterations
-    integer,parameter::T=9120 !100000
+    integer,parameter::T=50000 !100000
     integer,dimension(plots_in_map,3)::state,state_old
     integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min
     double precision::u_d,u_s,u_f,u_m,it2
@@ -21,6 +21,8 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max)::F
     double precision,dimension(P_max)::dist
     character::continue_k
+
+    n_initial=1
         
 
     !Call seed number
@@ -31,7 +33,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     iterations=0
     F_new=-9.0d0
     it=0
-    !print*,''
+    
     !Store the state for each plot and simulate decision to drill
     
     do t_l=1,T-1
@@ -43,14 +45,19 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
         else
             m_l=2
         end if
+        
         beliefs_c=0
+        
         if (t_l>T-(its+1)) then
             NPV(t_l-(T-(its+1)))=0.0d0
             NPV_PV(t_l-(T-(its+1)))=0.0d0
             CCP_av(t_l-(T-(its+1)))=0.0d0
             it2=0.0d0
         end if
+        
         state(:,1)=n_initial(:,1)
+        
+        !print*,'got here'
         !print*,'t_l',t_l,'av number of wells per plot',real(sum(n_initial(1:plots_v(v_l),1))-plots_v(v_l))/real(plots_v(v_l))
         do i_l=1,plots_v(v_l)
             if (active_plots(i_l,v_l)==1) then
@@ -78,6 +85,9 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
                     ind=N_all-2
                 else
                     print*,'error generating beliefs'
+                    print*,ind
+                    print*,n_initial(i_l,1)
+                    read*,continue_k
                 end if         
                 state(i_l,3)=ind
                 !Count transitions (in the first iteration state_old is undefined: no problem)
