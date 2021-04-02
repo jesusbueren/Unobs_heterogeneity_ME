@@ -15,7 +15,7 @@ subroutine estimation(params_MLE,log_likeli)
             double precision::log_likelihood
         end function log_likelihood
     end interface
-    integer,dimension(plots_in_map,villages)::n_all
+    integer,dimension(plots_in_map,villages)::n_initial_all
     double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP_old,CCP_mid
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::V_fct
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
@@ -35,16 +35,16 @@ subroutine estimation(params_MLE,log_likeli)
     Ef_v=0.0d0
    print*,'Generating beliefs'
     !Generate an initial well endowment: everyone has zero wells
-1   n_all=1    
+1   n_initial_all(1:plots_in_map,:)=1    
     call random_seed(GET=seed_c)
-    !$OMP PARALLEL default(private) shared(n_all,CCP_mid,V_fct,Ef_v,F_est,iterations_all,mean_N,mean_NPV,mean_budget)
+    !$OMP PARALLEL default(private) shared(CCP_mid,n_initial_all,F_est,iterations_all,V_fct,Ef_v,mean_N,mean_NPV,mean_budget)
     !$OMP  DO
     do v_l=1,villages
         print*,'village ',v_l,' out of ',villages
-        call generate_beliefs(CCP_mid(:,:,:,:,v_l,:),V_fct(:,:,:,:,v_l,:),Ef_v(:,:,:,:,v_l,:),n_all(:,v_l),F_est(:,:,:,:,:,v_l),v_l,iterations_all(:,:,:,:,v_l),mean_N(v_l),mean_NPV(v_l),mean_budget(v_l))
+        call generate_beliefs(CCP_mid(:,:,:,:,v_l,:),V_fct(:,:,:,:,v_l,:),Ef_v(:,:,:,:,v_l,:),n_initial_all(:,v_l),F_est(:,:,:,:,:,v_l),v_l,iterations_all(:,:,:,:,v_l),mean_N(v_l),mean_NPV(v_l),mean_budget(v_l))
     end do
     !$OMP END DO  
-    !$OMP END PARALLEL        
+    !$OMP END PARALLEL       
     call random_seed(PUT=seed_c)
     !Fixing beliefs, estimate parameter
     !print*,'Initial Conditions'
