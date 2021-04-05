@@ -49,7 +49,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
             CCP_av(t_l-(T-(its+1)))=0.0d0
             it2=0.0d0
         end if
-        state(:,1)=n_initial(:,1)
+        state(:,1)=n_initial(:,v_l)
         !print*,'t_l',t_l,'av number of wells per plot',real(sum(n_initial(1:plots_v(v_l),1))-plots_v(v_l))/real(plots_v(v_l))
         do i_l=1,plots_v(v_l)
             if (active_plots(i_l,v_l)==1) then
@@ -104,12 +104,12 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
                     if (u_d<CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))) then !decides to drill
                         call RANDOM_NUMBER(u_s)
                         if (u_s<PI_s_v(ind,n_l,P,v_l)) then !successful attempt
-                            n_initial(i_l,1)=n_l+1
+                            n_initial(i_l,v_l)=n_l+1
                         else !unsuccessful attempt
-                            n_initial(i_l,1)=n_l
+                            n_initial(i_l,v_l)=n_l
                         end if
                     else !decides not to drill
-                        n_initial(i_l,1)=n_l
+                        n_initial(i_l,v_l)=n_l
                     end if
                 elseif (n_l==2) then !one well
                     call RANDOM_NUMBER(u_d)
@@ -118,34 +118,34 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
                         if (u_s<PI_s_v(ind,n_l,P,v_l)) then !successful attempt
                             call RANDOM_NUMBER(u_f)
                             if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l))) then !failure of the previous well
-                                n_initial(i_l,1)=n_l
+                                n_initial(i_l,v_l)=n_l
                             else
-                                n_initial(i_l,1)=n_l+1
+                                n_initial(i_l,v_l)=n_l+1
                             end if
                         else !unsuccessful attempt
                             call RANDOM_NUMBER(u_f)
                             if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l))) then !failure of the previous well
-                                n_initial(i_l,1)=n_l-1
+                                n_initial(i_l,v_l)=n_l-1
                             else
-                                n_initial(i_l,1)=n_l
+                                n_initial(i_l,v_l)=n_l
                             end if
                         end if
                     else !decides not to drill
                         call RANDOM_NUMBER(u_f)
                         if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l))) then !failure of the previous well
-                            n_initial(i_l,1)=n_l-1
+                            n_initial(i_l,v_l)=n_l-1
                         else
-                            n_initial(i_l,1)=n_l
+                            n_initial(i_l,v_l)=n_l
                         end if 
                     end if 
                 elseif(n_l==3) then !two wells
                     call RANDOM_NUMBER(u_f)
                     if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l))**2) then !failure of the two wells
-                        n_initial(i_l,1)=n_l-2
+                        n_initial(i_l,v_l)=n_l-2
                     elseif (u_f>(1.0d0-PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l)))**2) then !failure of none
-                        n_initial(i_l,1)=n_l
+                        n_initial(i_l,v_l)=n_l
                     else !failure of one
-                        n_initial(i_l,1)=n_l-1
+                        n_initial(i_l,v_l)=n_l-1
                     end if 
                 else
                     print*,'error in gen beliefs 2'
@@ -178,7 +178,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
                     end if
             end do;end do;end do;end do
             if (t_l>T-(its+1)) then
-                total_N(t_l-(T-(its+1)))=sum(n_initial(1:plots_v(v_l),1))-plots_v(v_l)
+                total_N(t_l-(T-(its+1)))=sum(n_initial(1:plots_v(v_l),v_l))-plots_v(v_l)
             end if
             it=0
         end if
