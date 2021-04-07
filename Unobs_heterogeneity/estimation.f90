@@ -66,14 +66,31 @@ subroutine estimation(params_MLE,log_likeli)
     !Optimization of parameters given beliefs
     ftol=1.0d-5
     call amoeba(p_g,y,ftol,log_likelihood,iter)
-    print*,'got out of amoeba'
+    print*,'likelihood amoeba',y(1)
+    p_g(:,1)=exp(p_g(:,1))
+    p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
+    p_g(:,3)=exp(p_g(:,3))
+    print*,' parameters amoeba',p_g(1,:)
+    !Change parameters to the (-Inf;Inf) real line
+    do p_l=1,par+1
+        p_g(p_l,1)=log(p_g(p_l,1))
+        p_g(p_l,2)=log(p_g(p_l,2)/(1.0d0-p_g(p_l,2)))
+        p_g(p_l,3)=log(p_g(p_l,3))
+        y(p_l)=log_likelihood(p_g(p_l,:))
+    end do 
+    xi=0.0d0
+    do p_l=1,par
+        xi(p_l,p_l)=1.0d0
+    end do
+    ftol=1.0d-3
+    call powell(p_g(1,:),xi,ftol,iter,y(1))
     log_likeli=y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
     p_g(:,3)=exp(p_g(:,3))
+    print*,'likelihood powell',y(1)
+    print*,'parameter powell',p_g(1,:)
     
-    !print*,'estimated parameter',p_g(1,:)
-    !print*,'likelihood value',y(1)
     
     !Compute CCP to check convergence
     params_MLE=p_g(1,:)
@@ -143,7 +160,7 @@ function log_likelihood(params_MLE)
     params(3)=exp(params_MLE(3))
     rho=params(3)
 
-    print*,' parameters',params
+    !print*,' parameters',params
     
     log_likelihood=0.0d0
     
@@ -229,7 +246,7 @@ function log_likelihood(params_MLE)
         call compute_moments(av_CCP_it,"modl")
     end if
     
-    print*,'likelihood',log_likelihood
+    !print*,'likelihood',log_likelihood
     !print*,'paused'
     !read*,pause_k
 end function

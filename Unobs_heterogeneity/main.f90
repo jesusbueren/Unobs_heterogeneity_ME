@@ -50,14 +50,14 @@ call load_estimation_data()
     
 call compute_moments(dble(drilling_it(:,:,1)),"data")
 
-print*,'Start estimation'
-!Generate a random CCP for computing initial beliefs
-CCP_est=sqrt(-1.0d0)
-do P_l=1,P_max
-    CCP_est(1:2*P_l-1,1:2,P_l,:,:,:)=0.06d0
-end do
-call estimation(params_MLE,log_likeli)
-print*,'end maximization'
+!print*,'Start estimation'
+!!Generate a random CCP for computing initial beliefs
+!CCP_est=sqrt(-1.0d0)
+!do P_l=1,P_max
+!    CCP_est(1:2*P_l-1,1:2,P_l,:,:,:)=0.06d0
+!end do
+!call estimation(params_MLE,log_likeli)
+!print*,'end maximization'
 
 !open(unit=12, file=path_results//"bootstrapped_parameters_lowbeta.txt",status='replace')
 !write(12,'(f20.12,f20.12,f20.12,f20.12)'),params_mle(1),params_mle(2),params_mle(3),log_likeli

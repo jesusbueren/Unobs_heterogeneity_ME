@@ -22,7 +22,7 @@ subroutine transitional_dynamics(params_MLE)
                                                 mean_N(t_l),social_output(t_l),private_output(t_l))
     print*,'NPV at begining',social_output(t_l)
     
-    tau=20.0d0
+    tau=19.0d0
     t_l=T
     CCP_true(:,:,:,:,v_l,:,t_l)=0.07d0
     call compute_eq_F_CCP(params_MLE,F_in(:,:,:,:,:,t_l),CCP_true(:,:,:,:,v_l,:,t_l),V_fct(:,:,:,:,:,t_l),n_dist(:,t_l),v_l,&
@@ -73,7 +73,7 @@ subroutine solve_path(params,T_path,Sims,n_ini,F_in,v_l,V_in,mean_N,social_outpu
     CCP_old=0.0d0
 1   do P_l=2,P_max; do a_l=1,types_a; do u_l=1,unobs_types;do t_l=T_path,1,-1
         if (t_l>20) then
-            tau=20.0d0
+            tau=19.0d0
         else
             tau=0.0d0
         end if        
