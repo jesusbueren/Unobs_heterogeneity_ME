@@ -22,6 +22,8 @@ subroutine load_estimation_data
     UHE_type=data_csv(16:19,1,:)
     drilling_it(:,:,1)=data_csv(20,:,:)    
     
+    !UHE_type(selected_type,:)=1.0d0
+    
     !Modal value of unobserved heterogeneity
     do i_l=1,plots_i
         modal_UHE_type(i_l)=maxloc(UHE_type(:,i_l),1)

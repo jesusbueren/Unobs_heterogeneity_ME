@@ -8,7 +8,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max),intent(out)::F_new
     integer,intent(in)::v_l
     integer(8),dimension(2*P_max-1,3,3,P_max),intent(out)::iterations
-    integer,parameter::T=50000!100000
+    integer,parameter::T=25000!100000
     integer,dimension(plots_in_map,3)::state,state_old
     integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min
     double precision::u_d,u_s,u_f,u_m,it2
@@ -22,10 +22,12 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     double precision,dimension(P_max)::dist
     character::continue_k
     
+    !print*,'smthg'
     !Call seed number
-    call random_seed(GET=seed2)
+    !call random_seed(GET=seed2)
     call random_seed(PUT=seed)
     
+
     beliefs_c=0
     iterations=0
     F_new=-9.0d0
@@ -49,6 +51,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
             CCP_av(t_l-(T-(its+1)))=0.0d0
             it2=0.0d0
         end if
+        
         state(:,1)=n_initial(:,1)
         !print*,'t_l',t_l,'av number of wells per plot',real(sum(n_initial(1:plots_v(v_l),1))-plots_v(v_l))/real(plots_v(v_l))
         do i_l=1,plots_v(v_l)
@@ -215,7 +218,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     
     print*,'av drilling',sum(CCP_av)/dble(its)
     
-    call random_seed(PUT=seed2)
+    !call random_seed(PUT=seed2)
 
 !print*,'press key to continue'    
 !read*,continue_k
