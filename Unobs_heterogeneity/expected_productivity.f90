@@ -37,6 +37,8 @@ subroutine expected_productivity(params,a,Ef_v,v_l,u_l)
                 Ef_v(1:P*2-1,n_l,P)=PI_m(1,v_l)*Ef(2:2*P,1,n_l)+PI_m(2,v_l)*Ef(2:2*P,2,n_l) !Compute the expected return across monzoons
             end if           
         end do
+        !print*,'u_l',u_l
+        !print*,'Ef',Ef_v(1:P*2-1,2,P)
     end do
     
     

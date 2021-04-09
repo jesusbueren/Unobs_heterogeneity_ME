@@ -37,21 +37,23 @@ subroutine estimation(params_MLE,log_likeli)
     !Generate an initial well endowment: everyone has zero wells
 1   n_initial_all(1:plots_in_map,:)=1    
     call random_seed(GET=seed_c)
-    !$OMP PARALLEL default(private) shared(CCP_mid,n_initial_all,F_est,iterations_all,V_fct,Ef_v,mean_N,mean_NPV,mean_budget)
+    !$OMP PARALLEL default(shared) 
     !$OMP  DO
     do v_l=1,villages
         print*,'village ',v_l,' out of ',villages
         call generate_beliefs(CCP_mid(:,:,:,:,v_l,:),V_fct(:,:,:,:,v_l,:),Ef_v(:,:,:,:,v_l,:),n_initial_all(:,v_l),F_est(:,:,:,:,:,v_l),v_l,iterations_all(:,:,:,:,v_l),mean_N(v_l),mean_NPV(v_l),mean_budget(v_l))
     end do
     !$OMP END DO  
-    !$OMP END PARALLEL        
+    !$OMP END PARALLEL      
+    
     call random_seed(PUT=seed_c)
     !Fixing beliefs, estimate parameter
     !print*,'Initial Conditions'
-    p_g(1,:)=(/8.18d0,0.99d0,14.6d0/)
-    p_g(2,:)=(/8.8d0,0.33d0,12.9d0/)
-    p_g(3,:)=(/5.3d0,0.22d0,13.5d0/)
-    p_g(4,:)=(/30.1763d0,0.7d0,1.0d0/)
+
+    p_g(1,:)=(/10.7d0,0.22d0,17.5d0/)
+    p_g(2,:)=(/6.1d0,0.07d0,14.5d0/)
+    p_g(3,:)=(/3.1d0,0.31d0,14.7d0/)
+    p_g(4,:)=(/8.66d0,0.53d0,16.1d0/)
     !p_g(5,:)=(/30.1763d0,0.7d0,0.9d0,1.0d0/)
         
     !Change parameters to the (-Inf;Inf) real line
@@ -64,7 +66,8 @@ subroutine estimation(params_MLE,log_likeli)
     !print*,'likelihood_ini',y(1)
     
     !Optimization of parameters given beliefs
-    ftol=1.0d-5
+    ftol=1.0d-7
+    print*,'game against nature'
     call amoeba(p_g,y,ftol,log_likelihood,iter)
     print*,'likelihood amoeba',y(1)
     p_g(:,1)=exp(p_g(:,1))
@@ -72,24 +75,24 @@ subroutine estimation(params_MLE,log_likeli)
     p_g(:,3)=exp(p_g(:,3))
     print*,' parameters amoeba',p_g(1,:)
     !Change parameters to the (-Inf;Inf) real line
-    do p_l=1,par+1
-        p_g(p_l,1)=log(p_g(p_l,1))
-        p_g(p_l,2)=log(p_g(p_l,2)/(1.0d0-p_g(p_l,2)))
-        p_g(p_l,3)=log(p_g(p_l,3))
-        y(p_l)=log_likelihood(p_g(p_l,:))
-    end do 
-    xi=0.0d0
-    do p_l=1,par
-        xi(p_l,p_l)=1.0d0
-    end do
-    ftol=1.0d-3
-    call powell(p_g(1,:),xi,ftol,iter,y(1))
-    log_likeli=y(1)
-    p_g(:,1)=exp(p_g(:,1))
-    p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
-    p_g(:,3)=exp(p_g(:,3))
-    print*,'likelihood powell',y(1)
-    print*,'parameter powell',p_g(1,:)
+    !do p_l=1,par+1
+    !    p_g(p_l,1)=log(p_g(p_l,1))
+    !    p_g(p_l,2)=log(p_g(p_l,2)/(1.0d0-p_g(p_l,2)))
+    !    p_g(p_l,3)=log(p_g(p_l,3))
+    !    y(p_l)=log_likelihood(p_g(p_l,:))
+    !end do 
+    !xi=0.0d0
+    !do p_l=1,par
+    !    xi(p_l,p_l)=1.0d0
+    !end do
+    !ftol=1.0d-3
+    !call powell(p_g(1,:),xi,ftol,iter,y(1))
+    !log_likeli=y(1)
+    !p_g(:,1)=exp(p_g(:,1))
+    !p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
+    !p_g(:,3)=exp(p_g(:,3))
+    !print*,'likelihood powell',y(1)
+    !print*,'parameter powell',p_g(1,:)
     
     
     !Compute CCP to check convergence
@@ -125,7 +128,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     !New guess of the ccp is half way through
     CCP_mid=CCP_est*0.5d0+CCP_old*0.5d0
-    if (dist>1.0d-3) then
+    if (dist>5.0d-4) then
         it=it+1
         go to 1
     end if
@@ -164,14 +167,14 @@ function log_likelihood(params_MLE)
     
     log_likelihood=0.0d0
     
-    do a_l=1,types_a; do u_l=1,unobs_types;do v_l=1,villages 
+    do a_l=1,types_a; do v_l=1,villages;do u_l=1,unobs_types
         call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
     end do; end do;end do
+    
 
-    !$OMP PARALLEL default(private) private(v_l,a_l,u_l,P_l)  shared(Ef_v,F_est,CCP_est,CCP)
+    !$OMP PARALLEL default(shared) 
     !$OMP  DO
     do P_l=2,P_max; do a_l=1,types_a ; do u_l=1,unobs_types;do v_l=1,villages
-        !print*,P_l,a_l,u_l,v_l
         call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
                         ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
                         ,P_l &
@@ -182,9 +185,9 @@ function log_likelihood(params_MLE)
         !                    ,CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l &
         !                    ,V_fct(1:2*P_l-1,:,P_l,a_l,v_l,u_l)) 
     end do; end do;end do; end do
-    
     !$OMP END DO  
     !$OMP END PARALLEL
+
     do s_l=1,simulations
     do i_l=1,plots_i;
         if (P_type(i_l)>1) then !more than one neighbor
