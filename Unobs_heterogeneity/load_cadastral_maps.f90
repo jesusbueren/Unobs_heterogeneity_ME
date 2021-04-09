@@ -1,5 +1,5 @@
 subroutine load_cadastral_maps()
-    use cadastral_maps; use primitives
+    use cadastral_maps; use primitives;use simulation
     implicit none
     character(LEN=1)::s_c1
     character(LEN=2)::s_c2
@@ -81,6 +81,8 @@ subroutine load_cadastral_maps()
     
     call random_seed(PUT=seed)
     !Generate permanent unobserved heterogeneity type
+    !pr_unobs_t=0.0d0
+    !pr_unobs_t(selected_type)=1.0d0
     do v_l=1,villages;do i_l=1,plots_v(v_l)
         call RANDOM_NUMBER(u_m)
         if (u_m<pr_unobs_t(1)) then
