@@ -24,7 +24,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     do u_l=1,unobs_types;do a_l=1,types_a
         call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
     end do;end do
-
+    print*,maxval(Ef_v)
     !Generate beliefs consitent with CCP
     F=1.0d0
     CCP=CCP_mid

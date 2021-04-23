@@ -1,4 +1,4 @@
-subroutine generate_transition_beliefs(T_path,Sims,CCP,Ef_v,n_ini,F_new,v_l,V_fct,iterations,mean_N,social_output,ccp_mean)
+subroutine generate_transition_beliefs(T_path,Sims,CCP,Ef_v,n_ini,F_new,v_l,V_fct,iterations,mean_N,social_output,ccp_mean,diss_N)
     use cadastral_maps; use primitives
     implicit none
     integer,intent(in)::T_path,Sims
@@ -13,8 +13,8 @@ subroutine generate_transition_beliefs(T_path,Sims,CCP,Ef_v,n_ini,F_new,v_l,V_fc
     integer,dimension(plots_in_map,3)::state,state_old
     integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min,s_l
     double precision::u_d,u_s,u_f,u_m,it2
-    double precision,dimension(Sims,T_path)::NPV,total_N,CCP_av
-    double precision,dimension(T_path),intent(out)::mean_N,social_output,ccp_mean
+    double precision,dimension(Sims,T_path)::NPV,total_N,CCP_av,no_N
+    double precision,dimension(T_path),intent(out)::mean_N,social_output,ccp_mean,diss_N
     integer(8),dimension(2*P_max-1,2*P_max-1,3,3,P_max)::beliefs_c
     integer,dimension(1)::seed=123,seed2
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max)::F
@@ -33,6 +33,8 @@ subroutine generate_transition_beliefs(T_path,Sims,CCP,Ef_v,n_ini,F_new,v_l,V_fc
     !Store the state for each plot and simulate decision to drill
     NPV=0.0d0
     CCP_av=0.0d0
+    no_N=0.0d0
+    
     !CCP_av(1,:)
     do s_l=1,Sims
     do t_l=1,T_path+1;  
@@ -99,10 +101,19 @@ subroutine generate_transition_beliefs(T_path,Sims,CCP,Ef_v,n_ini,F_new,v_l,V_fc
                     !Decision to dismantle well
                     if (n_l==2 .and. V_fct(ind,n_l,P,A,unobs_types_i(i_l,v_l),t_l)<V_fct(ind,1,P,A,unobs_types_i(i_l,v_l),t_l)) then
                         n_initial(i_l,t_l+1)=1
+                        if (t_l<=T_path) then
+                            no_N(s_l,t_l)=no_N(s_l,t_l)+1.0d0
+                        end if
                     elseif (n_l==3 .and. V_fct(ind,n_l,P,A,unobs_types_i(i_l,v_l),t_l)<V_fct(ind,2,P,A,unobs_types_i(i_l,v_l),t_l)) then
                         n_initial(i_l,t_l+1)=2
+                        if (t_l<=T_path) then
+                            no_N(s_l,t_l)=no_N(s_l,t_l)+1.0d0
+                        end if
                         if (V_fct(ind,2,P,A,unobs_types_i(i_l,v_l),t_l)<V_fct(ind,1,P,A,unobs_types_i(i_l,v_l),t_l)) then
                             n_initial(i_l,t_l+1)=1
+                            if (t_l<=T_path) then
+                                no_N(s_l,t_l)=no_N(s_l,t_l)+1.0d0
+                            end if
                         end if
                     !Well drilling decision and failures/successes
                     elseif (n_l==1) then !no well
@@ -217,6 +228,7 @@ subroutine generate_transition_beliefs(T_path,Sims,CCP,Ef_v,n_ini,F_new,v_l,V_fc
     
     social_output=sum(NPV,1)/dble(Sims)/mean_area(v_l)
     mean_N=sum(total_N,1)/dble(Sims)/dble(plots_v(v_l))
+    diss_N=sum(no_N,1)/sum(total_N,1)
     ccp_mean=sum(CCP_av,1)/dble(Sims)
     !print*,'av drilling',ccp_mean
     

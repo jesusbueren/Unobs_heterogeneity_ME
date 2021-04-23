@@ -87,7 +87,7 @@ subroutine estimation(params_MLE,log_likeli)
     !end do
     !ftol=1.0d-3
     !call powell(p_g(1,:),xi,ftol,iter,y(1))
-    !log_likeli=y(1)
+    log_likeli=y(1)
     !p_g(:,1)=exp(p_g(:,1))
     !p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
     !p_g(:,3)=exp(p_g(:,3))

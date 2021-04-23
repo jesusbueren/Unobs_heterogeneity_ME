@@ -45,8 +45,8 @@ count if area_ac_`m'!=-9
 *Primitives on flow and failure by type and monsoon: I generate 4 different types of unobserved heterogeneity.
 clear all
 cd "C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME"
-import excel using "primitives\flow_fail_prob_r.xls",firstrow   
-
+import excel using "primitives\flow_fail_prob_q4.xls",firstrow   
+/* for old files
 egen id=group(N M T)
 
 reshape long Pfail_,i(id) j(T2)
@@ -57,12 +57,13 @@ drop T T2
 rename T3 T
 order T,after(M)
 br
+*/
 export delimited using "primitives\flow_fail_prob_r",novarnames  replace 
 
 *Primitives: probability of success
 clear all
 cd "C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME"
-import excel using "data\drill_export_r.xls",firstrow   
+import excel using "data\drill_export_q4.xls",firstrow   
 collapse P_R P_S,by(map_village)
 encode map_village,g(nb)
 drop if nb==.
@@ -73,7 +74,7 @@ br
 *Estimation data
 clear all
 cd "C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\data"
-import excel using "drill_export_r.xls",firstrow   
+import excel using "drill_export_q4.xls",firstrow   
 encode map_village,g(nb)
 drop if nb==.
 br
@@ -106,13 +107,21 @@ bys a_type: sum area,d
 gen P_type=min(Nplots_adj,7)
 
 sort RespondentID year
-
+/*
 gen P_T1=Pflow_T1_e*Pfail1_T1_e
 gen P_T2=Pflow_T1_e*Pfail2_T1_e
 gen P_T3=Pflow_T2_e*Pfail1_T2_e
 gen P_T4=Pflow_T2_e*Pfail2_T2_e
 
-*replace drill=-9 if IN_FF_SMPL!=1
+gen P_T1=Pflow_T1*Pfail1_T1
+gen P_T2=Pflow_T1*Pfail2_T1
+gen P_T3=Pflow_T2*Pfail1_T2
+gen P_T4=Pflow_T2*Pfail2_T2
+*/
+rename Pflow_T1 P_T1
+rename Pflow_T2 P_T2
+rename Pflow_T3 P_T3
+rename Pflow_T4 P_T4
 
 export delimited nb P_type a_type n f0_N - f10_N P_T1 P_T2 P_T3 P_T4 drill using "drill_export_r.csv",replace novarnames nolabel 
 
@@ -126,14 +135,6 @@ replace big_N=`i' if f`i'_N==max_pr
 }
 drop max_pr
 bys big_N: sum drill if drill>=0
-
-gen max_pr=max(P_T1, P_T2, P_T3, P_T4)
-gen modal_type=.
-forval i=1/4{
-replace modal_type=`i' if P_T`i'==max_pr
-}
-drop max_pr
-bys modal_type: sum drill if drill>=0 
 
 bys a_type n: sum drill if drill>=0
 

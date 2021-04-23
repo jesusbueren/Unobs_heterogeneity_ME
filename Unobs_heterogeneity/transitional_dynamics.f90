@@ -9,7 +9,7 @@ subroutine transitional_dynamics(params_MLE)
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,T)::V_fct
     integer,dimension(plots_in_map,T)::n_dist
     integer,dimension(plots_in_map,Sims)::n_ini
-    double precision,dimension(T)::mean_N,social_output,private_output,ccp_mean
+    double precision,dimension(T)::mean_N,social_output,private_output,ccp_mean,diss_N
     integer::v_l,p_l,it,t_l,s_l
     character::end_key
     
@@ -38,11 +38,11 @@ subroutine transitional_dynamics(params_MLE)
     do s_l=1,Sims
         n_ini(:,s_l)=n_dist(:,1)
     end do
-    call solve_path(params_MLE,T,Sims,n_ini,F_in,v_l,V_fct,mean_N,social_output,ccp_mean)    
+    call solve_path(params_MLE,T,Sims,n_ini,F_in,v_l,V_fct,mean_N,social_output,ccp_mean,diss_N)    
 
 end subroutine
     
-subroutine solve_path(params,T_path,Sims,n_ini,F_in,v_l,V_in,mean_N,social_output,ccp_mean)
+subroutine solve_path(params,T_path,Sims,n_ini,F_in,v_l,V_in,mean_N,social_output,ccp_mean,diss_N)
     use cadastral_maps; use dimensions; use primitives
     implicit none
     integer,intent(in)::T_path,Sims
@@ -52,7 +52,7 @@ subroutine solve_path(params,T_path,Sims,n_ini,F_in,v_l,V_in,mean_N,social_outpu
     integer,intent(in)::v_l  
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,T_path),intent(in)::V_in
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,T_path)::V_fct
-    double precision,dimension(T_path),intent(out)::mean_N,social_output,ccp_mean
+    double precision,dimension(T_path),intent(out)::mean_N,social_output,ccp_mean,diss_N
     
     double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types,T_path)::CCP_old,CCP,CCP_mid
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
@@ -101,7 +101,7 @@ subroutine solve_path(params,T_path,Sims,n_ini,F_in,v_l,V_in,mean_N,social_outpu
         end if
      end do; end do;end do;end do
     
-    call generate_transition_beliefs(T_path,Sims,CCP,Ef_v(:,:,:,:,v_l,:),n_ini,F_in,v_l,V_fct,iterations,mean_N,social_output,ccp_mean)
+    call generate_transition_beliefs(T_path,Sims,CCP,Ef_v(:,:,:,:,v_l,:),n_ini,F_in,v_l,V_fct,iterations,mean_N,social_output,ccp_mean,diss_N)
     F_in(:,:,:,:,:,20)=F_in(:,:,:,:,:,1)
     print*,'NPV at begining',social_output(1)
     print*,'NPV at end',social_output(T_path)
@@ -113,7 +113,7 @@ subroutine solve_path(params,T_path,Sims,n_ini,F_in,v_l,V_in,mean_N,social_outpu
     
     OPEN(UNIT=12, FILE="transitional_dynamics.txt")
     do t_l=1,T_path
-        write(12,'(F10.4,I4,F10.4,F10.4,F10.4)'),tau,v_l,mean_N(t_l),social_output(t_l),ccp_mean(t_l)
+        write(12,'(F10.4,I4,F10.4,F10.4,F10.4,F10.4)'),tau,v_l,mean_N(t_l),social_output(t_l),ccp_mean(t_l),diss_N(t_l)
     end do
     close(12)
     
