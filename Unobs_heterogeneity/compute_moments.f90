@@ -39,8 +39,7 @@ subroutine compute_moments(data_in,string_name)
             counter_P(P_type(i_l))=counter_P(P_type(i_l))+1.0d0
             moment_P(P_type(i_l))=(counter_P(P_type(i_l))-1.0)/counter_P(P_type(i_l))*moment_P(P_type(i_l))&
                                     +1.0d0/counter_P(P_type(i_l))*data_in(t_l,i_l)  
-        end if
-        
+        end if 
     end do;end do
     
     

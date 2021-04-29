@@ -41,7 +41,7 @@ subroutine estimation(params_MLE,log_likeli)
     !$OMP  DO
     do v_l=1,villages
         print*,'village ',v_l,' out of ',villages
-        call generate_beliefs(CCP_mid(:,:,:,:,v_l,:),V_fct(:,:,:,:,v_l,:),Ef_v(:,:,:,:,v_l,:),n_initial_all(:,v_l),F_est(:,:,:,:,:,v_l),v_l,iterations_all(:,:,:,:,v_l),mean_N(v_l),mean_NPV(v_l),mean_budget(v_l))
+        call generate_beliefs(CCP_mid(:,:,:,:,v_l,:),V_fct(:,:,:,:,v_l,:),Ef_v(:,:,:,:,v_l,:),n_initial_all(:,v_l),F_est(:,:,:,:,:,v_l),v_l,iterations_all(:,:,:,:,v_l),mean_N(v_l),mean_NPV(v_l),mean_budget(v_l),Pr_u_X(:,:,:,:,v_l,:))
     end do
     !$OMP END DO  
     !$OMP END PARALLEL      
@@ -163,7 +163,7 @@ function log_likelihood(params_MLE)
     params(3)=exp(params_MLE(3))
     rho=params(3)
 
-    !print*,' parameters',params
+    print*,' parameters',params
     
     log_likelihood=0.0d0
     
@@ -190,6 +190,7 @@ function log_likelihood(params_MLE)
 
     do s_l=1,simulations
     do i_l=1,plots_i;
+        UHE_type_model(:,i_l)=-9.0d0
         if (P_type(i_l)>1) then !more than one neighbor
             likelihood_i=1.0d0
             do t_l=1,T_sim
@@ -211,6 +212,9 @@ function log_likelihood(params_MLE)
                     else
                         print*,'error in estimation'
                     end if 
+                    if (j_l==n_data(t_l,i_l) .and. n_data(t_l,i_l)<3 .and. UHE_type_model(1,i_l)==-9.0d0) then
+                        UHE_type_model(:,i_l)=Pr_u_X(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)
+                    end if
                     if (drilling_it(t_l,i_l,s_l)==1) then
                         likelihood_it=likelihood_it+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
                         av_CCP_uhe=av_CCP_uhe+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
@@ -227,14 +231,20 @@ function log_likelihood(params_MLE)
                     read*,end_k
                 end if
                 if (drilling_it(t_l,i_l,s_l)==1 .or. drilling_it(t_l,i_l,s_l)==0) then
-                    av_CCP_it(t_l,i_l)=sum(av_CCP_uhe*UHE_type(:,i_l))
+                    if (UHE_type_model(1,i_l)==-9.0d0) then
+                        print*,n_data(t_l,i_l)
+                    end if
+                    av_CCP_it(t_l,i_l)=sum(av_CCP_uhe*UHE_type_model(:,i_l))
                 else
                     av_CCP_it(t_l,i_l)=-9.0d0
                 end if
             end do;
-            log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type(:,i_l)))
-            likelihood_aux(i_l)=log(sum(likelihood_i*UHE_type(:,i_l)))
-            !if (log(sum(likelihood_i*UHE_type(:,i_l)))==-1.0/0.0) then
+            if (UHE_type_model(1,i_l)==-9.0d0) then
+                UHE_type_model(:,i_l)=1.0d0/dble(unobs_types)
+            end if
+            log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l)))
+            likelihood_aux(i_l)=log(sum(likelihood_i*UHE_type_model(:,i_l)))
+            !if (log(sum(likelihood_i*UHE_type_model(:,i_l)))==-1.0/0.0) then
             !    print*,CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)
             !    print*,'paused'
             !    read*,pause_k
@@ -249,7 +259,7 @@ function log_likelihood(params_MLE)
         call compute_moments(av_CCP_it,"modl")
     end if
     
-    !print*,'likelihood',log_likelihood
+    print*,'likelihood',log_likelihood
     !print*,'paused'
     !read*,pause_k
 end function

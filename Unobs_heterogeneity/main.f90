@@ -59,11 +59,11 @@ end do
 call estimation(params_MLE,log_likeli)
 print*,'end maximization'
 
-open(unit=12, file=path_results//"bootstrapped_parametersq4_85.txt",status='replace')
+open(unit=12, file=path_results//"bootstrapped_parameters.txt",status='replace')
 write(12,'(f20.12,f20.12,f20.12,f20.12)'),params_mle(1),params_mle(2),params_mle(3),log_likeli
 close(12)
 !call bootstrap_se()
-open(unit=12, file=path_results//"bootstrapped_parametersq4_95.txt")
+open(unit=12, file=path_results//"bootstrapped_parameters.txt")
 read(12,*),params_mle
 close(12)
 !print*,'estimated parameters',params_MLE
