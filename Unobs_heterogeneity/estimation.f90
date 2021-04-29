@@ -50,17 +50,15 @@ subroutine estimation(params_MLE,log_likeli)
     !Fixing beliefs, estimate parameter
     !print*,'Initial Conditions'
 
-    p_g(1,:)=(/10.7d0,0.22d0,17.5d0/)
-    p_g(2,:)=(/6.1d0,0.07d0,14.5d0/)
-    p_g(3,:)=(/3.1d0,0.31d0,14.7d0/)
-    p_g(4,:)=(/8.66d0,0.53d0,16.1d0/)
-    !p_g(5,:)=(/30.1763d0,0.7d0,0.9d0,1.0d0/)
+    p_g(1,:)=(/10.7d0,0.22d0,.8d0,17.5d0/)
+    p_g(2,:)=(/6.1d0,0.07d0,0.8d0,14.5d0/)
+    p_g(3,:)=(/3.1d0,0.31d0,0.9d0,14.7d0/)
+    p_g(4,:)=(/8.66d0,0.53d0,1.1d0,16.1d0/)
+    p_g(5,:)=(/8.66d0,0.53d0,0.95d0,16.1d0/)
         
     !Change parameters to the (-Inf;Inf) real line
     do p_l=1,par+1
-        p_g(p_l,1)=log(p_g(p_l,1))
-        p_g(p_l,2)=log(p_g(p_l,2)/(1.0d0-p_g(p_l,2)))
-        p_g(p_l,3)=log(p_g(p_l,3))
+        p_g(p_l,:)=log(p_g(p_l,:))
         y(p_l)=log_likelihood(p_g(p_l,:))
     end do 
     !print*,'likelihood_ini',y(1)
@@ -70,9 +68,7 @@ subroutine estimation(params_MLE,log_likeli)
     print*,'game against nature'
     call amoeba(p_g,y,ftol,log_likelihood,iter)
     print*,'likelihood amoeba',y(1)
-    p_g(:,1)=exp(p_g(:,1))
-    p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
-    p_g(:,3)=exp(p_g(:,3))
+    p_g=exp(p_g)
     print*,' parameters amoeba',p_g(1,:)
     !Change parameters to the (-Inf;Inf) real line
     !do p_l=1,par+1
@@ -97,11 +93,11 @@ subroutine estimation(params_MLE,log_likeli)
     
     !Compute CCP to check convergence
     params_MLE=p_g(1,:)
-    rho=params_MLE(3)
+    rho=params_MLE(4)
     CCP_old=CCP_est
     do v_l=1,villages
         do u_l=1,unobs_types;do a_l=1,types_a
-            call expected_productivity(params_MLE(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+            call expected_productivity(params_MLE(1:3),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         end do;end do
         do P_l=2,P_max; do a_l=1,types_a; do u_l=1,unobs_types 
             call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
@@ -158,17 +154,15 @@ function log_likelihood(params_MLE)
     character::pause_k
     
     
-    params(1)=exp(params_MLE(1))
-    params(2)=1.0d0/(1.0d0 + exp(-params_MLE(2))) 
-    params(3)=exp(params_MLE(3))
-    rho=params(3)
+    params=exp(params_MLE)
+    rho=params(4)
 
     !print*,' parameters',params
     
     log_likelihood=0.0d0
     
     do a_l=1,types_a; do v_l=1,villages;do u_l=1,unobs_types
-        call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
+        call expected_productivity(params(1:3),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
     end do; end do;end do
     
 
