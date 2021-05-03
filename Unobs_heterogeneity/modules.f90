@@ -61,7 +61,7 @@ use cadastral_maps
     ! dec_it: drilling decision
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,villages)::F_est
     double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP_est
-    double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::Pr_u_X
+    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Pr_u_X
     integer::bootstrap=0
     
     !Data

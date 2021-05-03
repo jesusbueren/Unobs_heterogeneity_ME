@@ -190,7 +190,7 @@ function log_likelihood(params_MLE)
 
     do s_l=1,simulations
     do i_l=1,plots_i;
-        UHE_type_model(:,i_l)=-9.0d0
+        UHE_type_model(:,i_l)=0.0d0
         if (P_type(i_l)>1) then !more than one neighbor
             likelihood_i=1.0d0
             do t_l=1,T_sim
@@ -202,19 +202,21 @@ function log_likelihood(params_MLE)
                 !    read*,pause_k
                 !end if
                 
+                if (t_l==1) then
+                    do j_l=n_data(t_l,i_l),min(max_NFW+1,2*(P_type(i_l)-1)+n_data(t_l,i_l))
+                        if (n_data(t_l,i_l)==1) then
+                            ind=j_l !position in the state space wrt to the CCP, PI_s_v and ,PI_f_v
+                        elseif (n_data(t_l,i_l)==2) then
+                            ind=j_l-1
+                        elseif (n_data(t_l,i_l)==3) then
+                            ind=j_l-2
+                        else
+                            print*,'error in estimation'
+                        end if 
+                        UHE_type_model(:,i_l)=UHE_type_model(:,i_l)+Pr_u_X(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
+                    end do
+                end if
                 do j_l=n_data(t_l,i_l),min(max_NFW+1,2*(P_type(i_l)-1)+n_data(t_l,i_l))
-                    if (n_data(t_l,i_l)==1) then
-                        ind=j_l !position in the state space wrt to the CCP, PI_s_v and ,PI_f_v
-                    elseif (n_data(t_l,i_l)==2) then
-                        ind=j_l-1
-                    elseif (n_data(t_l,i_l)==3) then
-                        ind=j_l-2
-                    else
-                        print*,'error in estimation'
-                    end if 
-                    if (j_l==n_data(t_l,i_l) .and. n_data(t_l,i_l)<3 .and. UHE_type_model(1,i_l)==-9.0d0) then
-                        UHE_type_model(:,i_l)=Pr_u_X(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)
-                    end if
                     if (drilling_it(t_l,i_l,s_l)==1) then
                         likelihood_it=likelihood_it+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
                         av_CCP_uhe=av_CCP_uhe+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)

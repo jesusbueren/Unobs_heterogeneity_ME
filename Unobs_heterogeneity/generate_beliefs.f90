@@ -8,8 +8,8 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max),intent(out)::F_new
     integer,intent(in)::v_l
     integer(8),dimension(2*P_max-1,3,3,P_max),intent(out)::iterations
-    double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types),intent(out)::Pr_u_x
-    integer(8),dimension(2*P_max-1,2,P_max,types_a,unobs_types)::counter_u
+    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(out)::Pr_u_x
+    integer(8),dimension(2*P_max-1,3,P_max,types_a,unobs_types)::counter_u
     integer,parameter::T=100000
     integer,dimension(plots_in_map,3)::state,state_old
     integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min
@@ -90,12 +90,10 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
                     beliefs_c(state_old(i_l,3),state(i_l,3),state_old(i_l,1),state(i_l,1),P)=&
                     beliefs_c(state_old(i_l,3),state(i_l,3),state_old(i_l,1),state(i_l,1),P)+1
                     !Compute joint distribution state variables and unobserved heterogeneity type
-                    if (n_l==1 .or. n_l==2) then
-                        if (counter_u(ind,n_l,P,A,unobs_types_i(i_l,v_l))==-9) then
-                            counter_u(ind,n_l,P,A,:)=0
-                        end if
-                        counter_u(ind,n_l,P,A,unobs_types_i(i_l,v_l))=counter_u(ind,n_l,P,A,unobs_types_i(i_l,v_l))+1
+                    if (counter_u(ind,n_l,P,A,unobs_types_i(i_l,v_l))==-9) then
+                        counter_u(ind,n_l,P,A,:)=0
                     end if
+                    counter_u(ind,n_l,P,A,unobs_types_i(i_l,v_l))=counter_u(ind,n_l,P,A,unobs_types_i(i_l,v_l))+1
                 end if
                 !Compute NPV
                 if (t_l>T-(its+1)) then  
