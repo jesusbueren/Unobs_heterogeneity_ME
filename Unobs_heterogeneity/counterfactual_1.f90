@@ -128,6 +128,7 @@ subroutine compute_NPV_SP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,mean_NPV,m
     double precision::dist
     integer::a_l,u_l
     integer(8),dimension(2*P_max-1,3,3,P_max)::iterations
+    double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::Pr_u_X
     character::pause_k
     
     !Set scale parameter Gumbel distribution of shocks
@@ -143,6 +144,6 @@ subroutine compute_NPV_SP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,mean_NPV,m
     CCP=CCP_mid
 !   print*,'generating beliefs'
     n_initial=1
-    call generate_beliefs(CCP_mid,V_fct,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,mean_NPV,mean_budget)
+    call generate_beliefs(CCP_mid,V_fct,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,mean_NPV,mean_budget,Pr_u_X(:,:,:,:,v_l,:))
 end subroutine
     

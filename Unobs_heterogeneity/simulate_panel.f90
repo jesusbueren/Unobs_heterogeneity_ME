@@ -3,7 +3,7 @@ subroutine simulate_panel(CCP,n_initial)
     implicit none
     double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types),intent(in)::CCP
     integer,dimension(plots_in_map,villages),intent(inout)::n_initial
-    integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,v_l,m_l,max_Big_n,s_l,t
+    integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,v_l,m_l,max_Big_n,s_l,t,ind2
     double precision::u_d,u_s,u_f,u_m
     integer,dimension(plots_i)::unobs_types_i2
     integer,dimension(1)::seed=456
@@ -20,19 +20,9 @@ subroutine simulate_panel(CCP,n_initial)
     counter_a=0.0d0
     counter_t=0.0d0
     
-    do s_l=1,simulations
-        !Sample unobserved heterogeneity type
-        do i_l=1,plots_i
-            call RANDOM_NUMBER(u_m)
-            if (u_m<UHE_type(1,i_l)) then !these numbers come from hanan's estimation_v3.pdf
-                unobs_types_i2(i_l)=1
-            elseif (u_m<sum(UHE_type(1:2,i_l))) then
-                unobs_types_i2(i_l)=2
-            else
-                unobs_types_i2(i_l)=3
-            end if
-        end do
-            
+    do s_l=1,simulations            
+        UHE_type_model=-9.0d0
+        unobs_types_i2=-9
         !Store the state for each plot and simulate decision to drill
         do t_l=1,T_sim
             do i_l=1,plots_i
@@ -60,6 +50,18 @@ subroutine simulate_panel(CCP,n_initial)
                     print*,'error in sim panel'
                 end if      
                 !Well drilling decision and failures/successes
+                if (n_data(t_l,i_l)<3 .and. UHE_type_model(1,i_l)==-9.0d0) then
+                    UHE_type_model(:,i_l)=Pr_u_X(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)
+                    ind2=1
+                    call RANDOM_NUMBER(u_m)
+                    do while (unobs_types_i2(i_l)==-9)
+                        if (u_m<sum(UHE_type_model(1:ind,i_l))) then
+                            unobs_types_i2(i_l)=ind2
+                        else
+                            ind2=ind2+1
+                        end if
+                    end do  
+                end if
                 if (n_l==1) then !no well
                     call RANDOM_NUMBER(u_d)
                     if (u_d<CCP(ind,n_l,P,A,v_l,unobs_types_i2(i_l))) then !decides to drill

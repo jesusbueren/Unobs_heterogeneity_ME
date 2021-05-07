@@ -26,7 +26,7 @@ call load_estimation_data()
 
 !Uncomment if you want to simulate and check recovery of the simulated parameters.
     !Choose true parameter vector and compute associated equilibrium beliefs and a final distribution of wells in all plots
-    !params_true=(/30.1763d0,0.8d0,2.0d0/)
+    !params_true=(/8.66d0,0.53d0,16.1d0/)
     !do v_l=1,villages
     !    print*,'village,',v_l
     !    if (v_l==1) then
@@ -59,16 +59,16 @@ end do
 call estimation(params_MLE,log_likeli)
 print*,'end maximization'
 
-open(unit=12, file=path_results//"bootstrapped_parametersq4_85.txt",status='replace')
+open(unit=12, file=path_results//"bootstrapped_parameters.txt",status='replace')
 write(12,'(f20.12,f20.12,f20.12,f20.12)'),params_mle(1),params_mle(2),params_mle(3),log_likeli
 close(12)
-!call bootstrap_se()
-open(unit=12, file=path_results//"bootstrapped_parametersq4_95.txt")
-read(12,*),params_mle
-close(12)
-!print*,'estimated parameters',params_MLE
-
-call counterfactual_2(params_MLE)
+!!call bootstrap_se()
+!open(unit=12, file=path_results//"bootstrapped_parameters.txt")
+!read(12,*),params_mle
+!close(12)
+!!print*,'estimated parameters',params_MLE
+!
+!call counterfactual_2(params_MLE)
 !call counterfactual_1(params_MLE)
 
 !call transitional_dynamics(params_MLE)

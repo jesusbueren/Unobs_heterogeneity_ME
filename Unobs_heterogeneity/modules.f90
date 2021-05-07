@@ -36,7 +36,7 @@ module primitives
     double precision,dimension(2*P_max,villages)::PI_s
     double precision,dimension(2*P_max-1,3,P_max,villages)::PI_s_v
     !c_d: fixed cost of failing to drill;c_s: fixed cost of succeeding to drill; c_e: cost of electricity by well
-    double precision::c_s=72.3d0,beta=0.85d0,c_d=35.2d0, c_e=11.7d0
+    double precision::c_s=72.3d0,beta=0.95d0,c_d=35.2d0, c_e=11.7d0
     !extreme value distribution shocks
     double precision,parameter::gamma=0.577215664901533d0
     double precision::rho
@@ -61,11 +61,13 @@ use cadastral_maps
     ! dec_it: drilling decision
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,villages)::F_est
     double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP_est
+    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Pr_u_X
     integer::bootstrap=0
     
     !Data
     integer,dimension(plots_i)::V_type,P_type,A_type
     double precision,dimension(unobs_types,plots_i)::UHE_type
+    double precision,dimension(unobs_types,plots_i)::UHE_type_model
     integer,dimension(plots_i)::modal_UHE_type
     integer,dimension(T_sim,plots_i,simulations)::drilling_it
     integer,dimension(T_sim,plots_i)::n_data !number of wells in reference plot

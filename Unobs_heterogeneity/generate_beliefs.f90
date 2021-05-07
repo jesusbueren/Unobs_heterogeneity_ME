@@ -1,4 +1,4 @@
-subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N,social_output,private_output)
+subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N,social_output,private_output,Pr_u_x)
     use cadastral_maps; use primitives
     implicit none
     double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types),intent(in)::CCP
@@ -8,6 +8,8 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max),intent(out)::F_new
     integer,intent(in)::v_l
     integer(8),dimension(2*P_max-1,3,3,P_max),intent(out)::iterations
+    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(out)::Pr_u_x
+    integer(8),dimension(2*P_max-1,3,P_max,types_a,unobs_types)::counter_u
     integer,parameter::T=100000
     integer,dimension(plots_in_map,3)::state,state_old
     integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min
@@ -32,6 +34,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     iterations=0
     F_new=-9.0d0
     it=0
+    counter_u=-9
     
     !Store the state for each plot and simulate decision to drill
     
@@ -86,6 +89,11 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
                 if (t_l>=burn_t) then
                     beliefs_c(state_old(i_l,3),state(i_l,3),state_old(i_l,1),state(i_l,1),P)=&
                     beliefs_c(state_old(i_l,3),state(i_l,3),state_old(i_l,1),state(i_l,1),P)+1
+                    !Compute joint distribution state variables and unobserved heterogeneity type
+                    if (counter_u(ind,n_l,P,A,unobs_types_i(i_l,v_l))==-9) then
+                        counter_u(ind,n_l,P,A,:)=0
+                    end if
+                    counter_u(ind,n_l,P,A,unobs_types_i(i_l,v_l))=counter_u(ind,n_l,P,A,unobs_types_i(i_l,v_l))+1
                 end if
                 !Compute NPV
                 if (t_l>T-(its+1)) then  
@@ -183,7 +191,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
             if (t_l>T-(its+1)) then
                 total_N(t_l-(T-(its+1)))=sum(n_initial(1:plots_v(v_l),1))-plots_v(v_l)
             end if
-            it=0
+            it=0       
         end if
         it=it+1
     end do
@@ -217,6 +225,10 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     mean_N=sum(total_N)/(its)/dble(plots_v(v_l))
     
     print*,'av drilling',sum(CCP_av)/dble(its)
+    
+    do n_l=1,unobs_types
+        Pr_u_x(:,:,:,:,n_l)=dble(counter_u(:,:,:,:,n_l))/dble(sum(counter_u,5))
+    end do
     
     !call random_seed(PUT=seed2)
 

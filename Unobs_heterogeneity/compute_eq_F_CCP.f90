@@ -14,6 +14,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     double precision::dist
     integer::p_l,a_l,n_l,P_l2,ind,counter_all,counter_bad,u_l
     integer(8),dimension(2*P_max-1,3,3,P_max)::iterations
+    double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::Pr_u_X
     character::pause_k
     
     
@@ -30,7 +31,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     CCP=CCP_mid
 !   print*,'generating beliefs'
 1    n_initial=1
-    call generate_beliefs(CCP_mid,V_fct,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,social_output,private_output)
+    call generate_beliefs(CCP_mid,V_fct,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,social_output,private_output,Pr_u_X(:,:,:,:,v_l,:))
     
     !For each plot type obtain a new CCP given beliefs
     !print*,'policy step'
@@ -87,6 +88,6 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
         go to 1 
     end if
     
-    call generate_beliefs(CCP_mid,V_fct,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,social_output,private_output)
+    call generate_beliefs(CCP_mid,V_fct,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,social_output,private_output,Pr_u_X(:,:,:,:,v_l,:))
     !print*,'dist CCP',dist,'social_output',social_output
 end subroutine
