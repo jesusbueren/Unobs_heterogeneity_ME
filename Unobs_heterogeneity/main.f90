@@ -26,7 +26,7 @@ call load_estimation_data()
 
 !Uncomment if you want to simulate and check recovery of the simulated parameters.
     !Choose true parameter vector and compute associated equilibrium beliefs and a final distribution of wells in all plots
-    !params_true=(/8.66d0,0.53d0,16.1d0/)
+    !params_true=(/15.66d0,0.7d0,3.2d0/)
     !do v_l=1,villages
     !    print*,'village,',v_l
     !    if (v_l==1) then
@@ -37,10 +37,13 @@ call load_estimation_data()
     !        CCP_true(:,:,:,:,v_l,:)=CCP_true(:,:,:,:,1,:)
     !        n_dist(:,v_l)=n_dist(:,1)
     !    end if        
-    !    call compute_eq_F_CCP(params_true,F_true(:,:,:,:,:,v_l),CCP_true(:,:,:,:,v_l,:),V_fct,n_dist(:,v_l),v_l,mean_N(v_l),mean_NPV(v_l),mean_budget(v_l))
+    !    call compute_eq_F_CCP(params_true,F_true(:,:,:,:,:,v_l),CCP_true(:,:,:,:,v_l,:),V_fct,n_dist(:,v_l),v_l,mean_N(v_l),mean_NPV(v_l),mean_budget(v_l),Pr_u_X(:,:,:,:,v_l,:))
     !end do
-    !
-    !!Using CCPs simulate panel data with drilling decision.
+    
+    !Using CCPs simulate panel data with drilling decision.
+    !OPEN(UNIT=12, FILE="CCP_true.txt")
+    !    read(12,*),CCP_true,Pr_u_X
+    !close(12)
     !call simulate_panel(CCP_true,n_dist)
     !print*,'end simulate_panel'
     !print*,'Loading panel'
@@ -48,27 +51,28 @@ call load_estimation_data()
     !    read(12,*),drilling_it
     !close(12)
     
-call compute_moments(dble(drilling_it(:,:,1)),"data")
-
-print*,'Start estimation'
-!Generate a random CCP for computing initial beliefs
-CCP_est=sqrt(-1.0d0)
-do P_l=1,P_max
-    CCP_est(1:2*P_l-1,1:2,P_l,:,:,:)=0.06d0
-end do
-call estimation(params_MLE,log_likeli)
-print*,'end maximization'
-
-open(unit=12, file=path_results//"bootstrapped_parameters.txt",status='replace')
-write(12,'(f20.12,f20.12,f20.12,f20.12)'),params_mle(1),params_mle(2),params_mle(3),log_likeli
-close(12)
+!call compute_moments(dble(drilling_it(:,:,1)),"data")
+!
+!print*,'Start estimation'
+!!Generate a random CCP for computing initial beliefs
+!CCP_est=sqrt(-1.0d0)
+!do P_l=1,P_max
+!    CCP_est(1:2*P_l-1,1:2,P_l,:,:,:)=0.06d0
+!end do
+!call estimation(params_MLE,log_likeli)
+!print*,'end maximization'
+!
+!open(unit=12, file=path_results//"bootstrapped_parameters.txt",status='replace')
+!write(12,'(f20.12,f20.12,f20.12)'),params_mle(1),params_mle(2),log_likeli
+!close(12)
 !!call bootstrap_se()
 !open(unit=12, file=path_results//"bootstrapped_parameters.txt")
 !read(12,*),params_mle
 !close(12)
 !!print*,'estimated parameters',params_MLE
 !
-!call counterfactual_2(params_MLE)
+params_MLE=(/2.33d0,0.19d0,14.96d0/)
+call counterfactual_2(params_MLE)
 !call counterfactual_1(params_MLE)
 
 !call transitional_dynamics(params_MLE)

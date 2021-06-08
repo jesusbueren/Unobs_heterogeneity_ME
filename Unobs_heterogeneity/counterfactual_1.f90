@@ -30,7 +30,7 @@ subroutine counterfactual_1(params_MLE)
         n_dist(:,v_l)=1
         V_fct=0.0d0
         T_g=0.0d0
-        call compute_eq_F_CCP(params_MLE,F_true(:,:,:,:,:,v_l),CCP_true(:,:,:,:,v_l,:),V_fct,n_dist(:,v_l),v_l,mean_N(1),mean_NPV(1),mean_budget(v_l))
+        call compute_eq_F_CCP(params_MLE,F_true(:,:,:,:,:,v_l),CCP_true(:,:,:,:,v_l,:),V_fct,n_dist(:,v_l),v_l,mean_N(1),mean_NPV(1),mean_budget(v_l),Pr_u_X(:,:,:,:,v_l,:))
         print*,'mean_NPV',mean_NPV(v_l)
         OPEN(UNIT=12, FILE=path_results//"counterfactuals_1.txt")
         write(12,'(F20.3,F20.3,F20.3)'),0.0,mean_N(1),mean_NPV(1)
@@ -40,7 +40,7 @@ subroutine counterfactual_1(params_MLE)
             do ns=1,samples
                 print*,'p=',p_l,' ns=',ns
                 call select_active_plots(fraction_grid(p_l),v_l)
-                call compute_eq_F_CCP(params_MLE,F_true(:,:,:,:,:,v_l),CCP_true(:,:,:,:,v_l,:),V_fct,n_dist(:,v_l),v_l,mean_N(ns),mean_NPV(ns),mean_budget(v_l))
+                call compute_eq_F_CCP(params_MLE,F_true(:,:,:,:,:,v_l),CCP_true(:,:,:,:,v_l,:),V_fct,n_dist(:,v_l),v_l,mean_N(ns),mean_NPV(ns),mean_budget(v_l),Pr_u_X(:,:,:,:,v_l,:))
                 print*,'mean_NPV: ',mean_NPV(ns)
             end do
             OPEN(UNIT=12, FILE=path_results//"counterfactuals_1.txt",access='append')
@@ -128,7 +128,7 @@ subroutine compute_NPV_SP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,mean_NPV,m
     double precision::dist
     integer::a_l,u_l
     integer(8),dimension(2*P_max-1,3,3,P_max)::iterations
-    double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::Pr_u_X
+    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Pr_u_X
     character::pause_k
     
     !Set scale parameter Gumbel distribution of shocks

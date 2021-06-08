@@ -63,7 +63,7 @@ export delimited using "primitives\flow_fail_prob_r",novarnames  replace
 *Primitives: probability of success
 clear all
 cd "C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME"
-import excel using "data\drill_export.xls",firstrow   
+import excel using "data\drill_export_3T.xls",firstrow   
 collapse P_R P_S,by(map_village)
 encode map_village,g(nb)
 drop if nb==.
@@ -74,7 +74,7 @@ br
 *Estimation data
 clear all
 cd "C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\data"
-import excel using "drill_export.xls",firstrow   
+import excel using "drill_export_3T.xls",firstrow   
 encode map_village,g(nb)
 drop if nb==.
 br
@@ -104,26 +104,17 @@ local q=4
 xtile a_type=area,n(`q')
 bys a_type: sum area,d
 
-gen P_type=min(Nplots_adj,7)
+*recode a_type (1/3=1)(4=2)
+
+gen P_type=min(Nplots_adj,6)
 
 sort RespondentID year
-/*
-gen P_T1=Pflow_T1_e*Pfail1_T1_e
-gen P_T2=Pflow_T1_e*Pfail2_T1_e
-gen P_T3=Pflow_T2_e*Pfail1_T2_e
-gen P_T4=Pflow_T2_e*Pfail2_T2_e
 
-gen P_T1=Pflow_T1*Pfail1_T1
-gen P_T2=Pflow_T1*Pfail2_T1
-gen P_T3=Pflow_T2*Pfail1_T2
-gen P_T4=Pflow_T2*Pfail2_T2
-*/
 rename Pflow_T1 P_T1
 rename Pflow_T2 P_T2
 rename Pflow_T3 P_T3
-rename Pflow_T4 P_T4
 
-export delimited nb P_type a_type n f0_N - f10_N P_T1 P_T2 P_T3 P_T4 drill using "drill_export_r.csv",replace novarnames nolabel 
+export delimited nb P_type a_type n f0_N - f10_N P_T1 P_T2 P_T3 drill using "drill_export_r.csv",replace novarnames nolabel 
 
 *statistics by area en number of wells around
 bys a_type: sum drill if drill>=0

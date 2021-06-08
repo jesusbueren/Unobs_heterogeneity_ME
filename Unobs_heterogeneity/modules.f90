@@ -1,6 +1,6 @@
 module dimensions
     implicit none
-    integer,parameter::P_max=7 ! Set the maximum number of plots in an adjacency
+    integer,parameter::P_max=6 ! Set the maximum number of plots in an adjacency
     integer,parameter::K=5,par=3,M=2,types_a=4 !K: points of support of flow; M:types of moonzoons; type_a: types of areas
     integer::selected_type=4
 end
@@ -8,7 +8,7 @@ end
 module cadastral_maps
     use dimensions
     implicit none
-    integer,parameter::plots_in_map=1909,villages=14,unobs_types=4
+    integer,parameter::plots_in_map=1909,villages=14,unobs_types=3
     integer,parameter,dimension(villages)::plots_v=(/1794,302,912,517,292,535,939,637,405,837,973,1844,443,1909/) !plots in each village
     double precision,dimension(villages):: mean_area
     integer,dimension(plots_in_map,plots_in_map,villages)::neighbors_map
@@ -44,7 +44,7 @@ module primitives
     double precision,dimension(types_a)::area=(/1.0d0,2.0d0,3.0d0,5.1d0/)
     double precision,dimension(types_a-1)::area_lims=(/1.3d0,2.3d0,4.0d0/)
     !pr of unobserved heterogeneity type
-    double precision,dimension(unobs_types)::pr_unobs_t=(/0.25d0,0.25d0,0.25d0,0.25d0/)
+    double precision,dimension(unobs_types)::pr_unobs_t=(/0.333d0,0.333d0,0.334d0/)
     !Taxation parameters
     double precision::T_g=0.0d0,tau=0.0d0
 end
@@ -61,7 +61,6 @@ use cadastral_maps
     ! dec_it: drilling decision
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,villages)::F_est
     double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP_est
-    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Pr_u_X
     integer::bootstrap=0
     
     !Data
@@ -73,6 +72,9 @@ use cadastral_maps
     integer,dimension(T_sim,plots_i)::n_data !number of wells in reference plot
     double precision,dimension(max_NFW+1,T_sim,plots_i)::Pr_N_data !pr of number of functioning wells in the adjacency
     integer,dimension(T_sim,plots_i)::modal_N !pr of number of functioning wells in the adjacency
+    
+    !Unobsverded heterogeneity from beliefs
+    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Pr_u_X
     
 end module    
     

@@ -25,6 +25,7 @@ subroutine estimation(params_MLE,log_likeli)
     double precision,dimension(par,par)::xi
     integer,dimension(1)::seed_c
     double precision, dimension(villages)::mean_N,mean_NPV,mean_budget
+    character::pause_k
     
     it=1
     iterations_all=0.0d0
@@ -50,11 +51,11 @@ subroutine estimation(params_MLE,log_likeli)
     !Fixing beliefs, estimate parameter
     !print*,'Initial Conditions'
 
-    p_g(1,:)=(/10.7d0,0.22d0,17.5d0/)
-    p_g(2,:)=(/6.1d0,0.07d0,14.5d0/)
-    p_g(3,:)=(/3.1d0,0.31d0,14.7d0/)
-    p_g(4,:)=(/8.66d0,0.53d0,16.1d0/)
-    !p_g(5,:)=(/30.1763d0,0.7d0,0.9d0,1.0d0/)
+    p_g(1,:)=(/10.77d0,0.6d0,1.1d0/)
+    p_g(2,:)=(/8.5d0,0.1d0,1.3d0/)
+    p_g(3,:)=(/2.1d0,0.5d0,1.4d0/)
+    p_g(4,:)=(/10.1d0,0.5d0,2.4d0/)
+
         
     !Change parameters to the (-Inf;Inf) real line
     do p_l=1,par+1
@@ -62,6 +63,9 @@ subroutine estimation(params_MLE,log_likeli)
         p_g(p_l,2)=log(p_g(p_l,2)/(1.0d0-p_g(p_l,2)))
         p_g(p_l,3)=log(p_g(p_l,3))
         y(p_l)=log_likelihood(p_g(p_l,:))
+        !print*,'press key to continue'
+        !read*,pause_k
+        
     end do 
     !print*,'likelihood_ini',y(1)
     
@@ -69,28 +73,28 @@ subroutine estimation(params_MLE,log_likeli)
     ftol=1.0d-7
     print*,'game against nature'
     call amoeba(p_g,y,ftol,log_likelihood,iter)
-    print*,'likelihood amoeba',y(1)
-    p_g(:,1)=exp(p_g(:,1))
-    p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
-    p_g(:,3)=exp(p_g(:,3))
-    print*,' parameters amoeba',p_g(1,:)
-    !Change parameters to the (-Inf;Inf) real line
+    !print*,'likelihood amoeba',y(1)
+    !p_g(:,1)=exp(p_g(:,1))
+    !p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
+    !!p_g(:,3)=exp(p_g(:,3))
+    !print*,' parameters amoeba',p_g(1,:)
+    !!Change parameters to the (-Inf;Inf) real line
     !do p_l=1,par+1
     !    p_g(p_l,1)=log(p_g(p_l,1))
     !    p_g(p_l,2)=log(p_g(p_l,2)/(1.0d0-p_g(p_l,2)))
-    !    p_g(p_l,3)=log(p_g(p_l,3))
+    !    !p_g(p_l,3)=log(p_g(p_l,3))
     !    y(p_l)=log_likelihood(p_g(p_l,:))
     !end do 
     !xi=0.0d0
     !do p_l=1,par
     !    xi(p_l,p_l)=1.0d0
     !end do
-    !ftol=1.0d-3
+    !ftol=1.0d-4
     !call powell(p_g(1,:),xi,ftol,iter,y(1))
     log_likeli=y(1)
-    !p_g(:,1)=exp(p_g(:,1))
-    !p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
-    !p_g(:,3)=exp(p_g(:,3))
+    p_g(:,1)=exp(p_g(:,1))
+    p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
+    p_g(:,3)=exp(p_g(:,3))
     !print*,'likelihood powell',y(1)
     !print*,'parameter powell',p_g(1,:)
     
@@ -202,6 +206,7 @@ function log_likelihood(params_MLE)
                 !    read*,pause_k
                 !end if
                 
+                !Set distribution of unobserved heterogeneity
                 if (t_l==1) then
                     do j_l=n_data(t_l,i_l),min(max_NFW+1,2*(P_type(i_l)-1)+n_data(t_l,i_l))
                         if (n_data(t_l,i_l)==1) then
@@ -216,7 +221,17 @@ function log_likelihood(params_MLE)
                         UHE_type_model(:,i_l)=UHE_type_model(:,i_l)+Pr_u_X(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
                     end do
                 end if
+                
                 do j_l=n_data(t_l,i_l),min(max_NFW+1,2*(P_type(i_l)-1)+n_data(t_l,i_l))
+                    if (n_data(t_l,i_l)==1) then
+                        ind=j_l !position in the state space wrt to the CCP, PI_s_v and ,PI_f_v
+                    elseif (n_data(t_l,i_l)==2) then
+                        ind=j_l-1
+                    elseif (n_data(t_l,i_l)==3) then
+                        ind=j_l-2
+                    else
+                        print*,'error in estimation'
+                    end if
                     if (drilling_it(t_l,i_l,s_l)==1) then
                         likelihood_it=likelihood_it+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
                         av_CCP_uhe=av_CCP_uhe+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
@@ -233,10 +248,10 @@ function log_likelihood(params_MLE)
                     read*,end_k
                 end if
                 if (drilling_it(t_l,i_l,s_l)==1 .or. drilling_it(t_l,i_l,s_l)==0) then
-                    if (UHE_type_model(1,i_l)==-9.0d0) then
+                    if (UHE_type(1,i_l)==-9.0d0) then
                         print*,n_data(t_l,i_l)
                     end if
-                    av_CCP_it(t_l,i_l)=sum(av_CCP_uhe*UHE_type_model(:,i_l))
+                    av_CCP_it(t_l,i_l)=sum(av_CCP_uhe*UHE_type(:,i_l))
                 else
                     av_CCP_it(t_l,i_l)=-9.0d0
                 end if

@@ -39,15 +39,15 @@ fclose(fileID);
 fileID = fopen('data_uhe.txt','r');
 data_uhe = fscanf(fileID,'%f')
 fclose(fileID);
-data_uhe=reshape(data_uhe,4,2)
+data_uhe=reshape(data_uhe,3,2)
 fileID = fopen('counter_uhe.txt','r');
 counter_uhe = fscanf(fileID,'%f')
 fclose(fileID);
-counter_uhe=reshape(counter_uhe,4,2)
+counter_uhe=reshape(counter_uhe,3,2)
 fileID = fopen('modl_uhe.txt','r');
 modl_uhe = fscanf(fileID,'%f')
 fclose(fileID);
-modl_uhe=reshape(modl_uhe,4,2)
+modl_uhe=reshape(modl_uhe,3,2)
 
 
 clrs = [0.9 0.9 0.9;0 0 0];
@@ -63,12 +63,12 @@ for i=[2 4]
         xticklabels({'N=0','N=1','N=2','N=3','N=4'})
     elseif i==4
         title("Plots in Adjacency")
-        data_gr=[data_P(2:7) modl_P(2:7)]
-        xticks([1 2 3 4 5 6])
-        xticklabels({'P=2','P=3','P=4','P=5','P=6','P=7'})
+        data_gr=[data_P(2:5) modl_P(2:5)]
+        xticks([1 2 3 4 ])
+        xticklabels({'P=2','P=3','P=4','P=5'})
     end
-    yticks([0:0.03:0.15])
-    ylim([0 .15])
+%     yticks([0:0.03:0.15])
+%     ylim([0 .15])
     hold on
     hB=bar(data_gr)
     ngroups = size(data_gr, 1);
@@ -82,7 +82,7 @@ for i=[2 4]
             if i==2
                 errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_N(1:5)) , 'k', 'linestyle', 'none');
             elseif i==4
-                errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_P(2:7)) , 'k', 'linestyle', 'none');
+                errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_P(2:5)) , 'k', 'linestyle', 'none');
             end
         end
     set(hB,{'FaceColor'},{clrs(1,:),clrs(2,:)}.')
@@ -96,11 +96,11 @@ for i=[2 4]
 end
 
 set(groot,'defaultAxesTickLabelInterpreter','latex');  
-for i=[3 5]
+i=3 
     figure(i)
     for j=1:4
         subplot(2,2,j)
-        if i==3
+
             if j==1
                 title("$a<1.3$",'Interpreter','latex')
             elseif j==2
@@ -111,24 +111,9 @@ for i=[3 5]
                 title("$a>4.0$",'Interpreter','latex')
             end
             data_gr=[data_own_n(j,:); modl_own_n(j,:)]'
-            ylim([0 0.3])
-            yticks([0:0.05:0.3])
+            ylim([0 0.2])
+            yticks([0:0.05:0.2])
             set(gca,'TickLabelInterpreter','latex')
-        elseif i==5
-            if j==1
-                title("Low flow, High Failure",'Interpreter','latex')
-            elseif j==2
-                title("Low flow, Low Failure",'Interpreter','latex')
-            elseif j==3
-                title("High flow, High Failure",'Interpreter','latex')
-            elseif j==4
-                title("High flow, Low Failure",'Interpreter','latex')
-            end
-            data_gr=[data_uhe(j,:); modl_uhe(j,:)]'
-            ylim([0 0.3])
-            yticks([0:0.05:0.6])
-             set(gca,'TickLabelInterpreter','latex')
-        end
         xticks([1 2])
         xticklabels({'$n=0$','$n=1$'})
         hold on
@@ -154,7 +139,50 @@ for i=[3 5]
         set(gcf,'Position',[100 100 1000 500])
         print(strcat('model_fit',num2str(i)),'-depsc')
     end 
-end
+
+
+i= 5
+    figure(i)
+    for j=1:3
+        subplot(1,3,j)
+        if j==1
+            title("Type I",'Interpreter','latex')
+        elseif j==2
+            title("Type II",'Interpreter','latex')
+        elseif j==3
+            title("Type III",'Interpreter','latex')
+        end
+            data_gr=[data_uhe(j,:); modl_uhe(j,:)]'
+            ylim([0 0.2])
+            yticks([0:0.05:0.2])
+             set(gca,'TickLabelInterpreter','latex')
+
+        xticks([1 2])
+        xticklabels({'$n=0$','$n=1$'})
+        hold on
+        hB=bar(data_gr)
+        ngroups = size(data_gr, 1);
+        nbars = size(data_gr, 2);
+        groupwidth = min(0.8, nbars/(nbars + 1.5));
+        for i2 = 1:1
+            % Calculate center of each bar
+            x = (1:ngroups) - groupwidth/2 + (2*i2-1) * groupwidth / (2*nbars);
+            if i==3
+                errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_own_n(j,:)') , 'k', 'linestyle', 'none');
+            elseif i==5
+                errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_uhe(j,:)') , 'k', 'linestyle', 'none');
+            end
+        end
+        set(hB,{'FaceColor'},{clrs(1,:),clrs(2,:)}.')
+        I=legend('Data \pm 2 s.d.','Model')
+        legend('boxoff')
+        I.FontSize=FS
+        set(gca,'FontName','Times New Roman','Fontsize',FS);
+        set(gcf,'color','w') 
+        set(gcf,'Position',[100 100 1500 250])
+        print(strcat('model_fit',num2str(i)),'-depsc')
+    end 
+
 
 %% Counterfactuals
 

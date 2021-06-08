@@ -24,8 +24,8 @@ subroutine bootstrap_se()
     A_type_or=data_csv(3,1,:)
     n_data_or=data_csv(4,:,:)+1
     Pr_N_data_or=data_csv(5:15,:,:)
-    UHE_type_or=data_csv(16:19,1,:)
-    drilling_it_or(:,:,1)=data_csv(20,:,:)
+    UHE_type_or=data_csv(16:18,1,:)
+    drilling_it_or(:,:,1)=data_csv(19,:,:)
     
     do bs_l=1,bs_samples
         print*,'Sample ',bs_l,' out of ',bs_samples
@@ -53,7 +53,7 @@ subroutine bootstrap_se()
     
         call estimation(params_bs(:,bs_l),likeli)
         OPEN(UNIT=12, FILE=path_results//"bootstrapped_parameters.txt",access='append')
-        write(12,'(F20.12,F20.12,F20.12,F20.12)'),params_bs(1,bs_l),params_bs(2,bs_l),params_bs(3,bs_l),likeli
+        write(12,'(F20.12,F20.12,F20.12,F20.12)'),params_bs(1,bs_l),params_bs(2,bs_l),likeli
         close(12)
     
     end do

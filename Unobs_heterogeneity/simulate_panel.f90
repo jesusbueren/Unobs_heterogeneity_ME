@@ -21,7 +21,7 @@ subroutine simulate_panel(CCP,n_initial)
     counter_t=0.0d0
     
     do s_l=1,simulations            
-        UHE_type_model=-9.0d0
+        !UHE_type_model=-9.0d0
         unobs_types_i2=-9
         !Store the state for each plot and simulate decision to drill
         do t_l=1,T_sim
@@ -31,7 +31,7 @@ subroutine simulate_panel(CCP,n_initial)
                 ind=1
                 do while (N_all==-9)
                     call RANDOM_NUMBER(u_m)
-                    if ( (u_m<sum(Pr_N_data(1:ind,t_l,i_l))) .or. ind==max_NFW+1)  then
+                    if ( (u_m<sum(Pr_N_data(1:ind,t_l,i_l))) .or. ind==max_NFW+1)  then 
                         N_all=ind
                     end if
                     ind=ind+1
@@ -48,14 +48,17 @@ subroutine simulate_panel(CCP,n_initial)
                     ind=N_all-2
                 else
                     print*,'error in sim panel'
-                end if      
-                !Well drilling decision and failures/successes
-                if (n_data(t_l,i_l)<3 .and. UHE_type_model(1,i_l)==-9.0d0) then
+                end if
+                !Set distribution of unobserved heterogeneity
+                if (t_l==1) then
                     UHE_type_model(:,i_l)=Pr_u_X(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)
+                end if
+                !Well drilling decision and failures/successes
+                if (unobs_types_i2(i_l)==-9) then
                     ind2=1
                     call RANDOM_NUMBER(u_m)
                     do while (unobs_types_i2(i_l)==-9)
-                        if (u_m<sum(UHE_type_model(1:ind,i_l))) then
+                        if (u_m<sum(UHE_type_model(1:ind2,i_l))) then  
                             unobs_types_i2(i_l)=ind2
                         else
                             ind2=ind2+1

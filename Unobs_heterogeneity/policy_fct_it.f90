@@ -46,8 +46,8 @@ subroutine policy_fct_it(Ef_v,F,P,CCP_in,CCP_out,v_l,u_l,V_new)
         print*,'P',P
         print*,CCP_old(1:2*P-1,1)
         print*,CCP_out(1:2*P-1,1)
-        print*,'problem in policy fct it'
-        read*,pause_k
+        print*,'policy fct it not converged'
+        return
     end if
 
     if (dist>crit)then

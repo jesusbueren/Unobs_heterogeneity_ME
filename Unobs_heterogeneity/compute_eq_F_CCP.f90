@@ -1,4 +1,4 @@
-subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_output,private_output)
+subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_output,private_output,Pr_u_X)
     use cadastral_maps; use dimensions; use primitives
     implicit none
     double precision,dimension(par),intent(in)::params
@@ -8,13 +8,13 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(inout)::V_fct
     integer,intent(in)::v_l    
     double precision,intent(out)::mean_N,social_output,private_output
+    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(out)::Pr_u_X
     double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types)::CCP_old,CCP
     
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
     double precision::dist
     integer::p_l,a_l,n_l,P_l2,ind,counter_all,counter_bad,u_l
     integer(8),dimension(2*P_max-1,3,3,P_max)::iterations
-    double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::Pr_u_X
     character::pause_k
     
     
@@ -25,13 +25,13 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     do u_l=1,unobs_types;do a_l=1,types_a
         call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
     end do;end do
-    print*,maxval(Ef_v)
+
     !Generate beliefs consitent with CCP
     F=1.0d0
     CCP=CCP_mid
 !   print*,'generating beliefs'
 1    n_initial=1
-    call generate_beliefs(CCP_mid,V_fct,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,social_output,private_output,Pr_u_X(:,:,:,:,v_l,:))
+    call generate_beliefs(CCP_mid,V_fct,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,social_output,private_output,Pr_u_X)
     
     !For each plot type obtain a new CCP given beliefs
     !print*,'policy step'
@@ -39,7 +39,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     dist=0.0d0
     counter_bad=0
     counter_all=0
-    do P_l=1,P_max; do a_l=1,types_a; do u_l=1,unobs_types
+    do P_l=2,P_max; do a_l=1,types_a; do u_l=1,unobs_types
         call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
                             ,F(1:2*P_l-1,1:2*P_l-1,:,:,P_l) &
                             ,P_l &
@@ -84,10 +84,10 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     
     !print*,'press any key to continue'
     !read*,pause_k
-    if (dist>1.0d-4 ) then !dist>1d-3 
+    if (dist>0.1d0) then !1.0d-4 
         go to 1 
     end if
     
-    call generate_beliefs(CCP_mid,V_fct,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,social_output,private_output,Pr_u_X(:,:,:,:,v_l,:))
+    call generate_beliefs(CCP_mid,V_fct,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,social_output,private_output,Pr_u_X)
     !print*,'dist CCP',dist,'social_output',social_output
 end subroutine
