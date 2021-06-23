@@ -29,6 +29,17 @@ subroutine load_cadastral_maps()
             read(12,*),neighbors_map(1:plots_v(v_l),1:plots_v(v_l),v_l)
         close(12)
         
+        !Set zombie plots
+        do i=1,plots_in_map
+            call RANDOM_NUMBER(u)
+            if (u<pr_non_zombie(v_l)) then
+                active_plots(i,v_l)=1
+            else
+                neighbors_map(i,:,v_l)=0
+                neighbors_map(:,i,v_l)=0
+            end if
+        end do
+        
         !Store which are my neighbors
         do i=1,plots_in_map;
             neighbors_map(i,i,v_l)=1
@@ -43,10 +54,8 @@ subroutine load_cadastral_maps()
             !number of neighboring plots is larger than P_max in the data so in case it is not, I force the last neighbor to be the reference plot
             if (ind==P_max .and. ind<i) then
                 neighbors(i,P_max,v_l)=i
-            end if
-                
+            end if    
         end do
-    
         !number of neighbors
         PA_type(1:plots_v(v_l),1,v_l)=min(sum(neighbors_map(1:plots_v(v_l),1:plots_v(v_l),v_l),2),P_max)        
     end do

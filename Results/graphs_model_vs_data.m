@@ -67,8 +67,8 @@ for i=[2 4]
         xticks([1 2 3 4 ])
         xticklabels({'P=2','P=3','P=4','P=5'})
     end
-%     yticks([0:0.03:0.15])
-%     ylim([0 .15])
+    yticks([0:0.05:0.30])
+    ylim([0 .30])
     hold on
     hB=bar(data_gr)
     ngroups = size(data_gr, 1);
@@ -111,8 +111,8 @@ i=3
                 title("$a>4.0$",'Interpreter','latex')
             end
             data_gr=[data_own_n(j,:); modl_own_n(j,:)]'
-            ylim([0 0.2])
-            yticks([0:0.05:0.2])
+            ylim([0 0.30])
+            yticks([0:0.05:0.30])
             set(gca,'TickLabelInterpreter','latex')
         xticks([1 2])
         xticklabels({'$n=0$','$n=1$'})
@@ -144,7 +144,7 @@ i=3
 i= 5
     figure(i)
     for j=1:3
-        subplot(1,3,j)
+        subplot(2,2,j)
         if j==1
             title("Type I",'Interpreter','latex')
         elseif j==2
@@ -153,8 +153,8 @@ i= 5
             title("Type III",'Interpreter','latex')
         end
             data_gr=[data_uhe(j,:); modl_uhe(j,:)]'
-            ylim([0 0.2])
-            yticks([0:0.05:0.2])
+            ylim([0 0.30])
+            yticks([0:0.05:0.30])
              set(gca,'TickLabelInterpreter','latex')
 
         xticks([1 2])
@@ -179,7 +179,7 @@ i= 5
         I.FontSize=FS
         set(gca,'FontName','Times New Roman','Fontsize',FS);
         set(gcf,'color','w') 
-        set(gcf,'Position',[100 100 1500 250])
+        set(gcf,'Position',[100 100 1000 500])
         print(strcat('model_fit',num2str(i)),'-depsc')
     end 
 
@@ -193,14 +193,17 @@ cd("C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\Re
 fileID = fopen('counterfactuals.txt','r');
 counterfactuals = fscanf(fileID,'%f')
 fclose(fileID);
-villages=14
+
 variables=5
 nkk=50
-counterfactuals=reshape(counterfactuals,variables,nkk,villages)
+villages=floor(size(counterfactuals,1)/variables/nkk) %14
 
-plot(mean(counterfactuals(4,:,:),3),'linewidth',2)
+
+counterfactuals=reshape(counterfactuals(1:variables*nkk*villages),variables,nkk,villages)
+
+plot(max(counterfactuals(4,:,:),[],3),'linewidth',2)
 hold on
-plot(mean(counterfactuals(5,:,:),3),'--','linewidth',2)
+plot(max(counterfactuals(5,:,:),[],3),'--','linewidth',2)
 I=legend('Social','Private')
 set(gcf,'color','w') 
         

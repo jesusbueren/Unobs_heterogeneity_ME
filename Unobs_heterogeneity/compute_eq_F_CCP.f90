@@ -19,11 +19,11 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     
     
     !Set scale parameter Gumbel distribution of shocks
-    rho=params(3)
+    rho=params(5)
 
     !Compute expected productivity 
     do u_l=1,unobs_types;do a_l=1,types_a
-        call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+        call expected_productivity(params(1:4),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
     end do;end do
 
     !Generate beliefs consitent with CCP
@@ -39,7 +39,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     dist=0.0d0
     counter_bad=0
     counter_all=0
-    do P_l=2,P_max; do a_l=1,types_a; do u_l=1,unobs_types
+    do P_l=1,P_max; do a_l=1,types_a; do u_l=1,unobs_types
         call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
                             ,F(1:2*P_l-1,1:2*P_l-1,:,:,P_l) &
                             ,P_l &
@@ -84,10 +84,10 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     
     !print*,'press any key to continue'
     !read*,pause_k
-    if (dist>0.1d0) then !1.0d-4 
+    if (dist>0.0001d0) then !1.0d-4 
         go to 1 
     end if
     
     call generate_beliefs(CCP_mid,V_fct,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,social_output,private_output,Pr_u_X)
-    !print*,'dist CCP',dist,'social_output',social_output
+    print*,'dist CCP',dist,'social_output',social_output
 end subroutine

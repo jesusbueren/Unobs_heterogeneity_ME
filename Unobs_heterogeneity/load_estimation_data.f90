@@ -1,7 +1,7 @@
 subroutine load_estimation_data
     use simulation
     implicit none
-    double precision,dimension(19,T_sim,plots_i)::data_csv
+    double precision,dimension(20,T_sim,plots_i)::data_csv
     integer::i_l,t_l
     double precision,dimension(types_a)::moment_a
     double precision,dimension(max_NFW+1)::moment_N
@@ -20,8 +20,10 @@ subroutine load_estimation_data
     n_data=data_csv(4,:,:)+1
     Pr_N_data=data_csv(5:15,:,:)
     UHE_type=data_csv(16:18,1,:)
-    drilling_it(:,:,1)=data_csv(19,:,:)    
+    drilling_it(:,:,1)=data_csv(19,:,:) 
+    impute_i=0 !data_csv(20,1,:)
     
+
     !UHE_type(selected_type,:)=1.0d0
     
     !Modal value of unobserved heterogeneity

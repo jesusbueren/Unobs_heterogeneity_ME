@@ -1,7 +1,7 @@
 module dimensions
     implicit none
     integer,parameter::P_max=6 ! Set the maximum number of plots in an adjacency
-    integer,parameter::K=5,par=3,M=2,types_a=4 !K: points of support of flow; M:types of moonzoons; type_a: types of areas
+    integer,parameter::K=5,par=5,M=2,types_a=4 !K: points of support of flow; M:types of moonzoons; type_a: types of areas
     integer::selected_type=4
 end
     
@@ -15,7 +15,9 @@ module cadastral_maps
     integer,dimension(plots_in_map,2,villages)::PA_type !number of neighbors, a type for each plot in the map
     integer,dimension(plots_in_map,villages)::unobs_types_i
     integer,dimension(plots_in_map,P_max,villages)::neighbors !identify neighbors for each plot in the map
-    integer,dimension(plots_in_map,villages)::active_plots=1
+    !Zombie pr
+    double precision,dimension(villages):: pr_non_zombie=(/0.454545468,0.954918027,0.525423706,0.778947353,0.805970132,0.632911384,0.666666687,0.847826064,0.762162149,0.749077499,0.401544392,0.722857118,0.78772378,0.639024377/)
+    integer,dimension(plots_in_map,villages)::active_plots
     character(len=103)::file_map="C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\cadastral_maps\fortran_files\"
 end
     
@@ -36,7 +38,7 @@ module primitives
     double precision,dimension(2*P_max,villages)::PI_s
     double precision,dimension(2*P_max-1,3,P_max,villages)::PI_s_v
     !c_d: fixed cost of failing to drill;c_s: fixed cost of succeeding to drill; c_e: cost of electricity by well
-    double precision::c_s=72.3d0,beta=0.95d0,c_d=35.2d0, c_e=11.7d0
+    double precision::c_s=72.3d0,beta=0.85d0,c_d=35.2d0,c_e=11.7d0
     !extreme value distribution shocks
     double precision,parameter::gamma=0.577215664901533d0
     double precision::rho
@@ -47,6 +49,7 @@ module primitives
     double precision,dimension(unobs_types)::pr_unobs_t=(/0.333d0,0.333d0,0.334d0/)
     !Taxation parameters
     double precision::T_g=0.0d0,tau=0.0d0
+    
 end
      
 module simulation
@@ -64,7 +67,7 @@ use cadastral_maps
     integer::bootstrap=0
     
     !Data
-    integer,dimension(plots_i)::V_type,P_type,A_type
+    integer,dimension(plots_i)::V_type,P_type,A_type,impute_i
     double precision,dimension(unobs_types,plots_i)::UHE_type
     double precision,dimension(unobs_types,plots_i)::UHE_type_model
     integer,dimension(plots_i)::modal_UHE_type

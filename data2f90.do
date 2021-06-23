@@ -102,9 +102,10 @@ replace f`i'_N=f`j' if n==2
 
 local q=4
 xtile a_type=area,n(`q')
-bys a_type: sum area,d
 
-*recode a_type (1/3=1)(4=2)
+
+*recode a_type (1=1)(2/4=2)
+bys a_type: sum area,d
 
 gen P_type=min(Nplots_adj,6)
 

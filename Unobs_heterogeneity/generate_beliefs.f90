@@ -10,7 +10,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     integer(8),dimension(2*P_max-1,3,3,P_max),intent(out)::iterations
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(out)::Pr_u_x
     integer(8),dimension(2*P_max-1,3,P_max,types_a,unobs_types)::counter_u
-    integer,parameter::T=10000!0
+    integer,parameter::T=100000!100000
     integer,dimension(plots_in_map,3)::state,state_old
     integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min
     double precision::u_d,u_s,u_f,u_m,it2

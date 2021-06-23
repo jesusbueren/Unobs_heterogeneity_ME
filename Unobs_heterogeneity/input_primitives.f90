@@ -16,7 +16,7 @@ subroutine input_primitives()
    
     !!pr of good moonzoon from drill_export.xls (hanan's data)
     PI_m(2,:)=rain_success_csv(2,:)
-    !PI_s: Pr. of success (first position indicates no wells, last position indicates all plots with 2 wells except on with one well)
+    !PI_s: Pr. of success (varies by village)
     PI_s(1,:)=rain_success_csv(3,:)
     
     !Discharge distribution
@@ -31,7 +31,10 @@ subroutine input_primitives()
         PI_fm(1:2*P_max,1,u_l)=flow_fail_prob_csv(10,u_l,1,1:2*P_max)
         PI_fm(1:2*P_max,2,u_l)=flow_fail_prob_csv(10,u_l,2,1:2*P_max)
         
-        PI_f=PI_fm(:,1,u_l)*PI_m(1,v_l)+PI_fm(:,2,u_l)*PI_m(2,v_l)     
+        PI_f=PI_fm(:,1,u_l)*PI_m(1,v_l)+PI_fm(:,2,u_l)*PI_m(2,v_l)   
+        
+        !print*,'I destroy heterogeneity in failure with wells'
+        !PI_f=PI_f(1)
         
         !PI_s: Pr. of success doesn't vary with number of wells around
         PI_s(:,v_l)=PI_s(1,v_l)       
@@ -45,6 +48,10 @@ subroutine input_primitives()
             PI_k(N,:,1,u_l)=PI_k(N,:,1,u_l)/sum(PI_k(N,:,1,u_l))
             PI_k(N,:,2,u_l)=PI_k(N,:,2,u_l)/sum(PI_k(N,:,2,u_l))
         end do
+        !print*,'I destroy heterogeneity in flow with wells'
+        !do N=1,2*P_max
+        !    PI_k(N,:,1,u_l)=PI_k(1,:,1,u_l)
+        !end do
     
         !Fill in the probability of success/failure in vector form of dimension 2*P-1
         PI_s_v(:,:,:,v_l)=sqrt(-1.0d0)

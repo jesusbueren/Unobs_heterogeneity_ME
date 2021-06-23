@@ -19,28 +19,32 @@ subroutine compute_moments(data_in,string_name)
     counter_P=0.0d0
     moment_P=0.0d0
     
-    do i_l=1,plots_i;do t_l=1,T_sim
-        if (data_in(t_l,i_l)/=-9.0d0) then
-            !Moments across number of functioning wells in adjacency
-            counter_N(modal_N(t_l,i_l))=counter_N(modal_N(t_l,i_l))+1.0d0
-            moment_N(modal_N(t_l,i_l))=(counter_N(modal_N(t_l,i_l))-1.0)/counter_N(modal_N(t_l,i_l))*moment_N(modal_N(t_l,i_l))&
-                                        +1.0d0/counter_N(modal_N(t_l,i_l))*data_in(t_l,i_l)
-            !Moments across number of owned functioning wells and owned wells
-            counter_own_nxa(A_type(i_l),n_data(t_l,i_l))=counter_own_nxa(A_type(i_l),n_data(t_l,i_l))+1.0d0
-            moment_own_nxa(A_type(i_l),n_data(t_l,i_l))=(counter_own_nxa(A_type(i_l),n_data(t_l,i_l))-1.0)/counter_own_nxa(A_type(i_l),n_data(t_l,i_l))*moment_own_nxa(A_type(i_l),n_data(t_l,i_l))&
-                                            +1.0d0/counter_own_nxa(A_type(i_l),n_data(t_l,i_l))*data_in(t_l,i_l)
-            !Moments across number of unobserved heterogeneity types
-            do u_l=1,unobs_types
-                counter_uhe(u_l,n_data(t_l,i_l))=counter_uhe(u_l,n_data(t_l,i_l))+UHE_type(u_l,i_l)
-                moment_uhe(u_l,n_data(t_l,i_l))=moment_uhe(u_l,n_data(t_l,i_l))&
-                                                +data_in(t_l,i_l)*UHE_type(u_l,i_l)
+    do i_l=1,plots_i
+        if (impute_i(i_l)==0) then
+            do t_l=1,T_sim
+                if (data_in(t_l,i_l)/=-9.0d0) then
+                    !Moments across number of functioning wells in adjacency
+                    counter_N(modal_N(t_l,i_l))=counter_N(modal_N(t_l,i_l))+1.0d0
+                    moment_N(modal_N(t_l,i_l))=(counter_N(modal_N(t_l,i_l))-1.0)/counter_N(modal_N(t_l,i_l))*moment_N(modal_N(t_l,i_l))&
+                                                +1.0d0/counter_N(modal_N(t_l,i_l))*data_in(t_l,i_l)
+                    !Moments across number of owned functioning wells and owned wells
+                    counter_own_nxa(A_type(i_l),n_data(t_l,i_l))=counter_own_nxa(A_type(i_l),n_data(t_l,i_l))+1.0d0
+                    moment_own_nxa(A_type(i_l),n_data(t_l,i_l))=(counter_own_nxa(A_type(i_l),n_data(t_l,i_l))-1.0)/counter_own_nxa(A_type(i_l),n_data(t_l,i_l))*moment_own_nxa(A_type(i_l),n_data(t_l,i_l))&
+                                                    +1.0d0/counter_own_nxa(A_type(i_l),n_data(t_l,i_l))*data_in(t_l,i_l)
+                    !Moments across number of unobserved heterogeneity types
+                    do u_l=1,unobs_types
+                        counter_uhe(u_l,n_data(t_l,i_l))=counter_uhe(u_l,n_data(t_l,i_l))+UHE_type(u_l,i_l)
+                        moment_uhe(u_l,n_data(t_l,i_l))=moment_uhe(u_l,n_data(t_l,i_l))&
+                                                        +data_in(t_l,i_l)*UHE_type(u_l,i_l)
+                    end do
+                    !Moments across number of plots
+                    counter_P(P_type(i_l))=counter_P(P_type(i_l))+1.0d0
+                    moment_P(P_type(i_l))=(counter_P(P_type(i_l))-1.0)/counter_P(P_type(i_l))*moment_P(P_type(i_l))&
+                                            +1.0d0/counter_P(P_type(i_l))*data_in(t_l,i_l)  
+                end if 
             end do
-            !Moments across number of plots
-            counter_P(P_type(i_l))=counter_P(P_type(i_l))+1.0d0
-            moment_P(P_type(i_l))=(counter_P(P_type(i_l))-1.0)/counter_P(P_type(i_l))*moment_P(P_type(i_l))&
-                                    +1.0d0/counter_P(P_type(i_l))*data_in(t_l,i_l)  
-        end if 
-    end do;end do
+        end if
+    end do
     
     
     OPEN(UNIT=12, FILE=path_results//string_name//"_N.txt")
