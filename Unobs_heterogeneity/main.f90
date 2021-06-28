@@ -53,7 +53,7 @@ call load_estimation_data()
     
 call compute_moments(dble(drilling_it(:,:,1)),"data")
 
-!print*,'Start estimation'
+print*,'Start estimation'
 !Generate a random CCP for computing initial beliefs
 CCP_est=sqrt(-1.0d0)
 do P_l=1,P_max
@@ -76,7 +76,7 @@ close(12)
 !close(12)
 !!print*,'estimated parameters',params_MLE
 !
-!params_MLE=(/9.37d0,0.41d0,0.64d0,0.39d0,13.6d0/)
+!params_MLE=(/28.19d0,0.037d0,0.9d0,20.8d0,15.13d0/)
 call counterfactual_2(params_MLE)
 !call counterfactual_1(params_MLE)
 

@@ -8,7 +8,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max),intent(out)::F_new
     integer,intent(in)::v_l
     integer(8),dimension(2*P_max-1,3,3,P_max),intent(out)::iterations
-    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(out)::Pr_u_x
+    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(out)::Pr_u_x !Pr_u_x(1,1,3,4,:) counter_u(1,1,3,4,:)
     integer(8),dimension(2*P_max-1,3,P_max,types_a,unobs_types)::counter_u
     integer,parameter::T=100000!100000
     integer,dimension(plots_in_map,3)::state,state_old
@@ -18,8 +18,8 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     double precision,dimension(its)::NPV,total_N,NPV_PV,CCP_av
     double precision,intent(out)::mean_N,social_output,private_output
     integer(8),dimension(2*P_max-1,2*P_max-1,3,3,P_max)::beliefs_c
-    integer,dimension(1)::seed=123,seed2
-    integer,parameter::burn_t=100
+    integer,dimension(1)::seed=321,seed2
+    integer,parameter::burn_t=10000
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max)::F
     double precision,dimension(P_max)::dist
     character::continue_k
@@ -135,7 +135,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
                             end if
                         else !unsuccessful attempt
                             call RANDOM_NUMBER(u_f)
-                            if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l))) then !failure of the previous well
+                            if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l))) then !failure of the previous well PI_fm(:)
                                 n_initial(i_l,1)=n_l-1
                             else
                                 n_initial(i_l,1)=n_l

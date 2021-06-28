@@ -8,7 +8,7 @@ subroutine load_cadastral_maps()
     double precision,dimension(villages,plots_in_map)::areas
     integer,dimension(villages,plots_in_map)::area_type
     integer,dimension(P_max,2)::PA_stat
-    integer,dimension(1)::seed=123
+    integer,dimension(1)::seed=321
     
     PA_type=-9
     
