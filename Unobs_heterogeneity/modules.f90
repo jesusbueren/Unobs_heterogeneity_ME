@@ -1,7 +1,7 @@
 module dimensions
     implicit none
     integer,parameter::P_max=6 ! Set the maximum number of plots in an adjacency
-    integer,parameter::K=5,par=5,M=2,types_a=4 !K: points of support of flow; M:types of moonzoons; type_a: types of areas
+    integer,parameter::K=5,par=5,M=2,types_a=2 !K: points of support of flow; M:types of moonzoons; type_a: types of areas
     integer::selected_type=4
 end
     
