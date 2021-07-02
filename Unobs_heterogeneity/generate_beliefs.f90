@@ -10,9 +10,9 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     integer(8),dimension(2*P_max-1,3,3,P_max),intent(out)::iterations
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(out)::Pr_u_x !Pr_u_x(1,1,3,4,:) counter_u(1,1,3,4,:)
     integer(8),dimension(2*P_max-1,3,P_max,types_a,unobs_types)::counter_u
-    integer,parameter::T=100000!100000
+    integer,parameter::T=100000
     integer,dimension(plots_in_map,3)::state,state_old
-    integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min
+    integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min,a_l,u_l
     double precision::u_d,u_s,u_f,u_m,it2
     integer,parameter:: its=2000
     double precision,dimension(its)::NPV,total_N,NPV_PV,CCP_av
@@ -226,9 +226,14 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     
     print*,'av drilling',sum(CCP_av)/dble(its)
     
-    do n_l=1,unobs_types
-        Pr_u_x(:,:,:,:,n_l)=dble(counter_u(:,:,:,:,n_l))/dble(sum(counter_u,5))
-    end do
+
+    do ind=1,2*P_max-1; do n_l=1,3; do P_l=1,P_max; do a_l=1,types_a; do u_l=1,unobs_types
+        if (counter_u(ind,n_l,P_l,a_l,n_l)==-9) then
+            Pr_u_x(ind,n_l,P_l,a_l,u_l)=pr_unobs_t(u_l)
+        else
+            Pr_u_x(ind,n_l,P_l,a_l,u_l)=dble(counter_u(ind,n_l,P_l,a_l,u_l))/dble(sum(counter_u(ind,n_l,P_l,a_l,:)))
+        end if
+    end do;end do;end do;end do;end do
     
     !call random_seed(PUT=seed2)
 

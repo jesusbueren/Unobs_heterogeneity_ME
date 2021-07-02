@@ -132,11 +132,11 @@ subroutine compute_NPV_SP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,mean_NPV,m
     character::pause_k
     
     !Set scale parameter Gumbel distribution of shocks
-    rho=params(5)
+    !rho=params(4)
 
     !Compute expected productivity 
     do u_l=1,unobs_types;do a_l=1,types_a
-        call expected_productivity(params(1:4),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+        call expected_productivity(params(1:3),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
     end do;end do
 
     !Generate beliefs consitent with CCP

@@ -51,21 +51,20 @@ subroutine estimation(params_MLE,log_likeli)
     !Fixing beliefs, estimate parameter
     !print*,'Initial Conditions'
 
-    p_g(1,:)=(/12.39d0,0.17d0,0.69d0,4.0d0,14.81d0/)
-    p_g(2,:)=(/28.19d0,0.037d0,0.9d0,20.8d0,15.13d0/)
-    p_g(3,:)=(/32.d0,0.54d0,1.0d0-0.54d0,0.3d0,15.1d0/)
-    p_g(4,:)=(/8.33d0,0.64d0,0.54d0,1.2d0,12.1d0/)
-    p_g(5,:)=(/7.33d0,0.34d0,0.44d0,0.8d0,16.1d0/)
-    p_g(6,:)=(/7.33d0,0.44d0,0.54d0,0.1d0,15.1d0/)
-
+    p_g(1,:)=(/9.38d0,0.62d0,0.27d0/)
+    p_g(2,:)=(/28.19d0,0.037d0,0.9d0/)
+    p_g(3,:)=(/32.d0,0.54d0,1.0d0-0.54d0/)
+    p_g(4,:)=(/8.33d0,0.64d0,0.54d0/)
+    !p_g(5,:)=(/7.33d0,0.34d0,0.44d0/)
 
         
     !Change parameters to the (-Inf;Inf) real line
     do p_l=1,par+1
         p_g(p_l,1)=log(p_g(p_l,1))
         p_g(p_l,2:3)=log(p_g(p_l,2:3)/(1.0d0-p_g(p_l,2:3)))
-        p_g(p_l,4:5)=log(p_g(p_l,4:5))
+        !p_g(p_l,4)=p_g(p_l,4)
         y(p_l)=log_likelihood(p_g(p_l,:))
+        !print*,'press key to continue'
         !print*,'press key to continue'
         !read*,pause_k 
     end do 
@@ -78,12 +77,12 @@ subroutine estimation(params_MLE,log_likeli)
     print*,'likelihood amoeba',y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
-    p_g(:,4:5)=exp(p_g(:,4:5))
+    !p_g(:,4)=p_g(:,4)
     print*,' parameters amoeba',p_g(1,:)
     !Change parameters to the (-Inf;Inf) real line
     p_g(1,1)=log(p_g(1,1))
     p_g(1,2:3)=log(p_g(1,2:3)/(1.0d0-p_g(1,2:3)))
-    p_g(1,4:5)=log(p_g(1,4:5))
+    !p_g(1,4)=p_g(1,4)
     xi=0.0d0
     do p_l=1,par
         xi(p_l,p_l)=1.0d0
@@ -93,18 +92,17 @@ subroutine estimation(params_MLE,log_likeli)
     log_likeli=y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
-    p_g(:,4:5)=exp(p_g(:,4:5))
+    !p_g(:,4)=p_g(:,4)
     !print*,'likelihood powell',y(1)
     !print*,'parameter powell',p_g(1,:)
     
     
     !Compute CCP to check convergence
     params_MLE=p_g(1,:)
-    rho=params_MLE(5)
     CCP_old=CCP_est
     do v_l=1,villages
         do u_l=1,unobs_types;do a_l=1,types_a
-            call expected_productivity(params_MLE(1:4),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+            call expected_productivity(params_MLE(1:3),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         end do;end do
         do P_l=1,P_max; do a_l=1,types_a; do u_l=1,unobs_types 
             call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
@@ -163,15 +161,14 @@ function log_likelihood(params_MLE)
     
     params(1)=exp(params_MLE(1))
     params(2:3)=1.0d0/(1.0d0 + exp(-params_MLE(2:3))) 
-    params(4:5)=exp(params_MLE(4:5))
-    rho=params(5)
+    !params(4)=params_MLE(4)
 
     print*,' parameters',params
     
     log_likelihood=0.0d0
     
     do a_l=1,types_a; do v_l=1,villages;do u_l=1,unobs_types
-        call expected_productivity(params(1:4),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
+        call expected_productivity(params(1:3),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
     end do; end do;end do
     
 
