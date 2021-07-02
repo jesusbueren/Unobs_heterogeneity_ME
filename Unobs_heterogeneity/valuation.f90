@@ -33,6 +33,7 @@ subroutine valuation(CCP,C,Ef_v,P,V,v_l)
     end do; end do
     U_small=U_small+Ef_v+T_g
     !Tax on having a well
+    U_small(:,1)=U_small(:,1)+v_nod
     U_small(:,2)=U_small(:,2)-tau
     U_small(:,3)=U_small(:,3)-2.0d0*tau
     

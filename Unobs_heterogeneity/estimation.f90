@@ -51,18 +51,18 @@ subroutine estimation(params_MLE,log_likeli)
     !Fixing beliefs, estimate parameter
     !print*,'Initial Conditions'
 
-    p_g(1,:)=(/9.38d0,0.62d0,0.27d0/)
-    p_g(2,:)=(/28.19d0,0.037d0,0.9d0/)
-    p_g(3,:)=(/32.d0,0.54d0,1.0d0-0.54d0/)
-    p_g(4,:)=(/8.33d0,0.64d0,0.54d0/)
-    !p_g(5,:)=(/7.33d0,0.34d0,0.44d0/)
+    p_g(1,:)=(/15.8d0,0.9d0,0.13d0,0.0d0/)
+    p_g(2,:)=(/28.19d0,0.037d0,0.9d0,-0.1d0/)
+    p_g(3,:)=(/32.d0,0.54d0,1.0d0-0.54d0,2.1d0/)
+    p_g(4,:)=(/8.33d0,0.64d0,0.54d0,1.1d0/)
+    p_g(5,:)=(/7.33d0,0.34d0,0.44d0,-0.1d0/)
 
         
     !Change parameters to the (-Inf;Inf) real line
     do p_l=1,par+1
         p_g(p_l,1)=log(p_g(p_l,1))
         p_g(p_l,2:3)=log(p_g(p_l,2:3)/(1.0d0-p_g(p_l,2:3)))
-        !p_g(p_l,4)=p_g(p_l,4)
+        p_g(p_l,4)=p_g(p_l,4)
         y(p_l)=log_likelihood(p_g(p_l,:))
         !print*,'press key to continue'
         !print*,'press key to continue'
@@ -77,12 +77,12 @@ subroutine estimation(params_MLE,log_likeli)
     print*,'likelihood amoeba',y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
-    !p_g(:,4)=p_g(:,4)
+    p_g(:,4)=p_g(:,4)
     print*,' parameters amoeba',p_g(1,:)
     !Change parameters to the (-Inf;Inf) real line
     p_g(1,1)=log(p_g(1,1))
     p_g(1,2:3)=log(p_g(1,2:3)/(1.0d0-p_g(1,2:3)))
-    !p_g(1,4)=p_g(1,4)
+    p_g(1,4)=p_g(1,4)
     xi=0.0d0
     do p_l=1,par
         xi(p_l,p_l)=1.0d0
@@ -92,13 +92,14 @@ subroutine estimation(params_MLE,log_likeli)
     log_likeli=y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
-    !p_g(:,4)=p_g(:,4)
+    p_g(:,4)=p_g(:,4)
     !print*,'likelihood powell',y(1)
     !print*,'parameter powell',p_g(1,:)
     
     
     !Compute CCP to check convergence
     params_MLE=p_g(1,:)
+    v_nod=params_MLE(4)
     CCP_old=CCP_est
     do v_l=1,villages
         do u_l=1,unobs_types;do a_l=1,types_a
@@ -161,8 +162,8 @@ function log_likelihood(params_MLE)
     
     params(1)=exp(params_MLE(1))
     params(2:3)=1.0d0/(1.0d0 + exp(-params_MLE(2:3))) 
-    !params(4)=params_MLE(4)
-
+    params(4)=params_MLE(4)
+    v_nod=params(4)
     print*,' parameters',params
     
     log_likelihood=0.0d0
