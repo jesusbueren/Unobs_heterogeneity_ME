@@ -51,11 +51,11 @@ subroutine estimation(params_MLE,log_likeli)
     !Fixing beliefs, estimate parameter
     !print*,'Initial Conditions'
 
-    p_g(1,:)=(/15.8d0,0.9d0,0.13d0,0.0d0/)
-    p_g(2,:)=(/28.19d0,0.037d0,0.9d0,-0.1d0/)
-    p_g(3,:)=(/32.d0,0.54d0,1.0d0-0.54d0,2.1d0/)
-    p_g(4,:)=(/8.33d0,0.64d0,0.54d0,1.1d0/)
-    p_g(5,:)=(/7.33d0,0.34d0,0.44d0,-0.1d0/)
+    p_g(1,:)=(/46.1d0,0.98d0,0.06d0,2.5d0/)
+    p_g(2,:)=(/47.1d0,0.98d0,0.06d0,2.5d0/)
+    p_g(3,:)=(/46.1d0,0.96d0,0.06d0,2.5d0/)
+    p_g(4,:)=(/46.1d0,0.98d0,0.08d0,2.5d0/)
+    p_g(5,:)=(/46.1d0,0.98d0,0.06d0,1.5d0/)
 
         
     !Change parameters to the (-Inf;Inf) real line
