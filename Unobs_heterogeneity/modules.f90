@@ -17,7 +17,7 @@ module cadastral_maps
     integer,dimension(plots_in_map,P_max,villages)::neighbors !identify neighbors for each plot in the map
     !Zombie pr
     double precision,dimension(villages):: pr_non_zombie=(/0.454545468,0.954918027,0.525423706,0.778947353,0.805970132,0.632911384,0.666666687,0.847826064,0.762162149,0.749077499,0.401544392,0.722857118,0.78772378,0.639024377/)
-    integer,dimension(plots_in_map,villages)::active_plots
+    integer,dimension(plots_in_map,villages)::active_plots=0
     character(len=103)::file_map="C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\cadastral_maps\fortran_files\"
 end
     
@@ -38,7 +38,7 @@ module primitives
     double precision,dimension(2*P_max,villages)::PI_s
     double precision,dimension(2*P_max-1,3,P_max,villages)::PI_s_v
     !c_d: fixed cost of failing to drill;c_s: fixed cost of succeeding to drill; c_e: cost of electricity by well
-    double precision::c_s=72.3d0,beta=0.85d0,c_d=35.2d0,c_e=11.7d0
+    double precision::c_s=72.3d0,beta=0.85d0,c_d=35.2d0,c_e=11.7d0,phi=1.0d0
     !extreme value distribution shocks
     double precision,parameter::gamma=0.577215664901533d0
     double precision::rho=1.0d0,v_nod=0.0d0

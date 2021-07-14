@@ -3,7 +3,7 @@ subroutine load_cadastral_maps()
     implicit none
     character(LEN=1)::s_c1
     character(LEN=2)::s_c2
-    integer::v_l,i,j,ind,a_l,i_l!,x,y
+    integer::v_l,i,j,ind,a_l!,x,y
     double precision::u,u_m
     double precision,dimension(villages,plots_in_map)::areas
     integer,dimension(villages,plots_in_map)::area_type
@@ -11,10 +11,28 @@ subroutine load_cadastral_maps()
     integer,dimension(1)::seed=321
     
     PA_type=-9
+    active_plots=0
     
     OPEN(UNIT=12, FILE=file_map//"area_type.csv")
         read(12,*),areas
     close(12)
+    
+    call random_seed(PUT=seed)
+    !Generate permanent unobserved heterogeneity type
+    !pr_unobs_t=0.0d0
+    !pr_unobs_t(selected_type)=1.0d0
+    do v_l=1,villages;do i=1,plots_v(v_l)
+        call RANDOM_NUMBER(u_m)
+        if (u_m<pr_unobs_t(1)) then
+            unobs_types_i(i,v_l)=1
+        elseif (u_m<sum(pr_unobs_t(1:2))) then
+            unobs_types_i(i,v_l)=2
+        elseif (u_m<sum(pr_unobs_t(1:3))) then
+            unobs_types_i(i,v_l)=3
+        else
+            unobs_types_i(i,v_l)=4
+        end if
+    end do;end do
        
     !Load map (who is connected to who)
     neighbors_map=0
@@ -31,9 +49,15 @@ subroutine load_cadastral_maps()
         
         !Set zombie plots
         do i=1,plots_in_map
-            call RANDOM_NUMBER(u)
-            if (u<pr_non_zombie(v_l)) then
-                active_plots(i,v_l)=1
+            !call RANDOM_NUMBER(u)
+            !if (u<pr_non_zombie(v_l)) then
+            !    active_plots(i,v_l)=1 !active_plots(:,1)
+            !else
+            !    neighbors_map(i,:,v_l)=0
+            !    neighbors_map(:,i,v_l)=0
+            !end if
+            if (unobs_types_i(i,v_l)==3 .and. areas(v_l,i)>=4.0d0) then
+                active_plots(i,v_l)=1 !active_plots(:,1)
             else
                 neighbors_map(i,:,v_l)=0
                 neighbors_map(:,i,v_l)=0
@@ -88,22 +112,7 @@ subroutine load_cadastral_maps()
     !print*,'distribution of area types'
     !print*,dble(PA_stat(1:types_a,2))/dble(plots_v(v_l))
     
-    call random_seed(PUT=seed)
-    !Generate permanent unobserved heterogeneity type
-    !pr_unobs_t=0.0d0
-    !pr_unobs_t(selected_type)=1.0d0
-    do v_l=1,villages;do i_l=1,plots_v(v_l)
-        call RANDOM_NUMBER(u_m)
-        if (u_m<pr_unobs_t(1)) then
-            unobs_types_i(i_l,v_l)=1
-        elseif (u_m<sum(pr_unobs_t(1:2))) then
-            unobs_types_i(i_l,v_l)=2
-        elseif (u_m<sum(pr_unobs_t(1:3))) then
-            unobs_types_i(i_l,v_l)=3
-        else
-            unobs_types_i(i_l,v_l)=4
-        end if
-    end do;end do
+    
     
     
 

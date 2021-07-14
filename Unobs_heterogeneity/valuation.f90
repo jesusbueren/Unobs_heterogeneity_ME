@@ -15,12 +15,12 @@ subroutine valuation(CCP,C,Ef_v,P,V,v_l)
     do ind=1,2*P-1; do n_l=1,3
         if (n_l<3) then
             if (CCP(ind,n_l)==1.0d0)then
-                U_small(ind,n_l)=rho*gamma-c_s*PI_s_v(ind,n_l,P,v_l)-c_d*(1.0d0-PI_s_v(ind,n_l,P,v_l))              
+                U_small(ind,n_l)=rho*gamma-c_s*PI_s_v(ind,n_l,P,v_l)-c_d*(1.0d0-PI_s_v(ind,n_l,P,v_l))    
             elseif (CCP(ind,n_l)==0.0d0)then
                 U_small(ind,n_l)=rho*gamma
             else
                 U_small(ind,n_l)=CCP(ind,n_l)*(rho*gamma-rho*log(CCP(ind,n_l))-c_s*PI_s_v(ind,n_l,P,v_l)-c_d*(1.0d0-PI_s_v(ind,n_l,P,v_l)))+&
-                                (1.0d0-CCP(ind,n_l))*(rho*gamma-rho*log(1.0d0-CCP(ind,n_l)))
+                            (1.0d0-CCP(ind,n_l))*(rho*gamma-rho*log(1.0d0-CCP(ind,n_l)))
             end if
         else
             if (CCP(ind,2)==1.0d0 .or. CCP(ind,2)==0.0d0)then
