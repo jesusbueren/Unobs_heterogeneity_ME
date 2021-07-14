@@ -63,7 +63,7 @@ call estimation(params_MLE,log_likeli)
 print*,'end maximization'
 
 open(unit=12, file=path_results//"bootstrapped_parameters_z_85.txt",status='replace')
-write(12,'(<par>f20.12,f20.12)'),params_mle,log_likeli
+    write(12,'(<par>f20.12,f20.12)'),params_mle,log_likeli
 close(12)
 
 open(unit=12, file=path_results//"bootstrapped_parameters_z_85.txt")
@@ -71,8 +71,8 @@ open(unit=12, file=path_results//"bootstrapped_parameters_z_85.txt")
 close(12)
 
 !call bootstrap_se()
-open(unit=12, file=path_results//"bootstrapped_parameters.txt")
-read(12,*),params_mle
+open(unit=12, file=path_results//"bootstrapped_parameters_z_85.txt")
+    read(12,*),params_mle
 close(12)
 !print*,'estimated parameters',params_MLE
 

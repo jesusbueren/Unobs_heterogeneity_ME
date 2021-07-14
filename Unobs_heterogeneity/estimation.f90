@@ -50,19 +50,21 @@ subroutine estimation(params_MLE,log_likeli)
     call random_seed(PUT=seed_c)
     !Fixing beliefs, estimate parameter
     !print*,'Initial Conditions'
-
-    p_g(1,:)=(/20.9d0,0.99d0,0.05d0/)
-    p_g(2,:)=(/28.19d0,0.9d0,0.1d0/)
-    p_g(3,:)=(/10.d0,0.88d0,0.4d0/)
-    p_g(4,:)=(/8.33d0,0.64d0,0.54d0/)
-    !p_g(5,:)=(/7.33d0,0.34d0,0.44d0/)
-
+    
+    if (it==1) then
+        p_g(1,:)=(/3.03d0,0.10d0,0.51d0,15.04d0/)
+    end if
+    
+    do p_l=2,par+1
+        p_g(p_l,:)=p_g(1,:)
+        p_g(p_l,p_l-1)=p_g(1,p_l-1)+0.1d0
+    end do
         
     !Change parameters to the (-Inf;Inf) real line
     do p_l=1,par+1
         p_g(p_l,1)=log(p_g(p_l,1))
         p_g(p_l,2:3)=log(p_g(p_l,2:3)/(1.0d0-p_g(p_l,2:3)))
-        !p_g(p_l,4)=p_g(p_l,4)
+        p_g(p_l,4)=log(p_g(p_l,4))
         y(p_l)=log_likelihood(p_g(p_l,:))
         !print*,'press key to continue'
         !print*,'press key to continue'
@@ -73,26 +75,26 @@ subroutine estimation(params_MLE,log_likeli)
     !Optimization of parameters given beliefs
     print*,'game against nature'
     ftol=1.0d-6
-    call amoeba(p_g,y,ftol,log_likelihood,iter)
+    !call amoeba(p_g,y,ftol,log_likelihood,iter)
     print*,'likelihood amoeba',y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
-    !p_g(:,4)=p_g(:,4)
+    p_g(:,4)=exp(p_g(:,4))
     print*,' parameters amoeba',p_g(1,:)
     !Change parameters to the (-Inf;Inf) real line
     p_g(1,1)=log(p_g(1,1))
     p_g(1,2:3)=log(p_g(1,2:3)/(1.0d0-p_g(1,2:3)))
-    !p_g(1,4)=p_g(1,4)
+    p_g(1,4)=log(p_g(1,4))
     xi=0.0d0
     do p_l=1,par
         xi(p_l,p_l)=1.0d0
     end do
     ftol=1.0d-4
-    !call powell(p_g(1,:),xi,ftol,iter,y(1))
+    call powell(p_g(1,:),xi,ftol,iter,y(1))
     log_likeli=y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
-    !p_g(:,4)=p_g(:,4)
+    p_g(:,4)=exp(p_g(:,4))
     !print*,'likelihood powell',y(1)
     !print*,'parameter powell',p_g(1,:)
     
@@ -100,6 +102,8 @@ subroutine estimation(params_MLE,log_likeli)
     !Compute CCP to check convergence
     params_MLE=p_g(1,:)
     CCP_old=CCP_est
+    rho=params_MLE(4)
+    
     do v_l=1,villages
         do u_l=1,unobs_types;do a_l=1,types_a
             call expected_productivity(params_MLE(1:3),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
@@ -161,8 +165,9 @@ function log_likelihood(params_MLE)
     
     params(1)=exp(params_MLE(1))
     params(2:3)=1.0d0/(1.0d0 + exp(-params_MLE(2:3))) 
-    !params(4)=params_MLE(4)
-
+    params(4)=exp(params_MLE(4))
+    
+    rho=exp(params_MLE(4))
     print*,' parameters',params
     
     log_likelihood=0.0d0

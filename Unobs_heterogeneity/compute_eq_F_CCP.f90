@@ -19,7 +19,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     
     
     !Set scale parameter Gumbel distribution of shocks
-    !rho=params(4)
+    rho=params(4)
 
     !Compute expected productivity 
     do u_l=1,unobs_types;do a_l=1,types_a
