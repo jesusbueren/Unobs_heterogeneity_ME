@@ -8,12 +8,12 @@ end
 module cadastral_maps
     use dimensions
     implicit none
-    integer,parameter::plots_in_map=1909,villages=14,unobs_types=3
+    integer,parameter::plots_in_map=1909,villages=14,unobs_types=3,re_types=4
     integer,parameter,dimension(villages)::plots_v=(/1794,302,912,517,292,535,939,637,405,837,973,1844,443,1909/) !plots in each village
     double precision,dimension(villages):: mean_area
     integer,dimension(plots_in_map,plots_in_map,villages)::neighbors_map
     integer,dimension(plots_in_map,2,villages)::PA_type !number of neighbors, a type for each plot in the map
-    integer,dimension(plots_in_map,villages)::unobs_types_i
+    integer,dimension(plots_in_map,villages)::unobs_types_i,re_types_i
     integer,dimension(plots_in_map,P_max,villages)::neighbors !identify neighbors for each plot in the map
     !Zombie pr
     double precision,dimension(villages):: pr_non_zombie=(/0.454545468,0.954918027,0.525423706,0.778947353,0.805970132,0.632911384,0.666666687,0.847826064,0.762162149,0.749077499,0.401544392,0.722857118,0.78772378,0.639024377/)
@@ -41,12 +41,14 @@ module primitives
     double precision::c_s=72.3d0,beta=0.95d0,c_d=35.2d0,c_e=11.7d0
     !extreme value distribution shocks
     double precision,parameter::gamma=0.577215664901533d0
-    double precision::rho
+    double precision::rho=1.0d0
     !area of plots
     double precision,dimension(types_a)::area=(/1.0d0,2.0d0,3.0d0,5.1d0/)
     double precision,dimension(types_a-1)::area_lims=(/1.3d0,2.3d0,4.0d0/)
-    !pr of unobserved heterogeneity type
+    !pr of unobserved heterogeneity type flow/failure
     double precision,dimension(unobs_types)::pr_unobs_t=(/0.333d0,0.333d0,0.334d0/)
+    !pr of unobserved heterogeneity type productivity
+    double precision,dimension(re_types)::pr_re_t,re_effect
     !Taxation parameters
     double precision::T_g=0.0d0,tau=0.0d0
     
@@ -63,13 +65,13 @@ use cadastral_maps
     integer,parameter::T_sim=5,plots_i=1052
     ! dec_it: drilling decision
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,villages)::F_est
-    double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP_est
+    double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types,re_types)::CCP_est
     integer::bootstrap=0
     
     !Data
     integer,dimension(plots_i)::V_type,P_type,A_type,impute_i
     double precision,dimension(unobs_types,plots_i)::UHE_type
-    double precision,dimension(unobs_types,plots_i)::UHE_type_model
+    double precision,dimension(unobs_types,re_types,plots_i)::UHE_type_model
     integer,dimension(plots_i)::modal_UHE_type
     integer,dimension(T_sim,plots_i,simulations)::drilling_it
     integer,dimension(T_sim,plots_i)::n_data !number of wells in reference plot
@@ -77,7 +79,7 @@ use cadastral_maps
     integer,dimension(T_sim,plots_i)::modal_N !pr of number of functioning wells in the adjacency
     
     !Unobsverded heterogeneity from beliefs
-    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Pr_u_X
+    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types,re_types)::Pr_u_X
     
 end module    
     

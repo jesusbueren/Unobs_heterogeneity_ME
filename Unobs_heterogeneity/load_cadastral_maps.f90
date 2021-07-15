@@ -4,7 +4,7 @@ subroutine load_cadastral_maps()
     character(LEN=1)::s_c1
     character(LEN=2)::s_c2
     integer::v_l,i,j,ind,a_l,i_l!,x,y
-    double precision::u,u_m
+    double precision::u,u_m,dz
     double precision,dimension(villages,plots_in_map)::areas
     integer,dimension(villages,plots_in_map)::area_type
     integer,dimension(P_max,2)::PA_stat
@@ -89,9 +89,7 @@ subroutine load_cadastral_maps()
     !print*,dble(PA_stat(1:types_a,2))/dble(plots_v(v_l))
     
     call random_seed(PUT=seed)
-    !Generate permanent unobserved heterogeneity type
-    !pr_unobs_t=0.0d0
-    !pr_unobs_t(selected_type)=1.0d0
+    !Generate permanent unobserved heterogeneity type in flow/failure
     do v_l=1,villages;do i_l=1,plots_v(v_l)
         call RANDOM_NUMBER(u_m)
         if (u_m<pr_unobs_t(1)) then
@@ -103,6 +101,26 @@ subroutine load_cadastral_maps()
         else
             unobs_types_i(i_l,v_l)=4
         end if
+    end do;end do
+    
+    !Generate permanent unobserved heterogeneity type in productiviy
+    re_types_i=-9
+    do i_l=1,re_types
+        dz=4.0d0/dble(re_types-1)
+        pr_re_t(i_l)=0.5d0*(1.0d0+erf((-2.0d0+dz*dble(i_l-1)+dz/2.0d0)/sqrt(2.0d0)))
+    end do
+    pr_re_t(re_types)=1.0d0
+    
+    do v_l=1,villages;do i_l=1,plots_v(v_l)
+        call RANDOM_NUMBER(u_m)
+        ind=1
+        do while (re_types_i(i_l,v_l)==-9)
+            if (u_m<pr_re_t(ind)) then
+                re_types_i(i_l,v_l)=ind
+            else
+                ind=ind+1
+            end if
+        end do        
     end do;end do
     
     
