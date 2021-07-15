@@ -36,12 +36,14 @@ subroutine estimation(params_MLE,log_likeli)
     Ef_v=0.0d0
    print*,'Generating beliefs'
     !Generate an initial well endowment: everyone has zero wells
-1   n_initial_all(1:plots_in_map,:)=1    
+1   n_initial_all=1  
+    print*,n_initial_all(1,1)
     call random_seed(GET=seed_c)
     !$OMP PARALLEL default(shared) 
     !$OMP  DO
     do v_l=1,villages
         print*,'village ',v_l,' out of ',villages
+        !print*,n_initial_all(1,1)
         call generate_beliefs(CCP_mid(:,:,:,:,v_l,:,:),V_fct(:,:,:,:,v_l,:,:),Ef_v(:,:,:,:,v_l,:,:),n_initial_all(:,v_l),F_est(:,:,:,:,:,v_l),v_l,iterations_all(:,:,:,:,v_l),mean_N(v_l),mean_NPV(v_l),mean_budget(v_l),Pr_u_X(:,:,:,:,v_l,:,:))
     end do
     !$OMP END DO  
@@ -52,19 +54,19 @@ subroutine estimation(params_MLE,log_likeli)
     !print*,'Initial Conditions'
     
     if (it==1) then
-        p_g(1,:)=(/27.03d0,0.90d0,0.51d0,1.04d0/)
+        p_g(1,:)=(/8.8d0,0.33d0,0.67d0,0.04d0,12.0d0/)
     end if
     
     do p_l=2,par+1
         p_g(p_l,:)=p_g(1,:)
-        p_g(p_l,p_l-1)=p_g(1,p_l-1)+0.1d0
+        p_g(p_l,p_l-1)=p_g(1,p_l-1)*0.8d0
     end do
         
     !Change parameters to the (-Inf;Inf) real line
     do p_l=1,par+1
         p_g(p_l,1)=log(p_g(p_l,1))
         p_g(p_l,2:3)=log(p_g(p_l,2:3)/(1.0d0-p_g(p_l,2:3)))
-        p_g(p_l,4)=log(p_g(p_l,4))
+        p_g(p_l,4:5)=log(p_g(p_l,4:5))
         y(p_l)=log_likelihood(p_g(p_l,:))
         !print*,'press key to continue'
         !print*,'press key to continue'
@@ -75,16 +77,16 @@ subroutine estimation(params_MLE,log_likeli)
     !Optimization of parameters given beliefs
     print*,'game against nature'
     ftol=1.0d-6
-    !call amoeba(p_g,y,ftol,log_likelihood,iter)
+    call amoeba(p_g,y,ftol,log_likelihood,iter)
     print*,'likelihood amoeba',y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
-    p_g(:,4)=exp(p_g(:,4))
+    p_g(:,4:5)=exp(p_g(:,4:5))
     print*,' parameters amoeba',p_g(1,:)
     !Change parameters to the (-Inf;Inf) real line
     p_g(1,1)=log(p_g(1,1))
     p_g(1,2:3)=log(p_g(1,2:3)/(1.0d0-p_g(1,2:3)))
-    p_g(1,4)=log(p_g(1,4))
+    p_g(1,4:5)=log(p_g(1,4:5))
     xi=0.0d0
     do p_l=1,par
         xi(p_l,p_l)=1.0d0
@@ -94,7 +96,7 @@ subroutine estimation(params_MLE,log_likeli)
     log_likeli=y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
-    p_g(:,4)=exp(p_g(:,4))
+    p_g(:,4:5)=exp(p_g(:,4:5))
     !print*,'likelihood powell',y(1)
     !print*,'parameter powell',p_g(1,:)
     
@@ -102,7 +104,7 @@ subroutine estimation(params_MLE,log_likeli)
     !Compute CCP to check convergence
     params_MLE=p_g(1,:)
     CCP_old=CCP_est
-    !rho=params_MLE(4)
+    rho=params_MLE(5)
     !Grid of the random effect
     dz=4.0d0/dble(re_types-1)
     do re_l=1,re_types
@@ -170,22 +172,22 @@ function log_likelihood(params_MLE)
     
     params(1)=exp(params_MLE(1))
     params(2:3)=1.0d0/(1.0d0 + exp(-params_MLE(2:3))) 
-    params(4)=exp(params_MLE(4))
+    params(4:5)=exp(params_MLE(4:5))
     
-    !rho=exp(params_MLE(4))
+    rho=exp(params_MLE(5))
     print*,' parameters',params
     
     log_likelihood=0.0d0
     
     dz=4.0d0/dble(re_types-1)
     do re_l=1,re_types
-        re_effect(re_l)=(-2.0d0+dz*dble(i_l-1))*params_MLE(4)
+        re_effect(re_l)=(-2.0d0+dz*dble(re_l-1))*params(4)
     end do   
     
     do a_l=1,types_a; do v_l=1,villages;do u_l=1,unobs_types;do re_l=1,re_types
         call expected_productivity(params(1:3),area(a_l),Ef_v(:,:,:,a_l,u_l,re_l),v_l,u_l,re_l)
     end do; end do;end do;end do
-    
+    !Ef_v(1,2,5,1,2,:)
 
     !$OMP PARALLEL default(shared) 
     !$OMP  DO
@@ -199,7 +201,6 @@ function log_likelihood(params_MLE)
         !                    ,P_l &
         !                    ,CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l &
         !                    ,V_fct(1:2*P_l-1,:,P_l,a_l,v_l,u_l)) 
-        CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l,:)
     end do; end do;end do; end do;end do
     !$OMP END DO  
     !$OMP END PARALLEL
@@ -259,6 +260,14 @@ function log_likelihood(params_MLE)
                     if (isnan(sum(likelihood_i))) then
                         print*,'pb in likelihood',i_l,ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),2,1),drilling_it(t_l,i_l,s_l)
                         read*,end_k
+                    end if
+                    if (drilling_it(t_l,i_l,s_l)==1 .or. drilling_it(t_l,i_l,s_l)==0) then
+                        if (UHE_type(1,i_l)==-9.0d0) then
+                            print*,n_data(t_l,i_l)
+                        end if
+                        av_CCP_it(t_l,i_l)=sum(sum(av_CCP_uhe*UHE_type_model(:,:,i_l),2),1)
+                    else
+                        av_CCP_it(t_l,i_l)=-9.0d0
                     end if
                 end do;
                 if (UHE_type_model(1,1,i_l)==-9.0d0) then

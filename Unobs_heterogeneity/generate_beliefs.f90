@@ -4,13 +4,13 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types,re_types),intent(in)::CCP
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,re_types),intent(in)::V_fct
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,re_types),intent(in)::Ef_v 
-    integer,dimension(plots_in_map,1),intent(inout)::n_initial
+    integer,dimension(plots_in_map),intent(inout)::n_initial
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max),intent(out)::F_new
     integer,intent(in)::v_l
     integer(8),dimension(2*P_max-1,3,3,P_max),intent(out)::iterations
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,re_types),intent(out)::Pr_u_x !Pr_u_x(1,1,3,4,:) counter_u(1,1,3,4,:)
     integer(8),dimension(2*P_max-1,3,P_max,types_a,unobs_types,re_types)::counter_u
-    integer,parameter::T=10000!100000
+    integer,parameter::T=100000
     integer,dimension(plots_in_map,3)::state,state_old
     integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min,a_l,u_l,re_l
     double precision::u_d,u_s,u_f,u_m,it2
@@ -19,7 +19,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     double precision,intent(out)::mean_N,social_output,private_output
     integer(8),dimension(2*P_max-1,2*P_max-1,3,3,P_max)::beliefs_c
     integer,dimension(1)::seed=321,seed2
-    integer,parameter::burn_t=1000!10000
+    integer,parameter::burn_t=10000
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max)::F
     double precision,dimension(P_max)::dist
     character::continue_k
@@ -30,6 +30,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     call random_seed(PUT=seed)
     
 
+
     beliefs_c=0
     iterations=0
     F_new=-9.0d0
@@ -39,7 +40,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     !Store the state for each plot and simulate decision to drill
     
     do t_l=1,T-1;   
-        !print*,t_l
+        
         !simulate monsoon next period
         call RANDOM_NUMBER(u_m)
         if (u_m<PI_m(1,v_l))then
@@ -48,6 +49,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
             m_l=2
         end if
         beliefs_c=0
+
         if (t_l>T-(its+1)) then
             NPV(t_l-(T-(its+1)))=0.0d0
             NPV_PV(t_l-(T-(its+1)))=0.0d0
@@ -55,7 +57,8 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
             it2=0.0d0
         end if
         
-        state(:,1)=n_initial(:,1)
+        state(:,1)=n_initial
+
         !print*,'t_l',t_l,'av number of wells per plot',real(sum(n_initial(1:plots_v(v_l),1))-plots_v(v_l))/real(plots_v(v_l))
         do i_l=1,plots_v(v_l)
             if (active_plots(i_l,v_l)==1) then
@@ -115,12 +118,12 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
                     if (u_d<CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l),re_types_i(i_l,v_l))) then !decides to drill
                         call RANDOM_NUMBER(u_s)
                         if (u_s<PI_s_v(ind,n_l,P,v_l)) then !successful attempt
-                            n_initial(i_l,1)=n_l+1
+                            n_initial(i_l)=n_l+1
                         else !unsuccessful attempt
-                            n_initial(i_l,1)=n_l
+                            n_initial(i_l)=n_l
                         end if
                     else !decides not to drill
-                        n_initial(i_l,1)=n_l
+                        n_initial(i_l)=n_l
                     end if
                 elseif (n_l==2) then !one well
                     call RANDOM_NUMBER(u_d)
@@ -129,34 +132,34 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
                         if (u_s<PI_s_v(ind,n_l,P,v_l)) then !successful attempt
                             call RANDOM_NUMBER(u_f)
                             if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l))) then !failure of the previous well
-                                n_initial(i_l,1)=n_l
+                                n_initial(i_l)=n_l
                             else
-                                n_initial(i_l,1)=n_l+1
+                                n_initial(i_l)=n_l+1
                             end if
                         else !unsuccessful attempt
                             call RANDOM_NUMBER(u_f)
                             if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l))) then !failure of the previous well PI_fm(:)
-                                n_initial(i_l,1)=n_l-1
+                                n_initial(i_l)=n_l-1
                             else
-                                n_initial(i_l,1)=n_l
+                                n_initial(i_l)=n_l
                             end if
                         end if
                     else !decides not to drill
                         call RANDOM_NUMBER(u_f)
                         if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l))) then !failure of the previous well
-                            n_initial(i_l,1)=n_l-1
+                            n_initial(i_l)=n_l-1
                         else
-                            n_initial(i_l,1)=n_l
+                            n_initial(i_l)=n_l
                         end if 
                     end if 
                 elseif(n_l==3) then !two wells
                     call RANDOM_NUMBER(u_f)
                     if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l))**2) then !failure of the two wells
-                        n_initial(i_l,1)=n_l-2
+                        n_initial(i_l)=n_l-2
                     elseif (u_f>(1.0d0-PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l)))**2) then !failure of none
-                        n_initial(i_l,1)=n_l
+                        n_initial(i_l)=n_l
                     else !failure of one
-                        n_initial(i_l,1)=n_l-1
+                        n_initial(i_l)=n_l-1
                     end if 
                 else
                     print*,'error in gen beliefs 2'
@@ -189,7 +192,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
                     end if
             end do;end do;end do;end do
             if (t_l>T-(its+1)) then
-                total_N(t_l-(T-(its+1)))=sum(n_initial(1:plots_v(v_l),1))-plots_v(v_l)
+                total_N(t_l-(T-(its+1)))=sum(n_initial(1:plots_v(v_l)))-plots_v(v_l)
             end if
             it=0       
         end if
