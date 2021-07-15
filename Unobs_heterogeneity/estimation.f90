@@ -162,7 +162,7 @@ function log_likelihood(params_MLE)
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,re_types)::Ef_v !Ef_v: expected productivity
     double precision,dimension(unobs_types,re_types)::likelihood_i,likelihood_it
     character::end_k
-    double precision,dimension(unobs_types)::av_CCP_uhe
+    double precision,dimension(unobs_types,re_types)::av_CCP_uhe
     double precision,dimension(T_sim,plots_i)::av_CCP_it
     double precision,dimension(plots_i)::likelihood_aux
     character::pause_k
@@ -247,8 +247,10 @@ function log_likelihood(params_MLE)
                         end if
                         if (drilling_it(t_l,i_l,s_l)==1) then
                             likelihood_it=likelihood_it+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:,:)*Pr_N_data(j_l,t_l,i_l)
+                            av_CCP_uhe=av_CCP_uhe+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:,:)*Pr_N_data(j_l,t_l,i_l)
                         elseif (drilling_it(t_l,i_l,s_l)==0) then
                             likelihood_it=likelihood_it+(1.0d0-CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:,:))*Pr_N_data(j_l,t_l,i_l)
+                            av_CCP_uhe=av_CCP_uhe+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:,:)*Pr_N_data(j_l,t_l,i_l)
                         else
                             likelihood_it=likelihood_it+Pr_N_data(j_l,t_l,i_l) !so that if drilling_it is missing likelihood_it is one
                         end if
