@@ -30,15 +30,15 @@ subroutine expected_productivity(params,a,Ef_v,v_l,u_l)
                 Ef(p_l,m_l,2)=Ef(p_l,m_l,2)+(theta_p*(q(k_l,1)**beta_p*a_chosen**gamma_p)-cost_p*a_chosen)*PI_k(p_l,k_l,m_l,u_l)
             end do;end do
             do p_l=2,2*P;do k_l=1,K;do k_l2=1,K
-                !Ef(2:2*P,m_l,3)=Ef(2:2*P,m_l,3)+theta_p*(q(k_l,1)**(beta_p/(1.0d0-gamma_p))+q(k_l2,1)**(beta_p/(1.0d0-gamma_p)))**(1.0d0-gamma_p)*a**gamma_p &
-                !    *PI_k(2:2*P,k_l,m_l,u_l)*PI_k(2:2*P,k_l2,m_l,u_l)
-                if (theta_p*gamma_p*((q(k_l,1)+q(k_l2,1))**beta_p*a**(gamma_p-1.0d0))>cost_p) then
-                    a_chosen=a
-                else
-                    a_chosen=(cost_p/theta_p/gamma_p*(q(k_l,1)+q(k_l2,1))**beta_p)**(1.0d0/(1.0d0-gamma_p))
-                end if
-                Ef(p_l,m_l,3)=Ef(p_l,m_l,3)+(theta_p*(q(k_l,1)+q(k_l2,1))**(beta_p)*a_chosen**gamma_p-cost_p*a_chosen) &
-                    *PI_k(p_l,k_l,m_l,u_l)*PI_k(p_l,k_l2,m_l,u_l)
+                Ef(2:2*P,m_l,3)=Ef(2:2*P,m_l,3)+theta_p*(q(k_l,1)**(beta_p/(1.0d0-gamma_p))+q(k_l2,1)**(beta_p/(1.0d0-gamma_p)))**(1.0d0-gamma_p)*a**gamma_p &
+                    *PI_k(2:2*P,k_l,m_l,u_l)*PI_k(2:2*P,k_l2,m_l,u_l)
+                !if (theta_p*gamma_p*((q(k_l,1)+q(k_l2,1))**beta_p*a**(gamma_p-1.0d0))>cost_p) then
+                !    a_chosen=a
+                !else
+                !    a_chosen=(cost_p/theta_p/gamma_p*(q(k_l,1)+q(k_l2,1))**beta_p)**(1.0d0/(1.0d0-gamma_p))
+                !end if
+                !Ef(p_l,m_l,3)=Ef(p_l,m_l,3)+(theta_p*(q(k_l,1)+q(k_l2,1))**(beta_p)*a_chosen**gamma_p-cost_p*a_chosen) &
+                !    *PI_k(p_l,k_l,m_l,u_l)*PI_k(p_l,k_l2,m_l,u_l)
             end do; end do;end do
         end do 
     
