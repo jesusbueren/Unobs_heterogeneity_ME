@@ -57,7 +57,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     do p_l=2,par+1
         p_g(p_l,:)=p_g(1,:)
-        p_g(p_l,p_l-1)=p_g(1,p_l-1)+0.1d0
+        p_g(p_l,p_l-1)=p_g(1,p_l-1)*0.8d0
     end do
         
     !Change parameters to the (-Inf;Inf) real line
@@ -75,7 +75,7 @@ subroutine estimation(params_MLE,log_likeli)
     !Optimization of parameters given beliefs
     print*,'game against nature'
     ftol=1.0d-6
-    !call amoeba(p_g,y,ftol,log_likelihood,iter)
+    call amoeba(p_g,y,ftol,log_likelihood,iter)
     print*,'likelihood amoeba',y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
@@ -90,7 +90,7 @@ subroutine estimation(params_MLE,log_likeli)
         xi(p_l,p_l)=1.0d0
     end do
     ftol=1.0d-4
-    call powell(p_g(1,:),xi,ftol,iter,y(1))
+    !call powell(p_g(1,:),xi,ftol,iter,y(1))
     log_likeli=y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
