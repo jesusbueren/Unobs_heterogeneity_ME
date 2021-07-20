@@ -52,7 +52,7 @@ subroutine estimation(params_MLE,log_likeli)
     !print*,'Initial Conditions'
     
     if (it==1) then
-        p_g(1,:)=(/3.03d0,0.10d0,0.51d0,15.04d0/)
+        p_g(1,:)=(/6.11d0,0.07d0,1.0d0-0.07d0,14.52d0/) !(/3.03d0,0.10d0,0.51d0,15.04d0/)
     end if
     
     do p_l=2,par+1
