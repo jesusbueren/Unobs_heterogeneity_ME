@@ -132,7 +132,7 @@ subroutine compute_NPV_SP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,mean_NPV,m
     character::pause_k
     
     !Set scale parameter Gumbel distribution of shocks
-    !rho=params(4)
+    rho=params(4)
 
     !Compute expected productivity 
     do u_l=1,unobs_types;do a_l=1,types_a

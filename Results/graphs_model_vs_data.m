@@ -67,8 +67,8 @@ for i=[2 4]
         xticks([1 2 3 4 ])
         xticklabels({'P=2','P=3','P=4','P=5'})
     end
-    yticks([0:0.03:0.15])
-    ylim([0 .15])
+%     yticks([0:0.03:0.15])
+%     ylim([0 .15])
     hold on
     hB=bar(data_gr)
     ngroups = size(data_gr, 1);
@@ -111,8 +111,8 @@ i=3
                 title("$a>4.0$",'Interpreter','latex')
             end
             data_gr=[data_own_n(j,:); modl_own_n(j,:)]'
-            yticks([0:0.03:0.15])
-            ylim([0 .15])
+%             yticks([0:0.03:0.15])
+%             ylim([0 .15])
             set(gca,'TickLabelInterpreter','latex')
         xticks([1 2])
         xticklabels({'$n=0$','$n=1$'})
@@ -153,8 +153,8 @@ i= 5
             title("Type III",'Interpreter','latex')
         end
             data_gr=[data_uhe(j,:); modl_uhe(j,:)]'
-            yticks([0:0.03:0.15])
-            ylim([0 .15])
+%             yticks([0:0.03:0.15])
+%             ylim([0 .15])
              set(gca,'TickLabelInterpreter','latex')
 
         xticks([1 2])
@@ -190,7 +190,8 @@ close all
 clear all
 cd("C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\Results")
 
-fileID = fopen('counterfactuals.txt','r');
+fileID = fopen('counterfactuals_95.txt','r');
+% fileID = fopen('counterfactuals_p.txt','r');
 counterfactuals = fscanf(fileID,'%f')
 fclose(fileID);
 
@@ -200,9 +201,11 @@ villages=floor(size(counterfactuals,1)/variables/nkk) %14
 
 
 counterfactuals=reshape(counterfactuals(1:variables*nkk*villages),variables,nkk,villages)
-
+% subplot(1,2,1)
 plot(max(counterfactuals(4,:,:),[],3),'linewidth',2)
 hold on
+% I=legend('Social','Private')
+% subplot(1,2,2)
 plot(max(counterfactuals(5,:,:),[],3),'--','linewidth',2)
 I=legend('Social','Private')
 set(gcf,'color','w') 

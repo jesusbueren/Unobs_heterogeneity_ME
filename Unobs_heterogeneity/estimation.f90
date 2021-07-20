@@ -37,6 +37,7 @@ subroutine estimation(params_MLE,log_likeli)
    print*,'Generating beliefs'
     !Generate an initial well endowment: everyone has zero wells
 1   n_initial_all(1:plots_in_map,:)=1    
+    print*,n_initial_all(1,1)
     call random_seed(GET=seed_c)
     !$OMP PARALLEL default(shared) 
     !$OMP  DO
@@ -52,12 +53,12 @@ subroutine estimation(params_MLE,log_likeli)
     !print*,'Initial Conditions'
     
     if (it==1) then
-        p_g(1,:)=(/3.03d0,0.10d0,0.51d0,15.04d0/)
+        p_g(1,:)=(/6.11d0,0.07d0,1.0d0-0.07d0,14.52d0/)!(/5.23d0,0.067d0,0.6d0,15.4d0/)
     end if
     
     do p_l=2,par+1
         p_g(p_l,:)=p_g(1,:)
-        p_g(p_l,p_l-1)=p_g(1,p_l-1)+0.1d0
+        p_g(p_l,p_l-1)=p_g(1,p_l-1)*0.8d0
     end do
         
     !Change parameters to the (-Inf;Inf) real line
@@ -67,15 +68,15 @@ subroutine estimation(params_MLE,log_likeli)
         p_g(p_l,4)=log(p_g(p_l,4))
         y(p_l)=log_likelihood(p_g(p_l,:))
         !print*,'press key to continue'
-        !print*,'press key to continue'
-        !read*,pause_k 
+        print*,'press key to continue'
+        read*,pause_k 
     end do 
     !print*,'likelihood_ini',y(1)
     
     !Optimization of parameters given beliefs
     print*,'game against nature'
     ftol=1.0d-6
-    !call amoeba(p_g,y,ftol,log_likelihood,iter)
+    call amoeba(p_g,y,ftol,log_likelihood,iter)
     print*,'likelihood amoeba',y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
@@ -90,7 +91,7 @@ subroutine estimation(params_MLE,log_likeli)
         xi(p_l,p_l)=1.0d0
     end do
     ftol=1.0d-4
-    call powell(p_g(1,:),xi,ftol,iter,y(1))
+    !call powell(p_g(1,:),xi,ftol,iter,y(1))
     log_likeli=y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
@@ -176,10 +177,9 @@ function log_likelihood(params_MLE)
         call expected_productivity(params(1:3),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
     end do; end do;end do
     
-
     !$OMP PARALLEL default(shared) 
     !$OMP  DO
-    do P_l=1,P_max; do a_l=1,types_a ; do u_l=1,unobs_types;do v_l=1,villages
+    do a_l=types_a,1,-1 ; do u_l=1,unobs_types;do v_l=1,villages;do P_l=1,P_max
         call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
                         ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
                         ,P_l &

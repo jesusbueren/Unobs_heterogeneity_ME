@@ -62,7 +62,7 @@ subroutine solve_path(params,T_path,Sims,n_ini,F_in,v_l,V_in,mean_N,social_outpu
     
     print*,'got into solve path'
     !Set scale parameter Gumbel distribution of shocks
-    !rho=params(4)
+    rho=params(4)
 
     !Compute expected productivity 
     do u_l=1,unobs_types;do a_l=1,types_a

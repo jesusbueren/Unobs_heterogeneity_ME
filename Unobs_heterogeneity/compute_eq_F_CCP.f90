@@ -84,10 +84,11 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     
     !print*,'press any key to continue'
     !read*,pause_k
-    if (dist>0.0005d0) then !1.0d-4 
+    if (dist>0.0001d0) then !1.0d-4 
         go to 1 
     end if
     
     call generate_beliefs(CCP_mid,V_fct,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,social_output,private_output,Pr_u_X)
+
     print*,'dist CCP',dist,'social_output',social_output
 end subroutine

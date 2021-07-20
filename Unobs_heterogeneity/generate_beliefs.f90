@@ -104,9 +104,19 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
                                              CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))*(PI_s_v(ind,n_l,P,v_l)*c_s+(1.0d0-PI_s_v(ind,n_l,P,v_l))*c_d))
                         NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))- &
                                              CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))*(PI_s_v(ind,n_l,P,v_l)*c_s+(1.0d0-PI_s_v(ind,n_l,P,v_l))*c_d)-c_e*dble(n_l-1))
+                        !NPV_PV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV_PV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))+ &
+                        !                     CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))*(rho*gamma-rho*log(CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l)))-c_s*PI_s_v(ind,n_l,P,v_l)-c_d*(1.0d0-PI_s_v(ind,n_l,P,v_l)))+&
+                        !                    (1.0d0-CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l)))*(rho*gamma-rho*log(1.0d0-CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l)))))
+                        !NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))+ &
+                        !                     CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))*(rho*gamma-rho*log(CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l)))-c_s*PI_s_v(ind,n_l,P,v_l)-c_d*(1.0d0-PI_s_v(ind,n_l,P,v_l)))+&
+                        !                    (1.0d0-CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l)))*(rho*gamma-rho*log(1.0d0-CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))))-c_e*dble(n_l-1))
                     else
                         NPV_PV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV_PV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l)))
                         NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))-c_e*dble(n_l-1))
+                        !NPV_PV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV_PV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))+CCP(ind,2,P,A,unobs_types_i(i_l,v_l))*(rho*gamma-rho*log(CCP(ind,2,P,A,unobs_types_i(i_l,v_l))))+&
+                        !            (1.0d0-CCP(ind,2,P,A,unobs_types_i(i_l,v_l)))*(rho*gamma-rho*log(1.0d0-CCP(ind,2,P,A,unobs_types_i(i_l,v_l)))))
+                        !NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))+CCP(ind,2,P,A,unobs_types_i(i_l,v_l))*(rho*gamma-rho*log(CCP(ind,2,P,A,unobs_types_i(i_l,v_l))))+&
+                        !            (1.0d0-CCP(ind,2,P,A,unobs_types_i(i_l,v_l)))*(rho*gamma-rho*log(1.0d0-CCP(ind,2,P,A,unobs_types_i(i_l,v_l))))-c_e*dble(n_l-1))
                     end if
                 end if
                 !Well drilling decision and failures/successes
@@ -224,7 +234,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     private_output=sum(NPV_PV)/dble(its)/mean_area(v_l)
     mean_N=sum(total_N)/(its)/dble(plots_v(v_l))
     
-    print*,'av drilling',sum(CCP_av)/dble(its)
+    print*,'village',v_l,'av drilling',sum(CCP_av)/dble(its)
     
 
     do ind=1,2*P_max-1; do n_l=1,3; do P_l=1,P_max; do a_l=1,types_a; do u_l=1,unobs_types

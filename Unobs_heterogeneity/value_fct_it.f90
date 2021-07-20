@@ -84,7 +84,7 @@ subroutine one_step_value_fct_it(Ef_v,F,P,CCP,v_l,u_l,V_old,V_new)
                 CCP(1:2*P-1,2)=1.0d0/(1.0d0+exp(v_10(1:2*P-1)/rho-v_1I(1:2*P-1)/rho))
                 
                 V_new(1:2*P-1,3)=T_g+Ef_v(1:2*P-1,3)-2.0d0*tau &
-                                +CCP(1:2*P-1,2)*(rho*gamma-rho*log(CCP(1:2*P-1,2)))+(1.0d0-CCP(1:2*P-1,2))*(rho*gamma-rho*log(1.0d0-CCP(1:2*P-1,2))) &
+                                + CCP(1:2*P-1,2)*(rho*gamma-rho*log(CCP(1:2*P-1,2)))+(1.0d0-CCP(1:2*P-1,2))*(rho*gamma-rho*log(1.0d0-CCP(1:2*P-1,2))) &
                                 + beta*(1.0d0-PI_f_v(1:2*P-1,3,P,v_l,u_l))**2.0d0*matmul(F(1:2*P-1,1:2*P-1,3,3),V_old(1:2*P-1,3)) & !none fails
                                 + 2.0d0*beta*(1.0d0-PI_f_v(1:2*P-1,3,P,v_l,u_l))*PI_f_v(1:2*P-1,3,P,v_l,u_l)*matmul(F(1:2*P-1,1:2*P-1,3,2),V_old(1:2*P-1,2)) & !one fails
                                 + beta*PI_f_v(1:2*P-1,3,P,v_l,u_l)**2.0d0*matmul(F(1:2*P-1,1:2*P-1,3,1),V_old(1:2*P-1,1))  !both fail

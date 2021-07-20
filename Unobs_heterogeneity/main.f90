@@ -62,21 +62,21 @@ end do
 call estimation(params_MLE,log_likeli)
 print*,'end maximization'
 
-open(unit=12, file=path_results//"bootstrapped_parameters_z_85.txt",status='replace')
+open(unit=12, file=path_results//"bootstrapped_parameters_85_nem.txt",status='replace')
     write(12,'(<par>f20.12,f20.12)'),params_mle,log_likeli
 close(12)
 
-open(unit=12, file=path_results//"bootstrapped_parameters_z_85.txt")
+open(unit=12, file=path_results//"bootstrapped_parameters_85_nem.txt")
     read(12,'(<par>f20.12)'),params_mle
 close(12)
 
 !call bootstrap_se()
-open(unit=12, file=path_results//"bootstrapped_parameters_z_85.txt")
+open(unit=12, file=path_results//"bootstrapped_parameters_85_nem.txt")
     read(12,*),params_mle
 close(12)
-!print*,'estimated parameters',params_MLE
+print*,'estimated parameters',params_MLE
 
-!params_MLE=(/15.8d0,0.9d0,0.13d0/)
+params_MLE=(/6.11d0,0.07d0,1.0d0-0.07d0,14.52d0/)
 call counterfactual_2(params_MLE)
 !call counterfactual_1(params_MLE)
 

@@ -44,11 +44,11 @@ subroutine counterfactual_2(params_MLE)
 !        end if
         call compute_eq_F_CCP(params_MLE,F_true(:,:,:,:,:,v_l),CCP_true(:,:,:,:,v_l,:),V_fct,n_dist(:,v_l),v_l,mean_N(v_l),social_output(v_l),private_output(v_l),Pr_u_X(:,:,:,:,v_l,:))
         if (p_l==1 .and. v_l==1) then
-            OPEN(UNIT=12, FILE=path_results//"counterfactuals_noimp.txt")
+            OPEN(UNIT=12, FILE=path_results//"counterfactuals_95.txt")
             write(12,'(F10.3,I4,F10.3,F10.3,F10.3)'),tau,v_l,mean_N(v_l),social_output(v_l),private_output(v_l)
             close(12)
         else
-            OPEN(UNIT=12, FILE=path_results//"counterfactuals_noimp.txt",access='append')
+            OPEN(UNIT=12, FILE=path_results//"counterfactuals_95.txt",access='append')
             write(12,'(F10.3,I4,F10.3,F10.3,F10.3)'),tau,v_l,mean_N(v_l),social_output(v_l),private_output(v_l)
             close(12)
         end if        
