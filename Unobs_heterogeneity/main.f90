@@ -63,9 +63,9 @@ print*,'end maximization'
 !write(12,'(f20.12,f20.12,f20.12,f20.12)'),params_mle(1),params_mle(2),params_mle(3),log_likeli
 !close(12)
 !call bootstrap_se()
-open(unit=12, file=path_results//"bootstrapped_parameters.txt")
-read(12,*),params_mle
-close(12)
+!open(unit=12, file=path_results//"bootstrapped_parameters.txt")
+!read(12,*),params_mle
+!close(12)
 !print*,'estimated parameters',params_MLE
 !
 !call counterfactual_2(params_MLE)
