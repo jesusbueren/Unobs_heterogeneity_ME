@@ -28,14 +28,12 @@ subroutine input_primitives()
         PI_m(1,v_l)=1.0d0-PI_m(2,v_l)
         
         !Probability of failure (first position indicates one well, last position indicates all plots with 2 wells)
-        PI_fm(1:2*P_max,1,u_l)=flow_fail_prob_csv(10,2,1,1:2*P_max) !flow_fail_prob_csv(10,u_l,1,1:2*P_max)
-        PI_fm(1:2*P_max,2,u_l)=flow_fail_prob_csv(10,2,1,1:2*P_max) !flow_fail_prob_csv(10,u_l,2,1:2*P_max)
+        PI_fm(1:2*P_max,1,u_l)=flow_fail_prob_csv(10,u_l,1,1:2*P_max)
+        PI_fm(1:2*P_max,2,u_l)=flow_fail_prob_csv(10,u_l,2,1:2*P_max)
 
         PI_f=PI_fm(:,1,u_l)*PI_m(1,v_l)+PI_fm(:,2,u_l)*PI_m(2,v_l)   
         
-        print*,'I destroy heterogeneity in failure with wells & unobs types'
-        PI_f=PI_f(1) 
-        
+
         !PI_s: Pr. of success doesn't vary with number of wells around
         PI_s(:,v_l)=PI_s(1,v_l)       
     
