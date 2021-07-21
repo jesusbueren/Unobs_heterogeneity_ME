@@ -53,7 +53,7 @@ call load_estimation_data()
     
 call compute_moments(dble(drilling_it(:,:,1)),"data")
 
-print*,'Start estimation'
+!print*,'Start estimation'
 !Generate a random CCP for computing initial beliefs
 CCP_est=sqrt(-1.0d0)
 do P_l=1,P_max
