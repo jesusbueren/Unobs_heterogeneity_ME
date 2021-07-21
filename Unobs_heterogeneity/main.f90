@@ -71,7 +71,7 @@ close(12)
 !call counterfactual_2(params_MLE)
 !call counterfactual_1(params_MLE)
 
-call transitional_dynamics(params_MLE)
+!call transitional_dynamics(params_MLE)
 
 
 read*,end_key
