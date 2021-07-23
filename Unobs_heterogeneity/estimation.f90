@@ -52,7 +52,7 @@ subroutine estimation(params_MLE,log_likeli)
     !print*,'Initial Conditions'
     
     if (it==1) then
-        p_g(1,:)=(/6.11d0,0.07d0,1.0d0-0.07d0,14.52d0/) !(/3.03d0,0.10d0,0.51d0,15.04d0/)
+        p_g(1,:)=(/6.11d0,0.5d0,0.5d0,5.0d0/) !(/3.03d0,0.10d0,0.51d0,15.04d0/)
     end if
     
     do p_l=2,par+1
@@ -152,7 +152,7 @@ function log_likelihood(params_MLE)
     double precision,dimension(par)::params
     double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::V_fct
-    integer::i_l,t_l,type_l,a_l,p_l,v_l,ind,u_l,j_l,s_l,t
+    integer::i_l,t_l,type_l,a_l,p_l,v_l,ind,u_l,j_l,s_l,t,missing_x1
     double precision::log_likelihood
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types)::Ef_v !Ef_v: expected productivity
     double precision,dimension(unobs_types)::likelihood_i,likelihood_it
@@ -171,6 +171,7 @@ function log_likelihood(params_MLE)
     print*,' parameters',params
     
     log_likelihood=0.0d0
+    missing_x1=0
     
     do a_l=1,types_a; do v_l=1,villages;do u_l=1,unobs_types
         call expected_productivity(params(1:3),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
@@ -261,7 +262,11 @@ function log_likelihood(params_MLE)
                 if (UHE_type_model(1,i_l)==-9.0d0) then
                     UHE_type_model(:,i_l)=1.0d0/dble(unobs_types)
                 end if
-                log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l)))
+                if (sum(UHE_type_model(:,i_l))/=0.0d0)then
+                    log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l)))
+                else
+                    missing_x1=missing_x1+1
+                end if
                 likelihood_aux(i_l)=log(sum(likelihood_i*UHE_type_model(:,i_l)))
                 !if (log(sum(likelihood_i*UHE_type_model(:,i_l)))==-1.0/0.0) then
                 !    print*,CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)
@@ -280,6 +285,7 @@ function log_likelihood(params_MLE)
     end if
     
     print*,'likelihood',log_likelihood
+    print*,'missing_x1',missing_x1
     !print*,'paused'
     !read*,pause_k
 end function

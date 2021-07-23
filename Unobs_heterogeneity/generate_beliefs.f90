@@ -34,7 +34,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     iterations=0
     F_new=-9.0d0
     it=0
-    counter_u=-9
+    counter_u=0
     
     !Store the state for each plot and simulate decision to drill
     
@@ -90,9 +90,6 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
                     beliefs_c(state_old(i_l,3),state(i_l,3),state_old(i_l,1),state(i_l,1),P)=&
                     beliefs_c(state_old(i_l,3),state(i_l,3),state_old(i_l,1),state(i_l,1),P)+1
                     !Compute joint distribution state variables and unobserved heterogeneity type
-                    if (counter_u(ind,n_l,P,A,unobs_types_i(i_l,v_l))==-9) then
-                        counter_u(ind,n_l,P,A,:)=0
-                    end if
                     counter_u(ind,n_l,P,A,unobs_types_i(i_l,v_l))=counter_u(ind,n_l,P,A,unobs_types_i(i_l,v_l))+1
                 end if
                 !Compute NPV
@@ -228,11 +225,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     
 
     do ind=1,2*P_max-1; do n_l=1,3; do P_l=1,P_max; do a_l=1,types_a; do u_l=1,unobs_types
-        if (counter_u(ind,n_l,P_l,a_l,n_l)==-9) then
-            Pr_u_x(ind,n_l,P_l,a_l,u_l)=pr_unobs_t(u_l)
-        else
-            Pr_u_x(ind,n_l,P_l,a_l,u_l)=dble(counter_u(ind,n_l,P_l,a_l,u_l))/dble(sum(counter_u(ind,n_l,P_l,a_l,:)))
-        end if
+        Pr_u_x(ind,n_l,P_l,a_l,u_l)=dble(counter_u(ind,n_l,P_l,a_l,u_l))/dble(sum(counter_u(:,:,:,:,u_l)))
     end do;end do;end do;end do;end do
     
     !call random_seed(PUT=seed2)
