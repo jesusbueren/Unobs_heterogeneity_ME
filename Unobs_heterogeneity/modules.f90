@@ -1,7 +1,7 @@
 module dimensions
     implicit none
     integer,parameter::P_max=6 ! Set the maximum number of plots in an adjacency
-    integer,parameter::K=5,par=4,M=2,types_a=4 !K: points of support of flow; M:types of moonzoons; type_a: types of areas
+    integer,parameter::K=5,par=3,M=2,types_a=2 !K: points of support of flow; M:types of moonzoons; type_a: types of areas
     integer::selected_type=4
 end
     
@@ -38,13 +38,13 @@ module primitives
     double precision,dimension(2*P_max,villages)::PI_s
     double precision,dimension(2*P_max-1,3,P_max,villages)::PI_s_v
     !c_d: fixed cost of failing to drill;c_s: fixed cost of succeeding to drill; c_e: cost of electricity by well
-    double precision::c_s=72.3d0,beta=0.9d0,c_d=35.2d0,c_e=11.7d0
+    double precision::c_s=72.3d0,beta=0.85d0,c_d=35.2d0,c_e=11.7d0
     !extreme value distribution shocks
     double precision,parameter::gamma=0.577215664901533d0
-    double precision::rho
+    double precision::rho=1.0d0
     !area of plots
-    double precision,dimension(types_a)::area=(/1.0d0,2.0d0,3.0d0,5.1d0/)
-    double precision,dimension(types_a-1)::area_lims=(/1.3d0,2.3d0,4.0d0/)
+    double precision,dimension(types_a)::area=(/1.0d0,3.0d0/)!(/1.0d0,2.0d0,3.0d0,5.1d0/)
+    double precision,dimension(types_a-1)::area_lims=1.3d0 !(/1.3d0,2.3d0,4.0d0/)
     !pr of unobserved heterogeneity type
     double precision,dimension(unobs_types)::pr_unobs_t=(/0.333d0,0.333d0,0.334d0/)
     !Taxation parameters
