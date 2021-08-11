@@ -53,7 +53,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     print*,'iteration number',it
     if (it==1) then
-        p_g(1,:)=(/2.3d0,0.9d0,3.04d0/)
+        p_g(1,:)=(/25.1d0,0.99d0/)
     end if
     
     do p_l=2,par+1
@@ -65,7 +65,6 @@ subroutine estimation(params_MLE,log_likeli)
     do p_l=1,par+1
         p_g(p_l,1)=log(p_g(p_l,1))
         p_g(p_l,2)=log(p_g(p_l,2)/(1.0d0-p_g(p_l,2)))
-        p_g(p_l,3)=log(p_g(p_l,3))
         y(p_l)=log_likelihood(p_g(p_l,:))
         !print*,'press key to continue'
         !print*,'press key to continue'
@@ -80,12 +79,10 @@ subroutine estimation(params_MLE,log_likeli)
     print*,'likelihood amoeba',y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
-    p_g(:,3)=exp(p_g(:,3))
     print*,' parameters amoeba',p_g(1,:)
     !Change parameters to the (-Inf;Inf) real line
     p_g(1,1)=log(p_g(1,1))
     p_g(1,2)=log(p_g(1,2)/(1.0d0-p_g(1,2)))
-    p_g(1,3)=log(p_g(1,3))
     xi=0.0d0
     do p_l=1,par
         xi(p_l,p_l)=1.0d0
@@ -95,7 +92,6 @@ subroutine estimation(params_MLE,log_likeli)
     log_likeli=y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
-    p_g(:,3)=exp(p_g(:,3))
     !print*,'likelihood powell',y(1)
     !print*,'parameter powell',p_g(1,:)
     
@@ -103,7 +99,6 @@ subroutine estimation(params_MLE,log_likeli)
     !Compute CCP to check convergence
     params_MLE=p_g(1,:)
     CCP_old=CCP_est
-    rho=params_MLE(3)
     
     do v_l=1,villages
         do u_l=1,unobs_types;do a_l=1,types_a
@@ -167,9 +162,7 @@ function log_likelihood(params_MLE)
     
     params(1)=exp(params_MLE(1))
     params(2)=1.0d0/(1.0d0 + exp(-params_MLE(2))) 
-    params(3)=exp(params_MLE(3))
 
-    rho=exp(params_MLE(3))
     print*,' parameters',params
     
     log_likelihood=0.0d0
@@ -291,7 +284,7 @@ function log_likelihood(params_MLE)
     end if
     
     !GMM
-    log_likelihood=sum((moment_own_nxa_model-moment_own_nxa_data)**2)
+    log_likelihood=sum(((moment_own_nxa_model-moment_own_nxa_data)/moment_own_nxa_data)**2)
     
     print*,'likelihood',log_likelihood
     print*,'missing_x1',missing_x1

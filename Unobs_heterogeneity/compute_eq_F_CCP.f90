@@ -16,10 +16,6 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     integer::p_l,a_l,n_l,P_l2,ind,counter_all,counter_bad,u_l
     integer(8),dimension(2*P_max-1,3,3,P_max)::iterations
     character::pause_k
-    
-    
-    !Set scale parameter Gumbel distribution of shocks
-    rho=params(3)
 
     !Compute expected productivity 
     do u_l=1,unobs_types;do a_l=1,types_a
