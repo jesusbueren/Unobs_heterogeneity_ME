@@ -58,9 +58,9 @@ for i=[2 4]
     figure(i)
     if i==2
         title("Functioning Wells in Adjacency")
-        data_gr=[data_N(1:5) modl_N(1:5)] 
-        xticks([1 2 3 4 5])
-        xticklabels({'N=0','N=1','N=2','N=3','N=4'})
+        data_gr=[data_N(:) modl_N(:)] 
+%         xticks([1 2 3 4 5])
+%         xticklabels({'N=0','N=1','N=2','N=3','N=4'})
     elseif i==4
         title("Plots in Adjacency")
         data_gr=[data_P(2:5) modl_P(2:5)]
@@ -80,7 +80,7 @@ for i=[2 4]
             % Calculate center of each bar
             x = (1:ngroups) - groupwidth/2 + (2*i2-1) * groupwidth / (2*nbars);
             if i==2
-                errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_N(1:5)) , 'k', 'linestyle', 'none');
+                errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_N(:)) , 'k', 'linestyle', 'none');
             elseif i==4
                 errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_P(2:5)) , 'k', 'linestyle', 'none');
             end
@@ -190,7 +190,7 @@ close all
 clear all
 cd("C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\Results")
 
-fileID = fopen('counterfactuals.txt','r');
+fileID = fopen('counterfactuals_noimp.txt','r');
 counterfactuals = fscanf(fileID,'%f')
 fclose(fileID);
 

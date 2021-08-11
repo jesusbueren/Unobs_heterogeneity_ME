@@ -101,6 +101,7 @@ subroutine load_cadastral_maps()
         elseif (u_m<sum(pr_unobs_t(1:3))) then
             unobs_types_i(i_l,v_l)=3
         else
+            print*,'error'
             unobs_types_i(i_l,v_l)=4
         end if
     end do;end do

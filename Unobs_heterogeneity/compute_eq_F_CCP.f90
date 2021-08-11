@@ -25,10 +25,10 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     do u_l=1,unobs_types;do a_l=1,types_a
         call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
     end do;end do
-
+!max output Ef_v(1,:,1,4,v_l,3) CCP(1,:,1,4,3)
     !Generate beliefs consitent with CCP
     F=1.0d0
-    CCP=CCP_mid
+    CCP=CCP_mid !
 !   print*,'generating beliefs'
 
 1    call generate_beliefs(CCP_mid,V_fct,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,social_output,private_output,Pr_u_X)
@@ -39,7 +39,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     dist=0.0d0
     counter_bad=0
     counter_all=0
-    do P_l=1,P_max; do a_l=1,types_a; do u_l=1,unobs_types
+    do P_l=1,P_max; do u_l=1,unobs_types; do a_l=types_a,1,-1
         call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
                             ,F(1:2*P_l-1,1:2*P_l-1,:,:,P_l) &
                             ,P_l &

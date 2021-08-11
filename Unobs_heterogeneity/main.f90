@@ -12,6 +12,7 @@ double precision::log_likeli
 integer::v_l,p_l
 character::end_key
 
+
 !Call seed number
 call random_seed(PUT=seed)
 
@@ -51,7 +52,7 @@ call load_estimation_data()
     !    read(12,*),drilling_it
     !close(12)
     
-call compute_moments(dble(drilling_it(:,:,1)),"data")
+call compute_moments(dble(drilling_it(:,:,1)),"data",moment_own_nxa_data)
 
 print*,'Start estimation'
 !Generate a random CCP for computing initial beliefs
@@ -66,17 +67,17 @@ open(unit=12, file=path_results//"bootstrapped_parameters_85_nem.txt",status='re
     write(12,'(<par>f20.12,f20.12)'),params_mle,log_likeli
 close(12)
 
-open(unit=12, file=path_results//"bootstrapped_parameters_85_nem.txt")
-    read(12,'(<par>f20.12)'),params_mle
-close(12)
-
+!open(unit=12, file=path_results//"bootstrapped_parameters_85_nem.txt")
+!    read(12,'(<par>f20.12)'),params_mle
+!close(12)
+!
 !call bootstrap_se()
 open(unit=12, file=path_results//"bootstrapped_parameters_85_nem.txt")
     read(12,*),params_mle
 close(12)
 print*,'estimated parameters',params_MLE
 
-!params_MLE=(/15.8d0,0.9d0,0.13d0/)
+!params_MLE=(/15.95d0,0.90d0,5.92d0/)
 call counterfactual_2(params_MLE)
 !call counterfactual_1(params_MLE)
 

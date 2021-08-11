@@ -45,7 +45,7 @@ count if area_ac_`m'!=-9
 *Primitives on flow and failure by type and monsoon: I generate 4 different types of unobserved heterogeneity.
 clear all
 cd "C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME"
-import excel using "primitives\flow_fail_prob.xls",firstrow   
+import excel using "primitives\flow_lnN_fail_N_prob.xls",firstrow   
 /* for old files
 egen id=group(N M T)
 
@@ -63,7 +63,7 @@ export delimited using "primitives\flow_fail_prob_r",novarnames  replace
 *Primitives: probability of success
 clear all
 cd "C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME"
-import excel using "data\drill_export_3T.xls",firstrow   
+import excel using "data\drill_export_lnN_3T.xls",firstrow   
 collapse P_R P_S,by(map_village)
 encode map_village,g(nb)
 drop if nb==.
@@ -74,7 +74,7 @@ br
 *Estimation data
 clear all
 cd "C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\data"
-import excel using "drill_export_3T.xls",firstrow   
+import excel using "drill_export_lnN_3T.xls",firstrow   
 encode map_village,g(nb)
 drop if nb==.
 br

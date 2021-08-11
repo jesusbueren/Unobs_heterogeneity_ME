@@ -1,10 +1,11 @@
-subroutine compute_moments(data_in,string_name)
+subroutine compute_moments(data_in,string_name,moment_own_nxa)
     use simulation
     implicit none
     double precision,dimension(T_sim,plots_i),intent(in)::data_in
+    double precision,dimension(types_a,2),intent(out)::moment_own_nxa
     CHARACTER (LEN=4),intent(in) :: string_name
     double precision,dimension(max_NFW+1)::counter_N,moment_N
-    double precision,dimension(types_a,2)::counter_own_nxa,moment_own_nxa
+    double precision,dimension(types_a,2)::counter_own_nxa
     double precision,dimension(unobs_types,2)::counter_uhe,moment_uhe
     double precision,dimension(P_max)::counter_P,moment_P
     integer::i_l,t_l,u_l

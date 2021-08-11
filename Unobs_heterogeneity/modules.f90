@@ -38,13 +38,13 @@ module primitives
     double precision,dimension(2*P_max,villages)::PI_s
     double precision,dimension(2*P_max-1,3,P_max,villages)::PI_s_v
     !c_d: fixed cost of failing to drill;c_s: fixed cost of succeeding to drill; c_e: cost of electricity by well
-    double precision::c_s=72.3d0,beta=0.85d0,c_d=35.2d0,c_e=11.7d0
+    double precision::c_s=72.3d0,beta=0.9d0,c_d=35.2d0,c_e=11.7d0
     !extreme value distribution shocks
     double precision,parameter::gamma=0.577215664901533d0
-    double precision::rho=1.0d0
+    double precision::rho=1.0d0,v_nod=0.0d0
     !area of plots
-    double precision,dimension(types_a)::area=(/1.0d0,3.0d0/)!(/1.0d0,2.0d0,3.0d0,5.1d0/)
-    double precision,dimension(types_a-1)::area_lims=1.3d0 !(/1.3d0,2.3d0,4.0d0/)
+    double precision,dimension(types_a)::area=(/1.0d0,3.0d0/)!(/1.0d0,2.0d0,3.0d0,5.1d0/) 
+    double precision,dimension(types_a-1)::area_lims=1.3d0 !(/1.3d0,2.3d0,4.0d0/) !
     !pr of unobserved heterogeneity type
     double precision,dimension(unobs_types)::pr_unobs_t=(/0.333d0,0.333d0,0.334d0/)
     !Taxation parameters
@@ -64,6 +64,7 @@ use cadastral_maps
     ! dec_it: drilling decision
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,villages)::F_est
     double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP_est
+    double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP_final=0.0d0
     integer::bootstrap=0
     
     !Data
@@ -75,6 +76,7 @@ use cadastral_maps
     integer,dimension(T_sim,plots_i)::n_data !number of wells in reference plot
     double precision,dimension(max_NFW+1,T_sim,plots_i)::Pr_N_data !pr of number of functioning wells in the adjacency
     integer,dimension(T_sim,plots_i)::modal_N !pr of number of functioning wells in the adjacency
+    double precision,dimension(types_a,2)::moment_own_nxa_data
     
     !Unobsverded heterogeneity from beliefs
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Pr_u_X

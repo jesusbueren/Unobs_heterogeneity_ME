@@ -10,16 +10,16 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     integer(8),dimension(2*P_max-1,3,3,P_max),intent(out)::iterations
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(out)::Pr_u_x !Pr_u_x(1,1,3,4,:) counter_u(1,1,3,4,:)
     integer(8),dimension(2*P_max-1,3,P_max,types_a,unobs_types)::counter_u
-    integer,parameter::T=100000
+    integer,parameter::T=10000!0
     integer,dimension(plots_in_map,3)::state,state_old
-    integer::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min,a_l,u_l
+    integer(8)::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min,a_l,u_l
     double precision::u_d,u_s,u_f,u_m,it2
     integer,parameter:: its=2000
     double precision,dimension(its)::NPV,total_N,NPV_PV,CCP_av
     double precision,intent(out)::mean_N,social_output,private_output
     integer(8),dimension(2*P_max-1,2*P_max-1,3,3,P_max)::beliefs_c
     integer,dimension(1)::seed=321,seed2
-    integer,parameter::burn_t=10000
+    integer,parameter::burn_t=1000!0
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max)::F
     double precision,dimension(P_max)::dist
     character::continue_k
@@ -94,7 +94,14 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
                 end if
                 !Compute NPV
                 if (t_l>T-(its+1)) then  
-                    if (n_l==1 .or. n_l==2)then                     
+                    if (n_l==1 )then                     
+                        it2=it2+1.0d0
+                        CCP_av(t_l-(T-(its+1)))=(it2-1.0d0)/it2*CCP_av(t_l-(T-(its+1)))+1.0d0/it2*CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))
+                        NPV_PV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV_PV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))- &
+                                             CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))*(PI_s_v(ind,n_l,P,v_l)*c_s+(1.0d0-PI_s_v(ind,n_l,P,v_l))*c_d)+v_nod)
+                        NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))- &
+                                             CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))*(PI_s_v(ind,n_l,P,v_l)*c_s+(1.0d0-PI_s_v(ind,n_l,P,v_l))*c_d)-c_e*dble(n_l-1)+v_nod)
+                    elseif ( n_l==2)then                     
                         it2=it2+1.0d0
                         CCP_av(t_l-(T-(its+1)))=(it2-1.0d0)/it2*CCP_av(t_l-(T-(its+1)))+1.0d0/it2*CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))
                         NPV_PV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV_PV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))- &

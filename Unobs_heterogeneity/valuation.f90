@@ -10,10 +10,20 @@ subroutine valuation(CCP,C,Ef_v,P,V,v_l)
     double precision,dimension(2*P-1,3)::U_small
     integer::n_l,m_l,ind
     
+    
 
     U_small=0.0d0
     do ind=1,2*P-1; do n_l=1,3
-        if (n_l<3) then
+        if (n_l==1) then
+            if (CCP(ind,n_l)==1.0d0)then
+                U_small(ind,n_l)=v_nod+rho*gamma-c_s*PI_s_v(ind,n_l,P,v_l)-c_d*(1.0d0-PI_s_v(ind,n_l,P,v_l))              
+            elseif (CCP(ind,n_l)==0.0d0)then
+                U_small(ind,n_l)=v_nod+rho*gamma
+            else
+                U_small(ind,n_l)=v_nod+CCP(ind,n_l)*(rho*gamma-rho*log(CCP(ind,n_l))-c_s*PI_s_v(ind,n_l,P,v_l)-c_d*(1.0d0-PI_s_v(ind,n_l,P,v_l)))+&
+                                (1.0d0-CCP(ind,n_l))*(rho*gamma-rho*log(1.0d0-CCP(ind,n_l)))
+            end if
+        elseif (n_l==2) then
             if (CCP(ind,n_l)==1.0d0)then
                 U_small(ind,n_l)=rho*gamma-c_s*PI_s_v(ind,n_l,P,v_l)-c_d*(1.0d0-PI_s_v(ind,n_l,P,v_l))              
             elseif (CCP(ind,n_l)==0.0d0)then

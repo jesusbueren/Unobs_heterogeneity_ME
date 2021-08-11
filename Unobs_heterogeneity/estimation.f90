@@ -51,8 +51,9 @@ subroutine estimation(params_MLE,log_likeli)
     !Fixing beliefs, estimate parameter
     !print*,'Initial Conditions'
     
+    print*,'iteration number',it
     if (it==1) then
-        p_g(1,:)=(/6.11d0,0.07d0,14.5d0/) !(/3.03d0,0.10d0,0.51d0,15.04d0/)
+        p_g(1,:)=(/2.3d0,0.9d0,3.04d0/)
     end if
     
     do p_l=2,par+1
@@ -161,12 +162,13 @@ function log_likelihood(params_MLE)
     double precision,dimension(T_sim,plots_i)::av_CCP_it
     double precision,dimension(plots_i)::likelihood_aux
     character::pause_k
+    double precision,dimension(types_a,2)::moment_own_nxa_model
     
     
     params(1)=exp(params_MLE(1))
     params(2)=1.0d0/(1.0d0 + exp(-params_MLE(2))) 
     params(3)=exp(params_MLE(3))
-    
+
     rho=exp(params_MLE(3))
     print*,' parameters',params
     
@@ -262,12 +264,16 @@ function log_likelihood(params_MLE)
                 if (UHE_type_model(1,i_l)==-9.0d0) then
                     UHE_type_model(:,i_l)=1.0d0/dble(unobs_types)
                 end if
-                if (sum(UHE_type_model(:,i_l))/=0.0d0)then
-                    log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l)))
-                else
-                    missing_x1=missing_x1+1
-                end if
-                likelihood_aux(i_l)=log(sum(likelihood_i*UHE_type_model(:,i_l)))
+                
+                !Model 1
+                log_likelihood=log_likelihood+log(sum(likelihood_i))
+                !!Model 5
+                !if (sum(UHE_type_model(:,i_l))/=0.0d0)then
+                !    log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l)*UHE_type(:,i_l)))
+                !else
+                !    missing_x1=missing_x1+1
+                !end if
+                !likelihood_aux(i_l)=log(sum(likelihood_i*UHE_type_model(:,i_l)))
                 !if (log(sum(likelihood_i*UHE_type_model(:,i_l)))==-1.0/0.0) then
                 !    print*,CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)
                 !    print*,'paused'
@@ -281,8 +287,11 @@ function log_likelihood(params_MLE)
     log_likelihood=-log_likelihood
     
     if (bootstrap==0) then
-        call compute_moments(av_CCP_it,"modl")
+        call compute_moments(av_CCP_it,"modl",moment_own_nxa_model)
     end if
+    
+    !GMM
+    log_likelihood=sum((moment_own_nxa_model-moment_own_nxa_data)**2)
     
     print*,'likelihood',log_likelihood
     print*,'missing_x1',missing_x1
