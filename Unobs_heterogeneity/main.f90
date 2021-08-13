@@ -77,7 +77,7 @@ open(unit=12, file=path_results//"bootstrapped_parameters_85_nem.txt")
 close(12)
 print*,'estimated parameters',params_MLE
 
-!params_MLE=(/15.95d0,0.90d0,5.92d0/)
+!params_MLE=(/38.66d0,0.97d0,4.35d0/)
 call counterfactual_2(params_MLE)
 !call counterfactual_1(params_MLE)
 

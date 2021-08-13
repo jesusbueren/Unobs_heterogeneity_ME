@@ -41,7 +41,7 @@ subroutine expected_productivity(params,a,Ef_v,v_l,u_l)
                 !    *PI_k(p_l,k_l,m_l,u_l)*PI_k(p_l,k_l2,m_l,u_l)
             end do; end do;end do
         end do 
-    
+
         !Store expected productivity in vector form
         do n_l=1,3
             if (n_l==1) then

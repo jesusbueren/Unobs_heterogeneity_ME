@@ -19,7 +19,7 @@ subroutine load_estimation_data
     A_type=data_csv(3,1,:)
     n_data=data_csv(4,:,:)+1
     Pr_N_data=data_csv(5:15,:,:)
-    UHE_type=data_csv(16:18,1,:)!UHE_type(:,1)
+    UHE_type=data_csv(16:18,1,:)
     drilling_it(:,:,1)=data_csv(19,:,:) 
     impute_i=0 !data_csv(20,1,:)
     

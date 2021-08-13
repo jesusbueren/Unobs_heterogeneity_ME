@@ -13,11 +13,13 @@ subroutine input_primitives()
      OPEN(UNIT=12, FILE=path_primitives//"flow_fail_prob_r.csv")
         read(12,*),flow_fail_prob_csv
      close(12)
-   
+     
+     
+    print*,'kill heterogeneity across villages in pr of good moonzoon and success pr'
     !!pr of good moonzoon from drill_export.xls (hanan's data)
-    PI_m(2,:)=rain_success_csv(2,:)
+    PI_m(2,:)=0.5d0 !rain_success_csv(2,:)
     !PI_s: Pr. of success (varies by village)
-    PI_s(1,:)=rain_success_csv(3,:)
+    PI_s(1,:)=0.49 !rain_success_csv(3,:)
     
     !Discharge distribution
     q(:,1)=(/0.10d0,0.25d0,0.50d0,0.75d0,1.0d0/)
@@ -28,9 +30,9 @@ subroutine input_primitives()
         PI_m(1,v_l)=1.0d0-PI_m(2,v_l)
         
         !Probability of failure (first position indicates one well, last position indicates all plots with 2 wells)
-
-        PI_fm(1:2*P_max,1,u_l)=flow_fail_prob_csv(9,u_l,1,1:2*P_max)
-        PI_fm(1:2*P_max,2,u_l)=flow_fail_prob_csv(9,u_l,2,1:2*P_max)
+        print*,'kill changes in failure pr with N'
+        PI_fm(1:2*P_max,1,u_l)=flow_fail_prob_csv(9,u_l,1,1)!flow_fail_prob_csv(9,u_l,1,1:2*P_max)
+        PI_fm(1:2*P_max,2,u_l)=flow_fail_prob_csv(9,u_l,2,1)!flow_fail_prob_csv(9,u_l,2,1:2*P_max)
 
         PI_f=PI_fm(:,1,u_l)*PI_m(1,v_l)+PI_fm(:,2,u_l)*PI_m(2,v_l)   
         
