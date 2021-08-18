@@ -26,7 +26,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     F=1.0d0
     CCP=CCP_mid !
 !   print*,'generating beliefs'
-
+    n_initial=1
 1    call generate_beliefs(CCP_mid,V_fct,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,social_output,private_output,Pr_u_X)
     
     !For each plot type obtain a new CCP given beliefs

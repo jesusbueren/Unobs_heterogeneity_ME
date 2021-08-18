@@ -60,24 +60,24 @@ CCP_est=sqrt(-1.0d0)
 do P_l=1,P_max
     CCP_est(1:2*P_l-1,1:2,P_l,:,:,:)=0.06d0
 end do
-call estimation(params_MLE,log_likeli)
-print*,'end maximization'
-
-open(unit=12, file=path_results//"bootstrapped_parameters_85_nem.txt",status='replace')
-    write(12,'(<par>f20.12,f20.12)'),params_mle,log_likeli
-close(12)
-
-!open(unit=12, file=path_results//"bootstrapped_parameters_85_nem.txt")
-!    read(12,'(<par>f20.12)'),params_mle
+!call estimation(params_MLE,log_likeli)
+!print*,'end maximization'
+!
+!open(unit=12, file=path_results//"bootstrapped_parameters_85_nem.txt",status='replace')
+!    write(12,'(<par>f20.12,f20.12)'),params_mle,log_likeli
 !close(12)
+
+open(unit=12, file=path_results//"bootstrapped_parameters_85_nem.txt")
+    read(12,'(<par>f20.12)'),params_mle
+close(12)
 !
 !call bootstrap_se()
-open(unit=12, file=path_results//"bootstrapped_parameters_85_nem.txt")
-    read(12,*),params_mle
-close(12)
+!open(unit=12, file=path_results//"bootstrapped_parameters_85_nem.txt")
+!    read(12,*),params_mle
+!close(12)
 print*,'estimated parameters',params_MLE
 
-!params_MLE=(/38.66d0,0.97d0,4.35d0/)
+!params_MLE=(/15.2d0,0.53d0,2.7d0,14.1d0/)
 call counterfactual_2(params_MLE)
 !call counterfactual_1(params_MLE)
 

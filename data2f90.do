@@ -117,6 +117,11 @@ rename Pflow_T3 P_T3
 
 by RespondentID: egen Total_n=total(n)
 *drop if Total_n==10
+/*
+replace P_T1=1/3 if IMPUTE==1
+replace P_T2=1/3 if IMPUTE==1
+replace P_T3=1/3 if IMPUTE==1
+*/
 export delimited nb P_type a_type n f0_N - f10_N P_T1 P_T2 P_T3 drill IMPUTE using "drill_export_r.csv",replace novarnames nolabel 
 
 *statistics by area en number of wells around

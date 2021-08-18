@@ -101,7 +101,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
                                              CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))*(PI_s_v(ind,n_l,P,v_l)*c_s+(1.0d0-PI_s_v(ind,n_l,P,v_l))*c_d)+v_nod)
                         NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))- &
                                              CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))*(PI_s_v(ind,n_l,P,v_l)*c_s+(1.0d0-PI_s_v(ind,n_l,P,v_l))*c_d)-c_e*dble(n_l-1)+v_nod)
-                    elseif ( n_l==2)then                     
+                    elseif (n_l==2)then                     
                         it2=it2+1.0d0
                         CCP_av(t_l-(T-(its+1)))=(it2-1.0d0)/it2*CCP_av(t_l-(T-(its+1)))+1.0d0/it2*CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))
                         NPV_PV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV_PV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))- &
@@ -224,8 +224,8 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
         F_new(ind,1:2*P_l-1,n_l,n_l2,P_l)=1.0d0
     end do;end do
     
-    social_output=sum(NPV)/dble(its)/mean_area(v_l)
-    private_output=sum(NPV_PV)/dble(its)/mean_area(v_l)
+    social_output=sum(NPV)/dble(its)!/mean_area(v_l)
+    private_output=sum(NPV_PV)/dble(its)!/mean_area(v_l)
     mean_N=sum(total_N)/(its)/dble(plots_v(v_l))
     
     print*,'av drilling',sum(CCP_av)/dble(its)

@@ -58,9 +58,9 @@ for i=[2 4]
     figure(i)
     if i==2
         title("Functioning Wells in Adjacency")
-        data_gr=[data_N(:) modl_N(:)] 
-%         xticks([1 2 3 4 5])
-%         xticklabels({'N=0','N=1','N=2','N=3','N=4'})
+        data_gr=[data_N(1:5) modl_N(1:5)] 
+        xticks([1 2 3 4 5])
+        xticklabels({'N=0','N=1','N=2','N=3','N=4'})
     elseif i==4
         title("Plots in Adjacency")
         data_gr=[data_P(2:5) modl_P(2:5)]
@@ -80,7 +80,7 @@ for i=[2 4]
             % Calculate center of each bar
             x = (1:ngroups) - groupwidth/2 + (2*i2-1) * groupwidth / (2*nbars);
             if i==2
-                errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_N(:)) , 'k', 'linestyle', 'none');
+                errorbar(x,data_gr(1:5,i2), 2*sqrt((data_gr(1:5,i2)).*(1-data_gr(1:5,i2))./counter_N(1:5)) , 'k', 'linestyle', 'none');
             elseif i==4
                 errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_P(2:5)) , 'k', 'linestyle', 'none');
             end
@@ -189,7 +189,7 @@ i= 5
 close all
 clear all
 cd("C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\Results")
-
+FS=9
 fileID = fopen('counterfactuals_noimp.txt','r');
 counterfactuals = fscanf(fileID,'%f')
 fclose(fileID);
@@ -201,9 +201,55 @@ villages=floor(size(counterfactuals,1)/variables/nkk) %14
 
 counterfactuals=reshape(counterfactuals(1:variables*nkk*villages),variables,nkk,villages)
 
-plot(mean(counterfactuals(4,:,:),3),'linewidth',2)
+A=mean(counterfactuals(4,:,:),3)
+figure(1)
+set(1,'position',[50    150    225    200])
+plot(A,'linewidth',2)
 hold on
-plot(mean(counterfactuals(5,:,:),3),'--','linewidth',2)
-I=legend('Social','Private')
+% plot(mean(counterfactuals(5,:,:),3),'--','linewidth',2)
+% I=legend('Social','Private')
+[yMax, xMax] = max(mean(counterfactuals(4,:,:),3)); % xMax is an integer index 1,2,3, or 4,.....not a floating point value.
+yl = ylim();
+line([xMax, xMax], [yl(1), yMax] ,'color',[0.5,0.5,0.5 ], 'LineWidth', 2);
+line([11, 11], [yl(1), A(11)],'color',[0.5,0.5,0.5 ], 'LineWidth', 2);
+xticks([0:5:50])
+xlim([0 50])
 set(gcf,'color','w') 
+xlabel('Tax Per Well (000s Rs)')
+set(gca,'FontName','Times New Roman','Fontsize',FS);
+
+%% Graphs presentation
+
+close all
+clear all
+cd("C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\primitives")
+FS=9
+TAB = readtable('flow_fail_prob_r.csv');
+figure(1)
+set(1,'position',[50    150    450    200])
+subplot(1,2,1)
+plot(TAB.Var4(TAB.Var3 == 2 & TAB.Var2 == 0),'linewidth',2)
+hold on
+plot(TAB.Var4(TAB.Var3 == 2 & TAB.Var2 == 1),'--','linewidth',2)
+ylim([0 0.5])
+xlim([1 10])
+title('Pr. of Low Flow')
+xlabel('Number of Wells')
+set(gca,'FontName','Times New Roman','Fontsize',FS);
+subplot(1,2,2)
+plot(TAB.Var8(TAB.Var3 == 2 & TAB.Var2 == 0),'linewidth',2)
+hold on
+plot(TAB.Var8(TAB.Var3 == 2 & TAB.Var2 == 1),'--','linewidth',2)
+ylim([0 0.5])
+xlim([1 10])
+title('Pr. of High Flow')
+xlabel('Number of Wells')
+legend('Low Monsoon', 'High Monsoon')
+legend boxoff 
+set(gcf,'color','w') 
+set(gca,'FontName','Times New Roman','Fontsize',FS);
+print('flow_pr','-depsc')
+
+
+
         

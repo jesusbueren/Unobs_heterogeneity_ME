@@ -124,9 +124,8 @@ subroutine estimation(params_MLE,log_likeli)
         end do; end do;end do
     end do
     
-    !print*,'est CCP',CCP_est(1:2*P_max-1,:,P_max,:,:,:)
+    !print*,'est CCP',CCP_est(1,2,1,1,2,:)
 
-    
     dist=0.0
     do P_l=1,P_max; do n_l=1,2;do ind=1,2*P_l-1; do v_l=1,villages
         dist=dist+dble(sum(iterations_all(ind,n_l,1:3,P_l,v_l)))/dble(sum(iterations_all(:,1:2,1:3,:,:)))*sum(abs(CCP_old(ind,n_l,P_l,:,v_l,:)-CCP_est(ind,n_l,P_l,:,v_l,:)))/dble(types_a)/dble(unobs_types)
@@ -266,9 +265,19 @@ function log_likelihood(params_MLE)
                     UHE_type_model(:,i_l)=1.0d0/dble(unobs_types)
                 end if
                 
-                !Model 1
-                log_likelihood=log_likelihood+log(sum(likelihood_i))
-                !!Model 5
+                
+                !Model 1/3
+                !log_likelihood=log_likelihood+log(sum(likelihood_i))
+                !log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type(:,i_l)))
+                
+                !Model 4/6
+                !if (sum(UHE_type_model(:,i_l))/=0.0d0)then
+                !    log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l)*UHE_type(:,i_l)))
+                !else
+                !    missing_x1=missing_x1+1
+                !end if
+                
+                !Model 5
                 !if (sum(UHE_type_model(:,i_l))/=0.0d0)then
                 !    log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l)*UHE_type(:,i_l)))
                 !else
@@ -292,7 +301,7 @@ function log_likelihood(params_MLE)
     end if
     
     !GMM
-    !log_likelihood=sum(((moment_own_nxa_model-moment_own_nxa_data)/moment_own_nxa_data)**2)
+    log_likelihood=sum(((moment_own_nxa_model-moment_own_nxa_data)/moment_own_nxa_data)**2)
     
     print*,'likelihood',log_likelihood
     print*,'missing_x1',missing_x1
