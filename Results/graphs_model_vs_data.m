@@ -52,7 +52,7 @@ modl_uhe=reshape(modl_uhe,3,2)
 
 clrs = [0.9 0.9 0.9;0 0 0];
 
-FS=12
+FS=9
 set(groot,'defaultAxesTickLabelInterpreter','latex');  
 for i=[2 4]
     figure(i)
@@ -67,8 +67,8 @@ for i=[2 4]
         xticks([1 2 3 4 ])
         xticklabels({'P=2','P=3','P=4','P=5'})
     end
-%     yticks([0:0.03:0.15])
-%     ylim([0 .15])
+    yticks([0:0.03:0.15])
+    ylim([0 .15])
     hold on
     hB=bar(data_gr)
     ngroups = size(data_gr, 1);
@@ -98,21 +98,21 @@ end
 set(groot,'defaultAxesTickLabelInterpreter','latex');  
 i=3 
     figure(i)
+    set(i,'position',[50    150    450    200])
     for j=1:2
-        subplot(2,2,j)
-
+        subplot(1,2,j)
             if j==1
                 title("$a<1.3$",'Interpreter','latex')
             elseif j==2
-                title("$1.3<a<2.3$",'Interpreter','latex')
+                title("$1.3<a$",'Interpreter','latex')
             elseif j==3
                 title("$2.3<a<4.0$",'Interpreter','latex')
             elseif j==4
                 title("$a>4.0$",'Interpreter','latex')
             end
             data_gr=[data_own_n(j,:); modl_own_n(j,:)]'
-%             yticks([0:0.05:0.15])
-%             ylim([0 .15])
+            yticks([0:0.03:0.15])
+            ylim([0 .15])
             set(gca,'TickLabelInterpreter','latex')
         xticks([1 2])
         xticklabels({'$n=0$','$n=1$'})
@@ -136,7 +136,7 @@ i=3
         I.FontSize=FS
         set(gca,'FontName','Times New Roman','Fontsize',FS);
         set(gcf,'color','w') 
-        set(gcf,'Position',[100 100 1000 500])
+%         set(gcf,'Position',[100 100 1000 500])
         print(strcat('model_fit',num2str(i)),'-depsc')
     end 
 
@@ -153,8 +153,8 @@ i= 5
             title("Type III",'Interpreter','latex')
         end
             data_gr=[data_uhe(j,:); modl_uhe(j,:)]'
-%             yticks([0:0.03:0.15])
-%             ylim([0 .15])
+            yticks([0:0.05:0.25])
+            ylim([0 .25])
              set(gca,'TickLabelInterpreter','latex')
 
         xticks([1 2])
@@ -217,6 +217,7 @@ xlim([0 50])
 set(gcf,'color','w') 
 xlabel('Tax Per Well (000s Rs)')
 set(gca,'FontName','Times New Roman','Fontsize',FS);
+print('counterfactuals','-depsc')
 
 %% Graphs presentation
 
@@ -228,27 +229,37 @@ TAB = readtable('flow_fail_prob_r.csv');
 figure(1)
 set(1,'position',[50    150    450    200])
 subplot(1,2,1)
-plot(TAB.Var4(TAB.Var3 == 2 & TAB.Var2 == 0),'linewidth',2)
+plot(TAB.Var4(TAB.Var3 == 2 & TAB.Var2 == 0)*0.5+...
+TAB.Var4(TAB.Var3 == 2 & TAB.Var2 == 1)*0.5,'linewidth',2)
 hold on
-plot(TAB.Var4(TAB.Var3 == 2 & TAB.Var2 == 1),'--','linewidth',2)
-ylim([0 0.5])
+ylim([0 0.3])
 xlim([1 10])
 title('Pr. of Low Flow')
 xlabel('Number of Wells')
 set(gca,'FontName','Times New Roman','Fontsize',FS);
 subplot(1,2,2)
-plot(TAB.Var8(TAB.Var3 == 2 & TAB.Var2 == 0),'linewidth',2)
-hold on
-plot(TAB.Var8(TAB.Var3 == 2 & TAB.Var2 == 1),'--','linewidth',2)
-ylim([0 0.5])
+plot(TAB.Var8(TAB.Var3 == 2 & TAB.Var2 == 0)*0.5+...
+TAB.Var8(TAB.Var3 == 2 & TAB.Var2 == 1)*0.5,'linewidth',2)
+ylim([0 0.3])
 xlim([1 10])
 title('Pr. of High Flow')
 xlabel('Number of Wells')
-legend('Low Monsoon', 'High Monsoon')
-legend boxoff 
 set(gcf,'color','w') 
 set(gca,'FontName','Times New Roman','Fontsize',FS);
 print('flow_pr','-depsc')
+
+figure(2)
+set(2,'position',[50    150    225    200])
+plot(TAB.Var9(TAB.Var3 == 2 & TAB.Var2 == 0)*0.5+...
+TAB.Var9(TAB.Var3 == 2 & TAB.Var2 == 1)*0.5,'linewidth',2)
+hold on
+yticks([0:0.1:0.7])
+ylim([0 0.7])
+xlim([1 10])
+xlabel('Number of Wells')
+set(gca,'FontName','Times New Roman','Fontsize',FS);
+set(gcf,'color','w') ;
+print('failure_pr','-depsc')
 
 
 
