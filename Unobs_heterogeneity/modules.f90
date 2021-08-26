@@ -1,7 +1,7 @@
 module dimensions
     implicit none
     integer,parameter::P_max=6 ! Set the maximum number of plots in an adjacency
-    integer,parameter::K=5,par=3,M=2,types_a=2 !K: points of support of flow; M:types of moonzoons; type_a: types of areas
+    integer,parameter::K=5,par=16,M=2,types_a=2 !K: points of support of flow; M:types of moonzoons; type_a: types of areas
     integer::selected_type=4
 end
     
@@ -38,7 +38,7 @@ module primitives
     double precision,dimension(2*P_max,villages)::PI_s
     double precision,dimension(2*P_max-1,3,P_max,villages)::PI_s_v
     !c_d: fixed cost of failing to drill;c_s: fixed cost of succeeding to drill; c_e: cost of electricity by well
-    double precision::c_s=72.3d0,beta=0.7d0,c_d=35.2d0,c_e=11.7d0
+    double precision::c_s=72.3d0,beta=0.9d0,c_d=35.2d0,c_e=11.7d0
     !extreme value distribution shocks
     double precision,parameter::gamma=0.577215664901533d0
     double precision::rho=1.0d0,v_nod=0.0d0
@@ -80,6 +80,8 @@ use cadastral_maps
     
     !Unobsverded heterogeneity from beliefs
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Pr_u_X
+    
+    double precision:: max_mle=99999999.0d0
     
 end module    
     

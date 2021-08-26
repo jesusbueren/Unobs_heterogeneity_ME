@@ -60,8 +60,8 @@ CCP_est=sqrt(-1.0d0)
 do P_l=1,P_max
     CCP_est(1:2*P_l-1,1:2,P_l,:,:,:)=0.06d0
 end do
-!call estimation(params_MLE,log_likeli)
-!print*,'end maximization'
+call estimation(params_MLE,log_likeli)
+print*,'end maximization'
 !
 !open(unit=12, file=path_results//"bootstrapped_parameters_85_nem.txt",status='replace')
 !    write(12,'(<par>f20.12,f20.12)'),params_mle,log_likeli
@@ -77,7 +77,8 @@ close(12)
 !close(12)
 print*,'estimated parameters',params_MLE
 
-!params_MLE=(/13.75d0,0.36d0,15.3d0/)
+params_MLE=(/1.38d0,10.37d0,7.34d0,9.58d0,1.3d0,3.26d0,5.27d0,7.03d0,11.01d0,9.09d0,9.5d0,2.1d0,5.9d0,7.05d-2,  &
+                0.10d0,15.8d0/)
 call counterfactual_2(params_MLE)
 !call counterfactual_1(params_MLE)
 

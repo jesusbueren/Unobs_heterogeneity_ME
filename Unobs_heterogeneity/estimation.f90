@@ -53,7 +53,8 @@ subroutine estimation(params_MLE,log_likeli)
     
     print*,'iteration number',it
     if (it==1) then
-        p_g(1,:)=(/16.99d0,0.63d0,12.4d0/)
+        p_g(1,1:villages)=17.0
+        p_g(1,villages+1:villages+2)=(/0.63d0,12.4d0/)
     end if
     
     do p_l=2,par+1
@@ -63,9 +64,9 @@ subroutine estimation(params_MLE,log_likeli)
         
     !Change parameters to the (-Inf;Inf) real line
     do p_l=1,par+1
-        p_g(p_l,1)=log(p_g(p_l,1))
-        p_g(p_l,2)=log(p_g(p_l,2)/(1.0d0-p_g(p_l,2)))
-        p_g(p_l,3)=log(p_g(p_l,3))
+        p_g(p_l,1:villages)=log(p_g(p_l,1:villages))
+        p_g(p_l,villages+1)=log(p_g(p_l,villages+1)/(1.0d0-p_g(p_l,villages+1)))
+        p_g(p_l,villages+2)=log(p_g(p_l,villages+2))
         y(p_l)=log_likelihood(p_g(p_l,:))
         !print*,'press key to continue'
         !print*,'press key to continue'
@@ -78,14 +79,14 @@ subroutine estimation(params_MLE,log_likeli)
     ftol=1.0d-6
     call amoeba(p_g,y,ftol,log_likelihood,iter)
     print*,'likelihood amoeba',y(1)
-    p_g(:,1)=exp(p_g(:,1))
-    p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
-    p_g(:,3)=exp(p_g(:,3))
+    p_g(:,1:villages)=exp(p_g(:,1:villages))
+    p_g(:,villages+1)=1.0d0/(1.0d0 + exp(-p_g(:,villages+1))) 
+    p_g(:,villages+2)=exp(p_g(:,villages+2))
     print*,' parameters amoeba',p_g(1,:)
     !Change parameters to the (-Inf;Inf) real line
-    p_g(1,1)=log(p_g(1,1))
-    p_g(1,2)=log(p_g(1,2)/(1.0d0-p_g(1,2)))
-    p_g(1,3)=log(p_g(1,3))
+    p_g(1,1:villages)=log(p_g(1,1:villages))
+    p_g(1,villages+1)=log(p_g(1,villages+1)/(1.0d0-p_g(1,villages+1)))
+    p_g(1,villages+2)=log(p_g(1,villages+2))
     xi=0.0d0
     do p_l=1,par
         xi(p_l,p_l)=1.0d0
@@ -93,21 +94,21 @@ subroutine estimation(params_MLE,log_likeli)
     ftol=1.0d-4
     !call powell(p_g(1,:),xi,ftol,iter,y(1))
     log_likeli=y(1)
-    p_g(:,1)=exp(p_g(:,1))
-    p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
-    p_g(:,3)=exp(p_g(:,3))
+    p_g(:,1:villages)=exp(p_g(:,1:villages))
+    p_g(:,villages+1)=1.0d0/(1.0d0 + exp(-p_g(:,villages+1))) 
+    p_g(:,villages+2)=exp(p_g(:,villages+2))
     !print*,'likelihood powell',y(1)
     !print*,'parameter powell',p_g(1,:)
     
     
     !Compute CCP to check convergence
     params_MLE=p_g(1,:)
-    rho=p_g(1,3)
+    rho=p_g(1,villages+2)
     CCP_old=CCP_est
     
     do v_l=1,villages
         do u_l=1,unobs_types;do a_l=1,types_a
-            call expected_productivity(params_MLE(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+            call expected_productivity((/params_MLE(v_l),params_MLE(villages+1)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         end do;end do
         do P_l=1,P_max; do a_l=1,types_a; do u_l=1,unobs_types 
             call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
@@ -154,7 +155,7 @@ function log_likelihood(params_MLE)
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::V_fct
     integer::i_l,t_l,type_l,a_l,p_l,v_l,ind,u_l,j_l,s_l,t,missing_x1
     double precision::log_likelihood
-    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types)::Ef_v !Ef_v: expected productivity
+    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
     double precision,dimension(unobs_types)::likelihood_i,likelihood_it
     character::end_k
     double precision,dimension(unobs_types)::av_CCP_uhe
@@ -164,28 +165,28 @@ function log_likelihood(params_MLE)
     double precision,dimension(types_a,2)::moment_own_nxa_model
     
     
-    params(1)=exp(params_MLE(1))
-    params(2)=1.0d0/(1.0d0 + exp(-params_MLE(2))) 
-    params(3)=exp(params_MLE(3))
-    rho=params(3)
+    params(1:villages)=exp(params_MLE(1:villages))
+    params(villages+1)=1.0d0/(1.0d0 + exp(-params_MLE(villages+1))) 
+    params(villages+2)=exp(params_MLE(villages+2))
+    rho=params(villages+2)
     print*,' parameters',params
     
     log_likelihood=0.0d0
     missing_x1=0
     
     do a_l=1,types_a; do v_l=1,villages;do u_l=1,unobs_types
-        call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,u_l),v_l,u_l)
+        call expected_productivity((/params(v_l),params(villages+1)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
     end do; end do;end do
     
 
     !$OMP PARALLEL default(shared) 
     !$OMP  DO
     do P_l=1,P_max; do a_l=1,types_a ; do u_l=1,unobs_types;do v_l=1,villages
-        call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
+        call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
                         ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
                         ,P_l &
                         ,CCP_est(1:2*P_l-1,:,P_l,a_l,v_l,u_l),CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l,V_fct(1:2*P_l-1,:,P_l,a_l,v_l,u_l))
-        !call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,u_l)&
+        !call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
         !                    ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
         !                    ,P_l &
         !                    ,CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l &
@@ -269,11 +270,11 @@ function log_likelihood(params_MLE)
                 !log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type(:,i_l)))
                 
                 !Model 4/6
-                !if (sum(UHE_type_model(:,i_l))/=0.0d0)then
-                !    log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l)*UHE_type(:,i_l)))
-                !else
-                !    missing_x1=missing_x1+1
-                !end if
+                if (sum(UHE_type_model(:,i_l))/=0.0d0)then
+                    log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l)))!*UHE_type(:,i_l)
+                else
+                    missing_x1=missing_x1+1
+                end if
                 
                 !Model 5
                 !if (sum(UHE_type_model(:,i_l))/=0.0d0)then
@@ -294,12 +295,15 @@ function log_likelihood(params_MLE)
         
     log_likelihood=-log_likelihood
     
-    if (bootstrap==0) then
+    if (bootstrap==0 .and. log_likelihood<max_mle) then
         call compute_moments(av_CCP_it,"modl",moment_own_nxa_model)
+        open(unit=12, file=path_results//"parameters.txt",status='replace')
+            write(12,'(<par>f20.12,f20.12)'),params
+        close(12)
     end if
     
     !GMM
-    log_likelihood=sum(((moment_own_nxa_model-moment_own_nxa_data)/moment_own_nxa_data)**2)
+    !log_likelihood=sum(((moment_own_nxa_model-moment_own_nxa_data)/moment_own_nxa_data)**2)
     
     print*,'likelihood',log_likelihood
     print*,'missing_x1',missing_x1

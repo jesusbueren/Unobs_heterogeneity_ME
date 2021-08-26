@@ -111,8 +111,8 @@ i=3
                 title("$a>4.0$",'Interpreter','latex')
             end
             data_gr=[data_own_n(j,:); modl_own_n(j,:)]'
-            yticks([0:0.03:0.15])
-            ylim([0 .15])
+            yticks([0:0.05:0.20])
+            ylim([0 .20])
             set(gca,'TickLabelInterpreter','latex')
         xticks([1 2])
         xticklabels({'$n=0$','$n=1$'})
@@ -201,23 +201,31 @@ villages=floor(size(counterfactuals,1)/variables/nkk) %14
 
 counterfactuals=reshape(counterfactuals(1:variables*nkk*villages),variables,nkk,villages)
 
-A=mean(counterfactuals(4,:,:),3)
-figure(1)
-set(1,'position',[50    150    225    200])
-plot(A,'linewidth',2)
+for v_l=1:14
+% v_l=2
+% A=mean(counterfactuals(4,:,:),3)
+% B=mean(counterfactuals(5,:,:),3)
+A=counterfactuals(4,:,v_l)
+B=counterfactuals(5,:,v_l)
+figure(v_l)
+set(v_l,'position',[50    150    225    200])
+plot([0:1:49],A,'linewidth',2)
 hold on
-% plot(mean(counterfactuals(5,:,:),3),'--','linewidth',2)
+plot(B,'--','linewidth',2)
 % I=legend('Social','Private')
-[yMax, xMax] = max(mean(counterfactuals(4,:,:),3)); % xMax is an integer index 1,2,3, or 4,.....not a floating point value.
+[yMax, xMax] = max(A); % xMax is an integer index 1,2,3, or 4,.....not a floating point value.
 yl = ylim();
 line([xMax, xMax], [yl(1), yMax] ,'color',[0.5,0.5,0.5 ], 'LineWidth', 2);
 line([11, 11], [yl(1), A(11)],'color',[0.5,0.5,0.5 ], 'LineWidth', 2);
 xticks([0:5:50])
 xlim([0 50])
+% yticks([-1:0.25:0.6])
+% ylim([-1.1 0.6])
 set(gcf,'color','w') 
 xlabel('Tax Per Well (000s Rs)')
 set(gca,'FontName','Times New Roman','Fontsize',FS);
-print('counterfactuals','-depsc')
+% print('counterfactuals','-depsc')
+end 
 
 %% Graphs presentation
 
@@ -234,7 +242,7 @@ TAB.Var4(TAB.Var3 == 2 & TAB.Var2 == 1)*0.5,'linewidth',2)
 hold on
 ylim([0 0.3])
 xlim([1 10])
-title('Pr. of Low Flow')
+title('Pr. of q=0.1')
 xlabel('Number of Wells')
 set(gca,'FontName','Times New Roman','Fontsize',FS);
 subplot(1,2,2)
@@ -242,7 +250,7 @@ plot(TAB.Var8(TAB.Var3 == 2 & TAB.Var2 == 0)*0.5+...
 TAB.Var8(TAB.Var3 == 2 & TAB.Var2 == 1)*0.5,'linewidth',2)
 ylim([0 0.3])
 xlim([1 10])
-title('Pr. of High Flow')
+title('Pr. of q=1.0')
 xlabel('Number of Wells')
 set(gcf,'color','w') 
 set(gca,'FontName','Times New Roman','Fontsize',FS);

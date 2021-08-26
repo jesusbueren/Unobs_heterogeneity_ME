@@ -17,7 +17,7 @@ subroutine policy_fct_it(Ef_v,F,P,CCP_in,CCP_out,v_l,u_l,V_new)
     
     it=0
     CCP_old=CCP_in
-    crit=1.0d-8
+    crit=1.0d-9
     
     do it=1,2*P-1
         if (sum(F(it,:,1,1))<0.98d0) then
