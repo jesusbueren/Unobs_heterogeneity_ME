@@ -67,8 +67,8 @@ for i=[2 4]
         xticks([1 2 3 4 ])
         xticklabels({'P=2','P=3','P=4','P=5'})
     end
-    yticks([0:0.03:0.15])
-    ylim([0 .15])
+%     yticks([0:0.03:0.15])
+%     ylim([0 .15])
     hold on
     hB=bar(data_gr)
     ngroups = size(data_gr, 1);

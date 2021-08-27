@@ -12,7 +12,7 @@ subroutine counterfactual_2(params_MLE)
     integer,parameter::nkk=50
     double precision,dimension(nkk)::tau_grid
     
-    rho=params_MLE(villages+2)
+    !rho=params_MLE(villages+2)
     print*,'p2',params_MLE
     tau_grid(1)=0.0d0
     do p_l=2,nkk

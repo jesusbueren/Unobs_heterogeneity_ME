@@ -81,6 +81,8 @@ br
 *Number of well in the plot
 gen n=ref1well+2*ref2well
 replace drill=-9 if n==2
+*replace drill=-9 if n==1
+
 
 *Measurement error taking into account knowledge of number of well in own plot
 gen f9=0

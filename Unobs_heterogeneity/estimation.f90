@@ -53,8 +53,8 @@ subroutine estimation(params_MLE,log_likeli)
     
     print*,'iteration number',it
     if (it==1) then
-        p_g(1,1:villages)=17.0
-        p_g(1,villages+1:villages+2)=(/0.63d0,12.4d0/)
+        p_g(1,1:villages)=15.0
+        p_g(1,villages+1:villages+1)=(/0.63d0/)
     end if
     
     do p_l=2,par+1
@@ -66,7 +66,7 @@ subroutine estimation(params_MLE,log_likeli)
     do p_l=1,par+1
         p_g(p_l,1:villages)=log(p_g(p_l,1:villages))
         p_g(p_l,villages+1)=log(p_g(p_l,villages+1)/(1.0d0-p_g(p_l,villages+1)))
-        p_g(p_l,villages+2)=log(p_g(p_l,villages+2))
+        !p_g(p_l,villages+2)=log(p_g(p_l,villages+2))
         y(p_l)=log_likelihood(p_g(p_l,:))
         !print*,'press key to continue'
         !print*,'press key to continue'
@@ -81,12 +81,12 @@ subroutine estimation(params_MLE,log_likeli)
     print*,'likelihood amoeba',y(1)
     p_g(:,1:villages)=exp(p_g(:,1:villages))
     p_g(:,villages+1)=1.0d0/(1.0d0 + exp(-p_g(:,villages+1))) 
-    p_g(:,villages+2)=exp(p_g(:,villages+2))
+    !p_g(:,villages+2)=exp(p_g(:,villages+2))
     print*,' parameters amoeba',p_g(1,:)
     !Change parameters to the (-Inf;Inf) real line
     p_g(1,1:villages)=log(p_g(1,1:villages))
     p_g(1,villages+1)=log(p_g(1,villages+1)/(1.0d0-p_g(1,villages+1)))
-    p_g(1,villages+2)=log(p_g(1,villages+2))
+    !p_g(1,villages+2)=log(p_g(1,villages+2))
     xi=0.0d0
     do p_l=1,par
         xi(p_l,p_l)=1.0d0
@@ -96,14 +96,14 @@ subroutine estimation(params_MLE,log_likeli)
     log_likeli=y(1)
     p_g(:,1:villages)=exp(p_g(:,1:villages))
     p_g(:,villages+1)=1.0d0/(1.0d0 + exp(-p_g(:,villages+1))) 
-    p_g(:,villages+2)=exp(p_g(:,villages+2))
+    !p_g(:,villages+2)=exp(p_g(:,villages+2))
     !print*,'likelihood powell',y(1)
     !print*,'parameter powell',p_g(1,:)
     
     
     !Compute CCP to check convergence
     params_MLE=p_g(1,:)
-    rho=p_g(1,villages+2)
+    !rho=p_g(1,villages+2)
     CCP_old=CCP_est
     
     do v_l=1,villages
@@ -167,8 +167,8 @@ function log_likelihood(params_MLE)
     
     params(1:villages)=exp(params_MLE(1:villages))
     params(villages+1)=1.0d0/(1.0d0 + exp(-params_MLE(villages+1))) 
-    params(villages+2)=exp(params_MLE(villages+2))
-    rho=params(villages+2)
+    !params(villages+2)=exp(params_MLE(villages+2))
+    !rho=params(villages+2)
     print*,' parameters',params
     
     log_likelihood=0.0d0
@@ -270,18 +270,18 @@ function log_likelihood(params_MLE)
                 !log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type(:,i_l)))
                 
                 !Model 4/6
+                !if (sum(UHE_type_model(:,i_l))/=0.0d0)then
+                !    log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l)))!*UHE_type(:,i_l)
+                !else
+                !    missing_x1=missing_x1+1
+                !end if
+                
+                !Model 5
                 if (sum(UHE_type_model(:,i_l))/=0.0d0)then
                     log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l)))!*UHE_type(:,i_l)
                 else
                     missing_x1=missing_x1+1
                 end if
-                
-                !Model 5
-                !if (sum(UHE_type_model(:,i_l))/=0.0d0)then
-                !    log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l)*UHE_type(:,i_l)))
-                !else
-                !    missing_x1=missing_x1+1
-                !end if
                 !likelihood_aux(i_l)=log(sum(likelihood_i*UHE_type_model(:,i_l)))
                 !if (log(sum(likelihood_i*UHE_type_model(:,i_l)))==-1.0/0.0) then
                 !    print*,CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)
@@ -298,7 +298,7 @@ function log_likelihood(params_MLE)
     if (bootstrap==0 .and. log_likelihood<max_mle) then
         call compute_moments(av_CCP_it,"modl",moment_own_nxa_model)
         open(unit=12, file=path_results//"parameters.txt",status='replace')
-            write(12,'(<par>f20.12,f20.12)'),params
+            write(12,'(<par>f20.12,f20.12)'),params,log_likelihood
         close(12)
     end if
     
