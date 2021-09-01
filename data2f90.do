@@ -107,6 +107,7 @@ xtile a_type=area,n(`q')
 
 
 recode a_type (1=1)(2/4=2)
+
 bys a_type: sum area,d
 
 gen P_type=min(Nplots_adj,6)
@@ -124,6 +125,13 @@ replace P_T1=1/3 if IMPUTE==1
 replace P_T2=1/3 if IMPUTE==1
 replace P_T3=1/3 if IMPUTE==1
 */
+
+by RespondentID: egen total_attempts=total(drill) if drill!=-9
+by RespondentID: egen total_attempts_2=mean(total_attempts)
+*replace drill=-9 if total_attempts_2==0
+
+sort RespondentID year
+
 export delimited nb P_type a_type n f0_N - f10_N P_T1 P_T2 P_T3 drill IMPUTE using "drill_export_r.csv",replace novarnames nolabel 
 
 *statistics by area en number of wells around
