@@ -111,8 +111,8 @@ i=3
                 title("$a>4.0$",'Interpreter','latex')
             end
             data_gr=[data_own_n(j,:); modl_own_n(j,:)]'
-            yticks([0:0.05:0.20])
-            ylim([0 .20])
+%             yticks([0:0.05:0.20])
+%             ylim([0 .20])
             set(gca,'TickLabelInterpreter','latex')
         xticks([1 2])
         xticklabels({'$n=0$','$n=1$'})
@@ -153,8 +153,8 @@ i= 5
             title("Type III",'Interpreter','latex')
         end
             data_gr=[data_uhe(j,:); modl_uhe(j,:)]'
-            yticks([0:0.05:0.25])
-            ylim([0 .25])
+%             yticks([0:0.05:0.25])
+%             ylim([0 .25])
              set(gca,'TickLabelInterpreter','latex')
 
         xticks([1 2])

@@ -29,7 +29,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     !call random_seed(GET=seed2)
     call random_seed(PUT=seed)
     
-
+    
     beliefs_c=0
     iterations=0
     F_new=-9.0d0
@@ -224,11 +224,11 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
         F_new(ind,1:2*P_l-1,n_l,n_l2,P_l)=1.0d0
     end do;end do
     
-    social_output=sum(NPV)/dble(its)/mean_area(v_l)/pr_non_zombie(v_l)/(1.0d0-beta)
-    private_output=sum(NPV_PV)/dble(its)/mean_area(v_l)/pr_non_zombie(v_l)/(1.0d0-beta)
+    social_output=sum(NPV)/dble(its)/mean_area(v_l)/pr_non_zombie(v_l)!/(1.0d0-beta)
+    private_output=sum(NPV_PV)/dble(its)/mean_area(v_l)/pr_non_zombie(v_l)!/(1.0d0-beta)
     mean_N=sum(total_N)/(its)/dble(plots_v(v_l))
     
-    print*,'av drilling',sum(CCP_av)/dble(its),'in village',v_l
+    print*,'av drilling',sum(CCP_av)/dble(its),'private_output',private_output,'social_output',social_output,'in village',v_l
     
 
     do ind=1,2*P_max-1; do n_l=1,3; do P_l=1,P_max; do a_l=1,types_a; do u_l=1,unobs_types

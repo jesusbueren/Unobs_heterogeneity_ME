@@ -19,7 +19,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
 
     !Compute expected productivity 
     do u_l=1,unobs_types;do a_l=1,types_a
-        call expected_productivity((/params(v_l),params(villages+1)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+        call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
     end do;end do
 !max output Ef_v(1,:,1,4,v_l,3) CCP(1,:,1,4,3)
     !Generate beliefs consitent with CCP
@@ -80,7 +80,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     
     !print*,'press any key to continue'
     !read*,pause_k
-    if (dist>0.005d0) then !1.0d-4 
+    if (dist>0.5d0) then !1.0d-4 
         go to 1 
     end if
     
