@@ -38,7 +38,7 @@ subroutine estimation(params_MLE,log_likeli)
     !Generate an initial well endowment: everyone has zero wells
 1   n_initial_all(1:plots_in_map,:)=1    
     call random_seed(GET=seed_c)
-    if (it>1) then
+    !if (it>1) then
         !$OMP PARALLEL default(shared) 
         !$OMP  DO
         do v_l=1,villages
@@ -47,11 +47,11 @@ subroutine estimation(params_MLE,log_likeli)
         end do
         !$OMP END DO  
         !$OMP END PARALLEL      
-    else
-        open(unit=12, file=path_results//"beliefs_6.txt")
-            read(12,*),F_est,Pr_u_X,iterations_all
-        close(12)
-    end if
+    !else
+    !    open(unit=12, file=path_results//"beliefs_6.txt")
+    !        read(12,*),F_est,Pr_u_X,iterations_all
+    !    close(12)
+    !end if
     open(unit=12, file=path_results//"beliefs_6.txt")
         write(12,*),F_est,Pr_u_X,iterations_all
     close(12)
