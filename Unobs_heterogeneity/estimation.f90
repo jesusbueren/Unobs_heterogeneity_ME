@@ -61,7 +61,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     print*,'iteration number',it
     if (it==1) then
-        p_g(1,:)=(/4.19d0,0.29d0,15.7d0/)!(/3.0d0,0.2d0,15.6d0/)
+        p_g(1,:)=(/3.0d0,0.2d0,15.6d0/)!(/3.0d0,0.2d0,15.6d0/)
     end if
     
     do p_l=2,par+1
@@ -76,16 +76,15 @@ subroutine estimation(params_MLE,log_likeli)
         p_g(p_l,2)=log(p_g(p_l,2)/(1.0d0-p_g(p_l,2)))
         p_g(p_l,3)=log(p_g(p_l,3))
         y(p_l)=log_likelihood(p_g(p_l,:))
-
-        print*,'press key to continue'
-        read*,pause_k
+        !print*,'press key to continue'
+        !read*,pause_k
     end do 
     !print*,'likelihood_ini',y(1)
     
     !Optimization of parameters given beliefs
     print*,'game against nature'
-    ftol=1.0d-6
-    call amoeba(p_g,y,ftol,log_likelihood,iter)
+    ftol=1.0d-7
+    !call amoeba(p_g,y,ftol,log_likelihood,iter)
     print*,'likelihood amoeba',y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
@@ -103,8 +102,8 @@ subroutine estimation(params_MLE,log_likeli)
     do p_l=1,par
         xi(p_l,p_l)=1.0d0
     end do
-    ftol=1.0d-4
-    !call powell(p_g(1,:),xi,ftol,iter,y(1))
+    ftol=1.0d-5
+    call powell(p_g(1,:),xi,ftol,iter,y(1))
     log_likeli=y(1)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
@@ -184,7 +183,7 @@ function log_likelihood(params_MLE)
     params(1)=exp(params_MLE(1))
     params(2)=1.0d0/(1.0d0 + exp(-params_MLE(2))) 
     params(3)=exp(params_MLE(3))
-    !params(4:7)=exp(params_MLE(4:7))
+
     rho=params(3)
 
     !rho=reshape(params(4:7),(/2,2/))
@@ -304,7 +303,11 @@ function log_likelihood(params_MLE)
                     !Model 5
                     if (sum(UHE_type_model(:,i_l))/=0.0d0)then !UHE_type_model(1,i_l)
                         !print*,i_l,likelihood_i(2),UHE_type_model(2,i_l),log_likelihood
-                        log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l)))!*UHE_type(:,i_l)  likelihood_i(1)*UHE_type_model(1,i_l)
+                        if (can_be_zombie_i(i_l)==0) then
+                            log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l))) !*UHE_type(:,i_l)  likelihood_i(1)*UHE_type_model(1,i_l)
+                        else
+                            log_likelihood=log_likelihood+pr_non_zombie(V_type(i_l))*log(sum(likelihood_i*UHE_type_model(:,i_l)))+(1.0d0-pr_non_zombie(V_type(i_l))) !*UHE_type(:,i_l)
+                        end if
                     else
                         missing_x1=missing_x1+1
                     end if

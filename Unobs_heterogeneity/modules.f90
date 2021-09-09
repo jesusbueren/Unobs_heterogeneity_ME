@@ -70,7 +70,7 @@ use cadastral_maps
     integer::bootstrap=0
     
     !Data
-    integer,dimension(plots_i)::V_type,P_type,A_type,impute_i
+    integer,dimension(plots_i)::V_type,P_type,A_type,impute_i,can_be_zombie_i
     double precision,dimension(unobs_types,plots_i)::UHE_type
     double precision,dimension(unobs_types,plots_i)::UHE_type_model
     integer,dimension(plots_i)::modal_UHE_type
