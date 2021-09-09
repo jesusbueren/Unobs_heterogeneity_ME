@@ -18,10 +18,14 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     character::pause_k
 
     !Compute expected productivity 
-    do u_l=1,unobs_types;do a_l=1,types_a
+    do a_l=1,types_a;do u_l=1,unobs_types
         call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+        print*,'Type',u_l,a_l
+        print*, 'private return',(Ef_v(1,2,1,a_l,v_l,u_l))/(1.0d0-beta*(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_d
+        print*, 'social return',(Ef_v(1,2,1,a_l,v_l,u_l)-c_e),(Ef_v(1,2,1,a_l,v_l,u_l)-c_e)/(1.0d0-(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_d
     end do;end do
-!max output Ef_v(1,:,1,4,v_l,3) CCP(1,:,1,4,3)
+
+
     !Generate beliefs consitent with CCP
     F=1.0d0
     CCP=CCP_mid !
@@ -40,7 +44,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
                             ,F(1:2*P_l-1,1:2*P_l-1,:,:,P_l) &
                             ,P_l &
                             ,CCP_old(1:2*P_l-1,:,P_l,a_l,u_l),CCP(1:2*P_l-1,:,P_l,a_l,u_l),v_l,u_l &
-                            ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l))
+                            ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l),a_l)
         !print*,''
         !print*,'V_fct',V_fct(1:2*P_l-1,:,P_l,a_l,u_l)
         !print*,'CCP',CCP(1:2*P_l-1,:,P_l,a_l,u_l)
@@ -53,6 +57,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
         !print*,'V_fct',V_fct(1:2*P_l-1,:,P_l,a_l,u_l)
         !print*,'CCP',CCP(1:2*P_l-1,:,P_l,a_l,u_l)
     end do; end do;end do
+    smthg(:,:,:,v_l,:)=CCP(:,2,:,:,:)
     !V_fct(1,3,2:7,1,1)
    
     !V_fct(1,3,1,:,4)
@@ -80,7 +85,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     
     !print*,'press any key to continue'
     !read*,pause_k
-    if (dist>0.5d0) then !1.0d-4 
+    if (dist>5.0d-4) then !1.0d-4 
         go to 1 
     end if
     

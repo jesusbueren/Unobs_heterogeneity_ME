@@ -67,8 +67,8 @@ for i=[2 4]
         xticks([1 2 3 4 ])
         xticklabels({'P=2','P=3','P=4','P=5'})
     end
-%     yticks([0:0.03:0.15])
-%     ylim([0 .15])
+    yticks([0:0.03:0.15])
+    ylim([0 .15])
     hold on
     hB=bar(data_gr)
     ngroups = size(data_gr, 1);
@@ -91,7 +91,7 @@ for i=[2 4]
     I.FontSize=FS
     set(gca,'FontName','Times New Roman','Fontsize',FS);
     set(gcf,'color','w')
-    set(gcf,'Position',[100 100 1000 250])
+    set(gcf,'Position',[100 300 1000 250])
     print(strcat('model_fit',num2str(i)),'-depsc')
 end
 
@@ -111,8 +111,8 @@ i=3
                 title("$a>4.0$",'Interpreter','latex')
             end
             data_gr=[data_own_n(j,:); modl_own_n(j,:)]'
-%             yticks([0:0.05:0.20])
-%             ylim([0 .20])
+            yticks([0:0.03:0.15])
+            ylim([0 .15])
             set(gca,'TickLabelInterpreter','latex')
         xticks([1 2])
         xticklabels({'$n=0$','$n=1$'})
