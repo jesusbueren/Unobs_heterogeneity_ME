@@ -108,9 +108,9 @@ for i=[2 4 6]
             % Calculate center of each bar
             x = (1:ngroups) - groupwidth/2 + (2*i2-1) * groupwidth / (2*nbars);
             if i==2
-                errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_N(:)) , 'k', 'linestyle', 'none');
+                errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(1:5,i2))./counter_N(1:5)) , 'k', 'linestyle', 'none');
             elseif i==4
-                errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_P(:)) , 'k', 'linestyle', 'none');
+                errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_P(2:5)) , 'k', 'linestyle', 'none');
             elseif i==6
                 errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_V(:)) , 'k', 'linestyle', 'none');
             end

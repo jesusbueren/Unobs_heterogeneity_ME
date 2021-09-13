@@ -12,7 +12,7 @@ subroutine counterfactual_2(params_MLE)
     integer,parameter::nkk=50
     double precision,dimension(nkk)::tau_grid
     
-    rho=params_MLE(3)
+    rho=params_MLE(4)
     print*,'p2',params_MLE
     tau_grid(1)=0.0d0
     do p_l=2,nkk
@@ -24,7 +24,7 @@ subroutine counterfactual_2(params_MLE)
     !Set a tax to production, find the lumpsum transfer that makes government transfer to be in eq.
     !Look for the optimal tax that maximizes average NPV
     tau=0.0d0
-    do v_l=11,villages;do p_l=1,nkk
+    do v_l=1,villages;do p_l=1,nkk
         print*,'exp',p_l
         print*,'village,',v_l 
         tau=tau_grid(p_l)

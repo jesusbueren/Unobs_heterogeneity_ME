@@ -19,10 +19,10 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
 
     !Compute expected productivity 
     do a_l=1,types_a;do u_l=1,unobs_types
-        call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+        call expected_productivity((/params(a_l),params(3)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         print*,'Type',u_l,a_l
         print*, 'private return',(Ef_v(1,2,1,a_l,v_l,u_l))/(1.0d0-beta*(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_d
-        print*, 'social return',(Ef_v(1,2,1,a_l,v_l,u_l)-c_e),(Ef_v(1,2,1,a_l,v_l,u_l)-c_e)/(1.0d0-(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_d
+        print*, 'social return',(Ef_v(1,2,1,a_l,v_l,u_l)-c_e),(Ef_v(1,2,1,a_l,v_l,u_l)-c_e)/(1.0d0-beta*(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_d
     end do;end do
 
 
@@ -39,13 +39,14 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     dist=0.0d0
     counter_bad=0
     counter_all=0
-    do P_l=1,P_max; do u_l=1,unobs_types; do a_l=types_a,1,-1
+    do P_l=1,P_max; do u_l=1,unobs_types; do a_l=1,types_a
+        print*,'u_l',u_l,'a_l',a_l
         call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
                             ,F(1:2*P_l-1,1:2*P_l-1,:,:,P_l) &
                             ,P_l &
                             ,CCP_old(1:2*P_l-1,:,P_l,a_l,u_l),CCP(1:2*P_l-1,:,P_l,a_l,u_l),v_l,u_l &
                             ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l),a_l)
-        !print*,''
+        print*,CCP(1:2*P_l-1,:,P_l,a_l,u_l)
         !print*,'V_fct',V_fct(1:2*P_l-1,:,P_l,a_l,u_l)
         !print*,'CCP',CCP(1:2*P_l-1,:,P_l,a_l,u_l)
         !call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
@@ -85,7 +86,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     
     !print*,'press any key to continue'
     !read*,pause_k
-    if (dist>5.0d-4) then !1.0d-4 
+    if (dist>1.0d-2) then !1.0d-4 
         go to 1 
     end if
     

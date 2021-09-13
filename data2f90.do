@@ -81,7 +81,6 @@ br
 *Number of well in the plot
 gen n=ref1well+2*ref2well
 replace drill=-9 if n==2
-*replace drill=-9 if n==1
 
 
 *Measurement error taking into account knowledge of number of well in own plot
@@ -132,10 +131,12 @@ by RespondentID: egen total_attempts_2=mean(total_attempts)
 replace IMPUTE=0
 *replace IMPUTE=1 if total_attempts_2==0 & n==0
 
-gen can_be_zombie=0
-replace can_be_zombie=1 if total_attempts_2==0 & n==0
-
 sort RespondentID year
+gen can_be_zombie=0
+by RespondentID: replace can_be_zombie=1 if total_attempts_2==0 & n[1]==0
+
+*replace drill=0 if n==1 & a_type==1
+*replace n=1 if n==2 & a_type==1
 
 export delimited nb P_type a_type n f0_N - f10_N P_T1 P_T2 P_T3 drill IMPUTE can_be_zombie using "drill_export_r.csv",replace novarnames nolabel 
 
