@@ -14,6 +14,7 @@ subroutine load_estimation_data
     read(12,*),data_csv
     close(12)
     
+    
     V_type=data_csv(1,1,:)
     P_type=data_csv(2,1,:)
 
@@ -23,7 +24,8 @@ subroutine load_estimation_data
     UHE_type=data_csv(16:18,1,:)
     drilling_it(:,:,1)=data_csv(19,:,:) 
     impute_i=data_csv(20,1,:)
-    can_be_zombie_i=data_csv(21,1,:)
+    print*,'no zombie in estimation data'
+    can_be_zombie_i=0 !data_csv(21,1,:)
     
 
     !UHE_type(selected_type,:)=1.0d0

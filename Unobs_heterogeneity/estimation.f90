@@ -60,9 +60,9 @@ subroutine estimation(params_MLE,log_likeli)
     !print*,'Initial Conditions'
     
     print*,'iteration number',it
-    !if (it==1) then
-        p_g(1,:)=(/19.2d0,16.2d0,0.9d0,3.45d0/)
-    !end if
+    if (it==1) then
+        p_g(1,:)=(/2.33d0,3.32d0,0.2d0,16.2d0/)
+    end if
     
     do p_l=2,par+1
         p_g(p_l,:)=p_g(1,:)
@@ -76,8 +76,8 @@ subroutine estimation(params_MLE,log_likeli)
         p_g(p_l,3)=log(p_g(p_l,3)/(1.0d0-p_g(p_l,3)))
         p_g(p_l,4)=log(p_g(p_l,4))
         y(p_l)=log_likelihood(p_g(p_l,:))
-        print*,'press key to continue'
-        read*,pause_k 
+        !print*,'press key to continue'
+        !read*,pause_k 
 
     end do 
     !print*,'likelihood_ini',y(1)
@@ -207,6 +207,9 @@ function log_likelihood(params_MLE)
                             ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
                             ,P_l &
                             ,CCP_est(1:2*P_l-1,:,P_l,a_l,v_l,u_l),CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l,V_fct(1:2*P_l-1,:,P_l,a_l,v_l,u_l),a_l)
+            if(CCP(1,1,P_l,a_l,v_l,u_l)<CCP(1,2,P_l,a_l,v_l,u_l)) then
+                print*,'watch out: lower pr of drilling when n=0 than n=1'
+            end if
             !call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
             !                    ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
             !                    ,P_l &
@@ -286,7 +289,7 @@ function log_likelihood(params_MLE)
                 
                 
                     !Model 1/3
-                    log_likelihood=log_likelihood+log(sum(likelihood_i))
+                    !log_likelihood=log_likelihood+log(sum(likelihood_i))
                     !log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type(:,i_l)))
                 
                     !Model 4/6
@@ -297,16 +300,16 @@ function log_likelihood(params_MLE)
                     !end if
                 
                     !Model 5
-                    !if (sum(UHE_type_model(:,i_l))/=0.0d0)then !UHE_type_model(1,i_l)
-                    !    !print*,i_l,likelihood_i(2),UHE_type_model(2,i_l),log_likelihood
-                    !    if (can_be_zombie_i(i_l)==0) then
-                    !        log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l))) !log(likelihood_i(1)*UHE_type_model(1,i_l)) !*UHE_type(:,i_l)  
-                    !    else
-                    !        log_likelihood=log_likelihood+pr_non_zombie(V_type(i_l))*log(sum(likelihood_i*UHE_type_model(:,i_l)))+(1.0d0-pr_non_zombie(V_type(i_l))) !*UHE_type(:,i_l)
-                    !    end if
-                    !else
-                    !    missing_x1=missing_x1+1
-                    !end if
+                    if (sum(UHE_type_model(:,i_l))/=0.0d0)then !UHE_type_model(1,i_l)
+                        !print*,i_l,likelihood_i(2),UHE_type_model(2,i_l),log_likelihood
+                        if (can_be_zombie_i(i_l)==0) then
+                            log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l))) !log(likelihood_i(1)*UHE_type_model(1,i_l)) !*UHE_type(:,i_l)  
+                        else
+                            log_likelihood=log_likelihood+pr_non_zombie(V_type(i_l))*log(sum(likelihood_i*UHE_type_model(:,i_l)))+(1.0d0-pr_non_zombie(V_type(i_l))) !*UHE_type(:,i_l)
+                        end if
+                    else
+                        missing_x1=missing_x1+1
+                    end if
                     !likelihood_aux(i_l)=log(sum(likelihood_i*UHE_type_model(:,i_l)))
                     !if (log(sum(likelihood_i*UHE_type_model(:,i_l)))==-1.0/0.0) then
                     !    print*,CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)
@@ -316,9 +319,9 @@ function log_likelihood(params_MLE)
                     do t_l=1,T_sim
                         if (drilling_it(t_l,i_l,s_l)==1 .or. drilling_it(t_l,i_l,s_l)==0) then
                             if (can_be_zombie_i(i_l)==0) then
-                                av_CCP_it(t_l,i_l)=sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t))) !sum(av_CCP_uhe(t_l,i_l,:)*pr_unobs_t)
+                                av_CCP_it(t_l,i_l)=sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t))) !sum(av_CCP_uhe(t_l,i_l,:)*pr_unobs_t)!
                             else
-                                av_CCP_it(t_l,i_l)=pr_non_zombie(V_type(i_l))*sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t)))
+                                av_CCP_it(t_l,i_l)=pr_non_zombie(V_type(i_l))*sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t))) !pr_non_zombie(V_type(i_l))*sum(av_CCP_uhe(t_l,i_l,:)*(pr_unobs_t))!
                             end if
                             !print*,(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t)) 
                             !print*,'paused'

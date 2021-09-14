@@ -208,7 +208,8 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     do P_l=2,P_max; do ind=1,2*P_l-1; do n_l=1,3; do n_l2=1,min(n_l+1,3)
         it_min=300000
         if (iterations(ind,n_l,n_l2,P_l)==0) then
-            F_new(ind,1:2*P_l-1,n_l,n_l2,P_l)=1.0d0/(2.0d0*dble(P_l)-1.0d0)
+            F_new(ind,1:2*P_l-1,n_l,n_l2,P_l)=0.0d0!1.0d0/(2.0d0*dble(P_l)-1.0d0)
+            F_new(ind,ind,n_l,n_l2,P_l)=1.0d0
         end if
         if (isnan(F_new(ind,1,n_l,n_l2,P_l))) then
             print*,'error in generate beliefs'

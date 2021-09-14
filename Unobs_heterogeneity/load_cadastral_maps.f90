@@ -88,7 +88,7 @@ subroutine load_cadastral_maps()
     !print*,'distribution of area types'
     !print*,dble(PA_stat(1:types_a,2))/dble(plots_v(v_l))
     
-    call random_seed(PUT=seed)
+
     !Generate permanent unobserved heterogeneity type
     !pr_unobs_t=0.0d0
     !pr_unobs_t(selected_type)=1.0d0

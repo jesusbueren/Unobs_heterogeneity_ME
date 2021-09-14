@@ -79,7 +79,7 @@ print*,'estimated parameters',params_MLE
 
 !params_MLE=(/1.38d0,10.37d0,7.34d0,9.58d0,1.3d0,3.26d0,5.27d0,7.03d0,11.01d0,9.09d0,9.5d0,2.1d0,5.9d0,7.05d-2,  &
 !                0.10d0,15.8d0/)
-call counterfactual_2(params_MLE)
+!call counterfactual_2(params_MLE)
 !call counterfactual_1(params_MLE)
 
 !call transitional_dynamics(params_MLE)
