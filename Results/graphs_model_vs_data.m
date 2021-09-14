@@ -66,7 +66,7 @@ yfit = P(1)*modl_V+P(2);
 hold on;
 plot(modl_V,yfit,'r-.');
 ylim([0 0.15])
-xlim([0 0.15])
+xlim([0.05 0.1])
 xlabel('Model')
 ylabel('Data')
 

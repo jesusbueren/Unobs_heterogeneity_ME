@@ -61,7 +61,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     print*,'iteration number',it
     if (it==1) then
-        p_g(1,:)=(/2.33d0,3.32d0,0.2d0,16.2d0/)
+        p_g(1,:)=(/3.72d0,0.25d0,16.0d0/)
     end if
     
     do p_l=2,par+1
@@ -72,9 +72,9 @@ subroutine estimation(params_MLE,log_likeli)
         
     !Change parameters to the (-Inf;Inf) real line
     do p_l=1,par+1
-        p_g(p_l,1:2)=log(p_g(p_l,1:2))
-        p_g(p_l,3)=log(p_g(p_l,3)/(1.0d0-p_g(p_l,3)))
-        p_g(p_l,4)=log(p_g(p_l,4))
+        p_g(p_l,1)=log(p_g(p_l,1))
+        p_g(p_l,2)=log(p_g(p_l,2)/(1.0d0-p_g(p_l,2)))
+        p_g(p_l,3)=log(p_g(p_l,3))
         y(p_l)=log_likelihood(p_g(p_l,:))
         !print*,'press key to continue'
         !read*,pause_k 
@@ -89,17 +89,17 @@ subroutine estimation(params_MLE,log_likeli)
     max_mle=99999999.0d0
     call amoeba(p_g,y,ftol,log_likelihood,iter)
     print*,'likelihood amoeba',y(1)
-    p_g(:,1:2)=exp(p_g(:,1:2))
-    p_g(:,3)=1.0d0/(1.0d0 + exp(-p_g(:,3))) 
-    p_g(:,4)=exp(p_g(:,4))
+    p_g(:,1)=exp(p_g(:,1))
+    p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
+    p_g(:,3)=exp(p_g(:,3))
     !p_g(:,4:7)=exp(p_g(:,4:7))
     print*,' parameters amoeba',p_g(1,:)
     print*,'press key to continue'
     read*,pause_k 
     !Change parameters to the (-Inf;Inf) real line
-    p_g(1,1:2)=log(p_g(1,1:2))
-    p_g(1,3)=log(p_g(1,3)/(1.0d0-p_g(1,3)))
-    p_g(1,4)=log(p_g(1,4))
+    p_g(1,1)=log(p_g(1,1))
+    p_g(1,2)=log(p_g(1,2)/(1.0d0-p_g(1,2)))
+    p_g(1,3)=log(p_g(1,3))
     !p_g(1,4:7)=log(p_g(1,4:7))
     xi=0.0d0
     do p_l=1,par
@@ -108,9 +108,9 @@ subroutine estimation(params_MLE,log_likeli)
     ftol=1.0d-5
     !call powell(p_g(1,:),xi,ftol,iter,y(1))
     log_likeli=y(1)
-    p_g(:,1:2)=exp(p_g(:,1:2))
-    p_g(:,3)=1.0d0/(1.0d0 + exp(-p_g(:,3))) 
-    p_g(:,4)=exp(p_g(:,4))
+    p_g(:,1)=exp(p_g(:,1))
+    p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
+    p_g(:,3)=exp(p_g(:,3))
     !p_g(:,4:7)=exp(p_g(:,4:7))
     !print*,'likelihood powell',y(1)
     !print*,'parameter powell',p_g(1,:)
@@ -118,14 +118,14 @@ subroutine estimation(params_MLE,log_likeli)
     
     !Compute CCP to check convergence
     params_MLE=p_g(1,:)
-    rho=p_g(1,4)
+    rho=p_g(1,3)
 
     !rho=reshape(p_g(1,4:7),(/2,2/))
     CCP_old=CCP_est
     
     do v_l=1,villages
         do u_l=1,unobs_types;do a_l=1,types_a
-            call expected_productivity((/params_MLE(a_l),params_MLE(3)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+            call expected_productivity(params_MLE(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         end do;end do
         do P_l=1,P_max; do a_l=1,types_a; do u_l=1,unobs_types 
             call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
@@ -183,11 +183,11 @@ function log_likelihood(params_MLE)
     double precision,dimension(types_a,2)::moment_own_nxa_model
     
     
-    params(1:2)=exp(params_MLE(1:2))
-    params(3)=1.0d0/(1.0d0 + exp(-params_MLE(3))) 
-    params(4)=exp(params_MLE(4))
+    params(1)=exp(params_MLE(1))
+    params(2)=1.0d0/(1.0d0 + exp(-params_MLE(2))) 
+    params(3)=exp(params_MLE(3))
 
-    rho=params(4)
+    rho=params(3)
 
     !rho=reshape(params(4:7),(/2,2/))
     print*,' parameters',params
@@ -196,7 +196,7 @@ function log_likelihood(params_MLE)
     missing_x1=0
     
     do a_l=1,types_a; do v_l=1,villages;do u_l=1,unobs_types
-        call expected_productivity((/params(a_l),params(3)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+        call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
     end do; end do;end do
          
 

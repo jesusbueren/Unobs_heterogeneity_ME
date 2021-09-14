@@ -199,7 +199,7 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
         end if
         it=it+1
     end do
-
+    
     !close(13)
     
 
