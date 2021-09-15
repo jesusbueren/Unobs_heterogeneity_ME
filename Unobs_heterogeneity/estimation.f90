@@ -61,7 +61,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     print*,'iteration number',it
     if (it==1) then
-        p_g(1,:)=(/3.72d0,0.25d0,16.0d0/)
+        p_g(1,:)=(/2.4d0,0.21d0,15.8d0/)
     end if
     
     do p_l=2,par+1
