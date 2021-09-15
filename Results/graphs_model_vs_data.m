@@ -65,8 +65,8 @@ P = polyfit(modl_V,data_V,1);
 yfit = P(1)*modl_V+P(2);
 hold on;
 plot(modl_V,yfit,'r-.');
-ylim([0 0.15])
-xlim([0.05 0.1])
+% ylim([0 0.15])
+% xlim([0.05 0.1])
 xlabel('Model')
 ylabel('Data')
 
@@ -95,8 +95,8 @@ for i=[2 4 6]
         xticks(1:14)
 %         xticklabels({'P=2','P=3','P=4','P=5'})
     end
-    yticks([0:0.03:0.15])
-    ylim([0 .15])
+%     yticks([0:0.03:0.15])
+%     ylim([0 .15])
     hold on
     hB=bar(data_gr)
     ngroups = size(data_gr, 1);
@@ -141,8 +141,8 @@ i=3
                 title("$a>4.0$",'Interpreter','latex')
             end
             data_gr=[data_own_n(j,:); modl_own_n(j,:)]'
-            yticks([0:0.03:0.15])
-            ylim([0 .15])
+%             yticks([0:0.03:0.15])
+%             ylim([0 .15])
             set(gca,'TickLabelInterpreter','latex')
         xticks([1 2])
         xticklabels({'$n=0$','$n=1$'})
