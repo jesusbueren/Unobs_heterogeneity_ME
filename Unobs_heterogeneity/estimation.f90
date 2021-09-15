@@ -348,7 +348,7 @@ function log_likelihood(params_MLE)
     end if
     
     !GMM
-    !log_likelihood=sum(((moment_own_nxa_model-moment_own_nxa_data))**2)
+    log_likelihood=sum(((moment_own_nxa_model-moment_own_nxa_data))**2)
     
     print*,'likelihood',log_likelihood
     print*,'missing_x1',missing_x1
