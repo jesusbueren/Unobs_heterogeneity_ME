@@ -30,11 +30,11 @@ subroutine input_primitives()
         PI_m(1,v_l)=1.0d0-PI_m(2,v_l)
         
         !Probability of failure (first position indicates one well, last position indicates all plots with 2 wells)
-        if (v_l==1 .and. u_l==1) then
-            print*,'kill changes in failure pr with N'
-        end if
-        PI_fm(1:2*P_max,1,u_l)=flow_fail_prob_csv(9,u_l,1,1) !flow_fail_prob_csv(9,u_l,1,1:2*P_max) !
-        PI_fm(1:2*P_max,2,u_l)=flow_fail_prob_csv(9,u_l,2,1) !flow_fail_prob_csv(9,u_l,2,1:2*P_max) !
+        !if (v_l==1 .and. u_l==1) then
+        !    print*,'kill changes in failure pr with N'
+        !end if
+        PI_fm(1:2*P_max,1,u_l)=flow_fail_prob_csv(9,u_l,1,1:2*P_max) !flow_fail_prob_csv(9,u_l,1,1) !
+        PI_fm(1:2*P_max,2,u_l)=flow_fail_prob_csv(9,u_l,2,1:2*P_max) !flow_fail_prob_csv(9,u_l,2,1) !
 
         PI_f=PI_fm(:,1,u_l)*PI_m(1,v_l)+PI_fm(:,2,u_l)*PI_m(2,v_l)   
         

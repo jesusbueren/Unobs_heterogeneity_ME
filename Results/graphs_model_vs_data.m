@@ -241,7 +241,7 @@ figure(v_l)
 set(v_l,'position',[50    150    225    200])
 plot([0:1:49],A,'linewidth',2)
 hold on
-plot(B,'--','linewidth',2)
+% plot(B,'--','linewidth',2)
 % I=legend('Social','Private')
 [yMax, xMax] = max(A); % xMax is an integer index 1,2,3, or 4,.....not a floating point value.
 yl = ylim();

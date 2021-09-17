@@ -22,8 +22,12 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
     integer(8),parameter::burn_t=10000
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max)::F
     double precision,dimension(P_max)::dist
+    double precision,dimension(2*P_max-1)::CCP_aux
     character::continue_k
     
+    
+    
+    CCP_aux=1.0d0/(1.0d0+exp(-(-PI_s_v(1:2*P_max-1,2,P_max,v_l)*c_s-(1.0d0-PI_s_v(1:2*P_max-1,2,P_max,v_l))*c_d)/rho(2)))
     !print*,'smthg'
     !Call seed number
     !call random_seed(GET=seed2)
@@ -97,20 +101,28 @@ subroutine generate_beliefs(CCP,V_fct,Ef_v,n_initial,F_new,v_l,iterations,mean_N
                     if (n_l==1 )then                     
                         it2=it2+1.0d0
                         CCP_av(t_l-(T-(its+1)))=(it2-1.0d0)/it2*CCP_av(t_l-(T-(its+1)))+1.0d0/it2*CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))
-                        NPV_PV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV_PV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))- &
-                                             CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))*(PI_s_v(ind,n_l,P,v_l)*c_s+(1.0d0-PI_s_v(ind,n_l,P,v_l))*c_d)+v_nod)
-                        NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))- &
-                                             CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))*(PI_s_v(ind,n_l,P,v_l)*c_s+(1.0d0-PI_s_v(ind,n_l,P,v_l))*c_d)-c_e*dble(n_l-1)+v_nod)
+                        NPV_PV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV_PV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))+ &
+                                             CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))*(-PI_s_v(ind,n_l,P,v_l)*c_s-(1.0d0-PI_s_v(ind,n_l,P,v_l))*c_d+rho(n_l)*gamma-rho(n_l)*log(CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l)))) &
+                                             +(1.0d0-CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l)))*(rho(n_l)*gamma-rho(n_l)*log(1.0d0-CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))))+v_nod)
+                        NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))+ &
+                                             CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))*(-PI_s_v(ind,n_l,P,v_l)*c_s-(1.0d0-PI_s_v(ind,n_l,P,v_l))*c_d+rho(n_l)*gamma-rho(n_l)*log(CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l)))) &
+                                             +(1.0d0-CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l)))*(rho(n_l)*gamma-rho(n_l)*log(1.0d0-CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))))-c_e*dble(n_l-1)+v_nod)
                     elseif (n_l==2)then                     
                         it2=it2+1.0d0
                         CCP_av(t_l-(T-(its+1)))=(it2-1.0d0)/it2*CCP_av(t_l-(T-(its+1)))+1.0d0/it2*CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))
-                        NPV_PV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV_PV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))- &
-                                             CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))*(PI_s_v(ind,n_l,P,v_l)*c_s+(1.0d0-PI_s_v(ind,n_l,P,v_l))*c_d))
-                        NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))- &
-                                             CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))*(PI_s_v(ind,n_l,P,v_l)*c_s+(1.0d0-PI_s_v(ind,n_l,P,v_l))*c_d)-c_e*dble(n_l-1))
+                        NPV_PV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV_PV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))+ &
+                                             CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))*(-PI_s_v(ind,n_l,P,v_l)*c_s-(1.0d0-PI_s_v(ind,n_l,P,v_l))*c_d+rho(n_l)*gamma-rho(n_l)*log(CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))))+&
+                                             (1.0d0-CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l)))*(rho(n_l)*gamma-rho(n_l)*log(1.0d0-CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l)))))
+                        NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))+ &
+                                             CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))*(-PI_s_v(ind,n_l,P,v_l)*c_s-(1.0d0-PI_s_v(ind,n_l,P,v_l))*c_d+rho(n_l)*gamma-rho(n_l)*log(CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))))+&
+                                             (1.0d0-CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l)))*(rho(n_l)*gamma-rho(n_l)*log(1.0d0-CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))))-c_e*dble(n_l-1))
                     else
-                        NPV_PV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV_PV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l)))
-                        NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))-c_e*dble(n_l-1))
+                        NPV_PV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV_PV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))+ &
+                                             CCP_aux(ind)*(-PI_s_v(ind,2,P,v_l)*c_s-(1.0d0-PI_s_v(ind,2,P,v_l))*c_d+rho(2)*gamma-rho(2)*log(CCP_aux(ind)))+&
+                                             (1.0d0-CCP_aux(ind))*(rho(2)*gamma-rho(2)*log(1.0d0-CCP_aux(ind))))
+                        NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))+ &
+                                             CCP_aux(ind)*(-PI_s_v(ind,2,P,v_l)*c_s-(1.0d0-PI_s_v(ind,2,P,v_l))*c_d+rho(2)*gamma-rho(2)*log(CCP_aux(ind)))+&
+                                             (1.0d0-CCP_aux(ind))*(rho(2)*gamma-rho(2)*log(1.0d0-CCP_aux(ind)))-c_e*dble(n_l-1))
                     end if
                 end if
                 !Well drilling decision and failures/successes

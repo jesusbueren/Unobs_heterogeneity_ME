@@ -20,9 +20,9 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     !Compute expected productivity 
     do a_l=1,types_a;do u_l=1,unobs_types
         call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
-        print*,'Type',u_l,a_l
-        print*, 'private return',(Ef_v(1,2,1,a_l,v_l,u_l))/(1.0d0-beta*(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_s
-        print*, 'social return',(Ef_v(1,2,1,a_l,v_l,u_l)-c_e),(Ef_v(1,2,1,a_l,v_l,u_l)-c_e)/(1.0d0-(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_s
+        !print*,'Type',u_l,a_l
+        !print*, 'private return',(Ef_v(1,2,1,a_l,v_l,u_l))/(1.0d0-beta*(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_s
+        !print*, 'social return',(Ef_v(1,2,1,a_l,v_l,u_l)-c_e),(Ef_v(1,2,1,a_l,v_l,u_l)-c_e)/(1.0d0-(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_s
     end do;end do
 
 
@@ -85,7 +85,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,n_initial,v_l,mean_N,social_o
     
     !print*,'press any key to continue'
     !read*,pause_k
-    if (dist>1.0d-4) then !1.0d-4 
+    if (dist>5.0d-3) then !1.0d-4 
         go to 1 
     end if
     

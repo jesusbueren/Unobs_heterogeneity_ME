@@ -94,8 +94,8 @@ subroutine estimation(params_MLE,log_likeli)
     p_g(:,3)=exp(p_g(:,3))
     !p_g(:,4:7)=exp(p_g(:,4:7))
     print*,' parameters amoeba',p_g(1,:)
-    print*,'press key to continue'
-    read*,pause_k 
+    !print*,'press key to continue'
+    !read*,pause_k 
     !Change parameters to the (-Inf;Inf) real line
     p_g(1,1)=log(p_g(1,1))
     p_g(1,2)=log(p_g(1,2)/(1.0d0-p_g(1,2)))
@@ -152,7 +152,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     !New guess of the ccp is half way through
     CCP_mid=CCP_est*0.5d0+CCP_old*0.5d0
-    if (dist>5.0d-4) then
+    if (dist>5.0d-3) then
         it=it+1
         go to 1
     end if
@@ -203,18 +203,18 @@ function log_likelihood(params_MLE)
         !$OMP PARALLEL default(shared) 
         !$OMP  DO
         do P_l=2,P_max; do a_l=1,types_a;do v_l=1,villages ; do u_l=1,unobs_types
-            call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
-                            ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
-                            ,P_l &
-                            ,CCP_est(1:2*P_l-1,:,P_l,a_l,v_l,u_l),CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l,V_fct(1:2*P_l-1,:,P_l,a_l,v_l,u_l),a_l)
-            if(CCP(1,1,P_l,a_l,v_l,u_l)<CCP(1,2,P_l,a_l,v_l,u_l)) then
-                print*,'watch out: lower pr of drilling when n=0 than n=1'
-            end if
-            !call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
-            !                    ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
-            !                    ,P_l &
-            !                    ,CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l &
-            !                    ,V_fct(1:2*P_l-1,:,P_l,a_l,v_l,u_l)) 
+            !call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
+            !                ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
+            !                ,P_l &
+            !                ,CCP_est(1:2*P_l-1,:,P_l,a_l,v_l,u_l),CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l,V_fct(1:2*P_l-1,:,P_l,a_l,v_l,u_l),a_l)
+            !if(CCP(1,1,P_l,a_l,v_l,u_l)<CCP(1,2,P_l,a_l,v_l,u_l)) then
+            !    print*,'watch out: lower pr of drilling when n=0 than n=1'
+            !end if
+            call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
+                                ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
+                                ,P_l &
+                                ,CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l &
+                                ,V_fct(1:2*P_l-1,:,P_l,a_l,v_l,u_l)) 
         end do; end do;end do; end do
         !$OMP END DO  
         !$OMP END PARALLEL
@@ -348,7 +348,7 @@ function log_likelihood(params_MLE)
     end if
     
     !GMM
-    log_likelihood=sum(((moment_own_nxa_model-moment_own_nxa_data))**2)
+    !log_likelihood=sum(((moment_own_nxa_model-moment_own_nxa_data))**2)
     
     print*,'likelihood',log_likelihood
     print*,'missing_x1',missing_x1
