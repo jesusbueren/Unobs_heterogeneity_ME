@@ -61,7 +61,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     print*,'iteration number',it
     if (it==1) then
-        p_g(1,:)=(/2.4d0,0.21d0,15.8d0/)
+        p_g(1,:)=(/10.4d0,0.21d0,15.8d0/)
     end if
     
     do p_l=2,par+1
@@ -197,6 +197,11 @@ function log_likelihood(params_MLE)
     
     do a_l=1,types_a; do v_l=1,villages;do u_l=1,unobs_types
         call expected_productivity(params(1:2),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+        !if (v_l==1) then
+        !    print*,'Type',u_l,a_l
+        !    print*, 'private return',(Ef_v(1,2,1,a_l,v_l,u_l))/(1.0d0-beta*(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_s
+        !    print*, 'social return',(Ef_v(1,2,1,a_l,v_l,u_l)-c_e),(Ef_v(1,2,1,a_l,v_l,u_l)-c_e)/(1.0d0-(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_s
+        !end if
     end do; end do;end do
          
 
