@@ -80,7 +80,7 @@ drop if nb==.
 br
 *Number of well in the plot
 gen n=ref1well+2*ref2well
-replace drill=-9 if n==2
+replace drill=0 if n==2
 
 
 *Measurement error taking into account knowledge of number of well in own plot

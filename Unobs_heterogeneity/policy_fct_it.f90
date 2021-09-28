@@ -31,7 +31,7 @@ subroutine policy_fct_it(Ef_v,F,P,CCP_in,CCP_out,v_l,u_l,V_new,a_l)
     CCP_aux=1.0d0/(1.0d0+exp(-(-PI_s_v(1:2*P-1,2,P,v_l)*c_s-(1.0d0-PI_s_v(1:2*P-1,2,P,v_l))*c_d)/rho(2)))
     
         
-1   call generate_C(CCP_old,F,P,C,v_l,u_l) 
+    call generate_C(CCP_old,F,P,C,v_l,u_l) 
     call valuation(CCP_old,C,Ef_v,P,V,v_l,u_l,a_l,CCP_aux)
     call update_CCP(V,F,Ef_v,P,CCP_out,v_l,u_l,a_l)
     
@@ -53,10 +53,10 @@ subroutine policy_fct_it(Ef_v,F,P,CCP_in,CCP_out,v_l,u_l,V_new,a_l)
         return
     end if
 
-    if (dist>crit)then
-        CCP_old=CCP_out
-        go to 1
-    end if
+    !if (dist>crit)then
+    !    CCP_old=CCP_out
+    !    go to 1
+    !end if
     
     V_new=reshape(V,(/(2*P-1),3/))
 

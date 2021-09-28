@@ -44,10 +44,40 @@ subroutine valuation(CCP,C,Ef_v,P,V,v_l,u_l,a_l,CCP_aux)
              end if
         end if
     end do; end do
-    U_small=U_small+Ef_v+T_g
+    
+    !U_small=0.0d0
+    !do ind=1,2*P-1; do n_l=1,3
+    !    if (n_l==1) then
+    !        if (CCP(ind,n_l)==1.0d0)then
+    !            U_small(ind,n_l)=-c_s*PI_s_v(ind,n_l,P,v_l)-c_d*(1.0d0-PI_s_v(ind,n_l,P,v_l))              
+    !        elseif (CCP(ind,n_l)==0.0d0)then
+    !            U_small(ind,n_l)=v_nod
+    !        else
+    !            U_small(ind,n_l)=CCP(ind,n_l)*(-c_s*PI_s_v(ind,n_l,P,v_l)-c_d*(1.0d0-PI_s_v(ind,n_l,P,v_l)))
+    !        end if
+    !    elseif (n_l==2) then
+    !        if (CCP(ind,n_l)==1.0d0)then
+    !            U_small(ind,n_l)=-c_s*PI_s_v(ind,n_l,P,v_l)-c_d*(1.0d0-PI_s_v(ind,n_l,P,v_l))              
+    !        elseif (CCP(ind,n_l)==0.0d0)then
+    !            U_small(ind,n_l)=0.0d0
+    !        else
+    !            U_small(ind,n_l)=CCP(ind,n_l)*(-c_s*PI_s_v(ind,n_l,P,v_l)-c_d*(1.0d0-PI_s_v(ind,n_l,P,v_l)))
+    !        end if
+    !    else
+    !        if (CCP_aux(ind)==1.0d0 )then
+    !            U_small(ind,n_l)=0.0d0
+    !        elseif (CCP_aux(ind)==0.0d0 )then
+    !            U_small(ind,n_l)=0.0d0
+    !        else
+    !             U_small(ind,n_l)=0.0d0
+    !         end if
+    !    end if
+    !end do; end do
+    
+    U_small=U_small+Ef_v
     !Tax on having a well
-    U_small(:,2)=U_small(:,2)-tau
-    U_small(:,3)=U_small(:,3)-2.0d0*tau
+    U_small(:,2)=U_small(:,2)-c_e
+    U_small(:,3)=U_small(:,3)-2.0d0*c_e
     
     
     

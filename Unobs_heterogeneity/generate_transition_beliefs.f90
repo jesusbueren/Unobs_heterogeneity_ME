@@ -18,7 +18,12 @@ subroutine generate_transition_beliefs(T_path,Sims,CCP,Ef_v,n_ini,F_new,v_l,V_fc
     integer(8),dimension(2*P_max-1,2*P_max-1,3,3,P_max)::beliefs_c
     integer,dimension(1)::seed=123,seed2
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max)::F
+    double precision,dimension(2*P_max-1)::CCP_aux
     character::continue_k
+    
+    
+    
+    CCP_aux=1.0d0/(1.0d0+exp(-(-PI_s_v(1:2*P_max-1,2,P_max,v_l)*c_s-(1.0d0-PI_s_v(1:2*P_max-1,2,P_max,v_l))*c_d)/rho(2)))
     
     print*,'got into trans beliefs'
     !Call seed number
@@ -94,17 +99,24 @@ subroutine generate_transition_beliefs(T_path,Sims,CCP,Ef_v,n_ini,F_new,v_l,V_fc
                         CCP_av(s_l,t_l)=(it2-1.0d0)/it2*CCP_av(s_l,t_l)+1.0d0/it2*CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l),t_l)
                         NPV(s_l,t_l)=dble(i_l-1)/dble(i_l)*NPV(s_l,t_l)+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))- &
                                                 CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l),t_l)*(PI_s_v(ind,n_l,P,v_l)*c_s+(1.0d0-PI_s_v(ind,n_l,P,v_l))*c_d)-c_e*dble(n_l-1))
+                        !NPV(s_l,t_l)=dble(i_l-1)/dble(i_l)*NPV(s_l,t_l)+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))+ &
+                        !                     CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l),t_l)*(-PI_s_v(ind,n_l,P,v_l)*c_s-(1.0d0-PI_s_v(ind,n_l,P,v_l))*c_d+rho(n_l)*gamma-rho(n_l)*log(CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l),t_l))) &
+                        !                     +(1.0d0-CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l),t_l))*(rho(n_l)*gamma-rho(n_l)*log(1.0d0-CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l),t_l)))-c_e*dble(n_l-1)+v_nod)
                     else
                         NPV(s_l,t_l)=dble(i_l-1)/dble(i_l)*NPV(s_l,t_l)+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))-c_e*dble(n_l-1))
+                        !NPV(s_l,t_l)=dble(i_l-1)/dble(i_l)*NPV(s_l,t_l)+1.0d0/dble(i_l)*(Ef_v(ind,n_l,P,A,unobs_types_i(i_l,v_l))+ &
+                        !                     CCP_aux(ind)*(-PI_s_v(ind,2,P,v_l)*c_s-(1.0d0-PI_s_v(ind,2,P,v_l))*c_d+rho(2)*gamma-rho(2)*log(CCP_aux(ind)))+&
+                        !                     (1.0d0-CCP_aux(ind))*(rho(2)*gamma-rho(2)*log(1.0d0-CCP_aux(ind)))-c_e*dble(n_l-1))
                     end if
                     
-                    !Decision to dismantle well
-                    if (n_l==2 .and. V_fct(ind,n_l,P,A,unobs_types_i(i_l,v_l),t_l)<V_fct(ind,1,P,A,unobs_types_i(i_l,v_l),t_l)) then
+                    !!Decision to dismantle well
+
+                    if (n_l==2 .and. V_fct(ind,n_l,P,A,unobs_types_i(i_l,v_l),t_l)<V_fct(ind,1,P,A,unobs_types_i(i_l,v_l),t_l) .and. t_l==21) then
                         n_initial(i_l,t_l+1)=1
                         if (t_l<=T_path) then
                             no_N(s_l,t_l)=no_N(s_l,t_l)+1.0d0
                         end if
-                    elseif (n_l==3 .and. V_fct(ind,n_l,P,A,unobs_types_i(i_l,v_l),t_l)<V_fct(ind,2,P,A,unobs_types_i(i_l,v_l),t_l)) then
+                    elseif (n_l==3 .and. V_fct(ind,n_l,P,A,unobs_types_i(i_l,v_l),t_l)<V_fct(ind,2,P,A,unobs_types_i(i_l,v_l),t_l) .and. t_l==21) then
                         n_initial(i_l,t_l+1)=2
                         if (t_l<=T_path) then
                             no_N(s_l,t_l)=no_N(s_l,t_l)+1.0d0
@@ -115,6 +127,7 @@ subroutine generate_transition_beliefs(T_path,Sims,CCP,Ef_v,n_ini,F_new,v_l,V_fc
                                 no_N(s_l,t_l)=no_N(s_l,t_l)+1.0d0
                             end if
                         end if
+                        
                     !Well drilling decision and failures/successes
                     elseif (n_l==1) then !no well
                         call RANDOM_NUMBER(u_d)

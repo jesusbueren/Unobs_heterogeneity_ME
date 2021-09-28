@@ -35,4 +35,44 @@ set(gcf,'Position',[100 100 750 250])
 print('counterfactual','-dpdf')
 print('counterfactual','-deps')
 
+%% Transitional Dynamics
 
+close all
+clear all
+cd("C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\Unobs_heterogeneity")
+
+fileID = fopen('transitional_dynamics.txt','r');
+dynamics = fscanf(fileID,'%f')
+fclose(fileID);
+
+columns=6
+lines=size(dynamics,1)/columns
+dynamics=reshape(dynamics,columns,lines);
+dynamics=dynamics';
+FS=11
+
+T2=50
+subplot(1,2,1)
+plot([-5:1:T2],dynamics(16:71,4),'linewidth',2)
+xticks([0:10:50])
+xlim([-10 55])
+xlabel('Time (Years)')
+% yticks([0:0.1:0.4])
+% ylim([0 0.4])
+title('Social Welfare per Acre of Land')
+set(gca,'FontName','Times New Roman','Fontsize',FS);
+set(gcf,'color','w')
+subplot(1,2,2)
+plot([-5:1:50],dynamics(16:71,3)./dynamics(16,3),'linewidth',2)
+xticks([-5:10:50])
+xlabel('Time (Years)')
+yticks([0.4:0.1:1])
+xticks([0:10:50])
+xlim([-10 55])
+ylim([0.35 1.05])
+title('Wells Relative to Benchmark')
+set(gca,'FontName','Times New Roman','Fontsize',FS);
+set(gcf,'color','w')
+set(gcf,'Position',[50    150    550    200])
+cd('C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\Results')
+print('dynamics','-depsc')

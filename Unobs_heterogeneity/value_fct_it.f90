@@ -100,6 +100,5 @@ subroutine one_step_value_fct_it(Ef_v,F,P,CCP,v_l,u_l,V_old,V_new)
     end if
     
     
-    
 
 end subroutine

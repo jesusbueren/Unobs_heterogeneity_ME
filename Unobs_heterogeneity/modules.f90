@@ -16,7 +16,7 @@ module cadastral_maps
     integer,dimension(plots_in_map,villages)::unobs_types_i
     integer,dimension(plots_in_map,P_max,villages)::neighbors !identify neighbors for each plot in the map
     !Zombie pr
-    double precision,dimension(villages):: pr_non_zombie=(/0.454545468,0.954918027,0.525423706,0.778947353,0.805970132,0.632911384,0.666666687,0.847826064,0.762162149,0.749077499,0.401544392,0.722857118,0.78772378,0.639024377/)
+    double precision,dimension(villages):: pr_non_zombie=1.0d0!(/0.454545468,0.954918027,0.525423706,0.778947353,0.805970132,0.632911384,0.666666687,0.847826064,0.762162149,0.749077499,0.401544392,0.722857118,0.78772378,0.639024377/)
     integer,dimension(plots_in_map,villages)::active_plots
     character(len=103)::file_map="C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\cadastral_maps\fortran_files\"
 end
@@ -38,16 +38,16 @@ module primitives
     double precision,dimension(2*P_max,villages)::PI_s
     double precision,dimension(2*P_max-1,3,P_max,villages)::PI_s_v
     !c_d: fixed cost of failing to drill;c_s: fixed cost of succeeding to drill; c_e: cost of electricity by well
-    double precision::c_s=72.3d0,beta=0.95d0,c_d=35.2d0,c_e=11.7d0
+    double precision::c_s=72.3d0,beta=0.95d0,c_d=35.2d0,c_e=5.0d0!11.7d0
     !extreme value distribution shocks
     double precision,parameter::gamma=0.577215664901533d0
     double precision::v_nod=0.0d0
     double precision,dimension(2)::rho=1.0d0
     !area of plots
-    double precision,dimension(types_a)::area=(/0.82d0,3.74d0/)!(/1.0d0,2.0d0,3.0d0,5.1d0/) 
-    double precision,dimension(types_a-1)::area_lims=1.3d0 !(/1.3d0,2.3d0,4.0d0/) !
+    double precision,dimension(types_a)::area=(/1.3d0,3.1d0/)!(/1.0d0,2.0d0,3.0d0,5.1d0/) 
+    double precision,dimension(types_a-1)::area_lims=2.3d0 !(/1.3d0,2.3d0,4.0d0/) !
     !pr of unobserved heterogeneity type
-    double precision,dimension(unobs_types)::pr_unobs_t=(/0.333d0,0.333d0,0.334d0/)!(/1.0d0,0.0d0,0.0d0/) !
+    double precision,dimension(unobs_types)::pr_unobs_t=(/0.333d0,0.333d0,0.334d0/)
     !Taxation parameters
     double precision::T_g=0.0d0,tau=0.0d0
     double precision,dimension(2*P_max-1,P_max,types_a,villages,unobs_types)::smthg=0.06d0

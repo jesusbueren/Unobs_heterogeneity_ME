@@ -359,17 +359,11 @@ fileID = fopen('wells_counterfactual.txt','r');
 counterfactual = fscanf(fileID,'%f');
 fclose(fileID);
 EDGES=0.38:0.003:0.5
-
-FS=11
 histogram(benchmark,EDGES,'Normalization','probability')
 hold on
 histogram(counterfactual,EDGES,'Normalization','probability')
-legend('Benchmark','No Interactions')
 set(gca,'FontName','Times New Roman','Fontsize',FS);
 set(gcf,'color','w')
-set(gcf,'Position',[50    150    450    200])
-cd('C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\Results')
-print('no_interactions','-depsc')
 
 
         

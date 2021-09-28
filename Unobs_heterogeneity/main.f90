@@ -58,8 +58,9 @@ print*,'Start estimation'
 !Generate a random CCP for computing initial beliefs
 CCP_est=sqrt(-1.0d0)
 do P_l=1,P_max
-    CCP_est(1:2*P_l-1,1:2,P_l,:,:,:)=0.06d0
+    CCP_est(1:2*P_l-1,1:2,P_l,:,:,:)=0.15d0
 end do
+
 call estimation(params_MLE,log_likeli)
 !print*,'end maximization'
 !
@@ -77,12 +78,12 @@ close(12)
 !close(12)
 print*,'estimated parameters',params_MLE
 
-
-call counterfactual_2(params_MLE)
+params_MLE=(/10.1d0,0.65d0,5.0d0/)
+!call counterfactual_2(params_MLE)
 !call counterfactual_1(params_MLE)
 
 !call transitional_dynamics(params_MLE)
-
+!call quantifiying_strategic_interactions(params_MLE)
 
 read*,end_key
 
