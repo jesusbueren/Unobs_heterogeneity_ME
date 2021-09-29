@@ -82,6 +82,13 @@ br
 gen n=ref1well+2*ref2well
 replace drill=0 if n==2
 
+sort RespondentID year
+by RespondentID: gen delta_n=n-n[_n-1]
+replace n=n-1 if delta_n==2
+drop delta_n
+by RespondentID: gen delta_n=n-n[_n-1]
+tab delta_n if drill[_n-1]==0
+by RespondentID:  replace drill=1 if delta_n[_n+1]==1 & drill==0
 
 *Measurement error taking into account knowledge of number of well in own plot
 gen f9=0
@@ -137,13 +144,13 @@ by RespondentID: replace can_be_zombie=1 if total_attempts_2==0 & n[1]==0
 
 *replace drill=0 if n==1 & a_type==1
 *replace n=1 if n==2 & a_type==1
-
+replace P_type=3  if P_type==2
 export delimited nb P_type a_type n f0_N - f10_N P_T1 P_T2 P_T3 drill IMPUTE can_be_zombie using "drill_export_r.csv",replace novarnames nolabel 
 
 *statistics by area en number of wells around
 bys a_type: sum drill if drill>=0
 
-gen max_pr=max(f0_N, f1_N, f2_N, f3_N, f4_N, f5_N ,f6_N ,f7_N ,f8_N, f9_N ,f10_N)
+gen max_pr=max(f0, f1, f2, f3, f4, f5 ,f6 ,f7 ,f8, f9 ,f10)
 gen big_N=.
 forval i=0/10{
 replace big_N=`i' if f`i'_N==max_pr
