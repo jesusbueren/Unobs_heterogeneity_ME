@@ -311,6 +311,10 @@ function log_likelihood(params_MLE)
                                     
                                     P_N2_N1=P_N2_N1+((1.d0-PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l)))*(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))+&
                                                      PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l))*PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))*Pr_N_data(j_l,t_l,i_l)
+                                
+                                    elseif (n_data(t_l,i_l)==2.and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==3 ) then
+                                    
+                                    P_N2_N1=
                                     
                                 elseif (n_data(t_l,i_l)==3 .and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==1 ) then
                                     
