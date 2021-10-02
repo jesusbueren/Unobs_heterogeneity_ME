@@ -45,7 +45,28 @@ count if area_ac_`m'!=-9
 *Primitives on flow and failure by type and monsoon: I generate 4 different types of unobserved heterogeneity.
 clear all
 cd "C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME"
-import excel using "primitives\flow_lnN_fail_N_prob.xls",firstrow   
+import excel using "primitives\flow_lnN_fail_N_prob_2T.xls",firstrow  
+sort T N M
+forval i=3/4{
+set obs `=_N+18*2'
+replace N=N[_n-18*2*2] if N==.
+replace M=M[_n-18*2*2] if M==.
+replace T=`i' if T==.
+if `i'==3{
+foreach var of varlist Pq1-Pq5 {
+replace `var'=`var'[_n-18*2*2] if `var'==.
+}
+replace Pfail=Pfail[_n-18*2] if Pfail==.
+}
+if `i'==4{
+foreach var of varlist Pq1-Pq5 {
+replace `var'=`var'[_n-18*2*2] if `var'==.
+}
+replace Pfail=Pfail[_n-18*2*3] if Pfail==.
+}
+}
+sort N M T 
+br
 /* for old files
 egen id=group(N M T)
 
@@ -112,7 +133,7 @@ local q=4
 xtile a_type=area,n(`q')
 
 
-recode a_type (1=1)(2/4=2)
+recode a_type (1/2=1)(3/4=2)
 
 bys a_type: sum area,d
 
