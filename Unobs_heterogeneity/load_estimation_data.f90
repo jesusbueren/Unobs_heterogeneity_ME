@@ -21,12 +21,12 @@ subroutine load_estimation_data
     A_type=data_csv(3,1,:)
     n_data=data_csv(4,:,:)+1
     Pr_N_data=data_csv(5:15,:,:)
-    UHE_type=data_csv(16:18,1,:)
+    UHE_type=0.25d0!data_csv(16:18,1,:)
     drilling_it(:,:,1)=data_csv(19,:,:) 
     impute_i=data_csv(20,1,:)
     can_be_zombie_i=data_csv(21,1,:)
-    print*,'no zombie in estimation data'
-    impute_i=can_be_zombie_i
+    !print*,'no zombie in estimation data'
+    !impute_i=can_be_zombie_i
     can_be_zombie_i=0
     
 
@@ -39,7 +39,7 @@ subroutine load_estimation_data
     
     !Modal number of functionning wells
     do i_l=1,plots_i;do t_l=1,T_sim
-        modal_N(t_l,i_l)=maxloc(Pr_N_data(:,t_l,i_l),1)
+        modal_N(t_l,i_l)=maxloc(Pr_N_data(:,t_l,i_l),1)-(n_data(t_l,i_l)-1)
     end do;end do
     
     

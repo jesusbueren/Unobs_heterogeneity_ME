@@ -39,15 +39,15 @@ fclose(fileID);
 fileID = fopen('data_uhe.txt','r');
 data_uhe = fscanf(fileID,'%f')
 fclose(fileID);
-data_uhe=reshape(data_uhe,3,2)
+data_uhe=reshape(data_uhe,4,2)
 fileID = fopen('counter_uhe.txt','r');
 counter_uhe = fscanf(fileID,'%f')
 fclose(fileID);
-counter_uhe=reshape(counter_uhe,3,2)
+counter_uhe=reshape(counter_uhe,4,2)
 fileID = fopen('modl_uhe.txt','r');
 modl_uhe = fscanf(fileID,'%f')
 fclose(fileID);
-modl_uhe=reshape(modl_uhe,3,2)
+modl_uhe=reshape(modl_uhe,4,2)
 
 fileID = fopen('data_V.txt','r');
 data_V = fscanf(fileID,'%f')
@@ -139,8 +139,8 @@ i=3
                 title("$a>4.0$",'Interpreter','latex')
             end
             data_gr=[data_own_n(j,:); modl_own_n(j,:)]'
-            yticks([0:0.05:0.40])
-            ylim([0 0.4])
+            yticks([0:0.05:0.15])
+            ylim([0 0.15])
             set(gca,'TickLabelInterpreter','latex')
         xticks([1 2])
         xticklabels({'$n=0$','$n=1$'})

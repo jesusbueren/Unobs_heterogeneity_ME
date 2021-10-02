@@ -24,11 +24,11 @@ subroutine counterfactual_2(params_MLE)
     !Set a tax to production, find the lumpsum transfer that makes government transfer to be in eq.
     !Look for the optimal tax that maximizes average NPV
     tau=0.0d0
-    do v_l=1,1;do p_l=5,nkk
+    do v_l=1,1;do p_l=1,nkk
         print*,'exp',p_l
         print*,'village,',v_l 
         tau=tau_grid(p_l)
-        if (p_l==5) then
+        if (p_l==1) then
             CCP_true(:,:,:,:,v_l,:)=0.07d0
             n_dist(:,v_l)=1
             V_fct=0.0d0

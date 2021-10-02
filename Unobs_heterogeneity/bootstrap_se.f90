@@ -24,7 +24,7 @@ subroutine bootstrap_se()
     A_type_or=data_csv(3,1,:)
     n_data_or=data_csv(4,:,:)+1
     Pr_N_data_or=data_csv(5:15,:,:)
-    UHE_type_or=data_csv(16:18,1,:)
+    UHE_type_or=0.25d0!data_csv(16:18,1,:)
     drilling_it_or(:,:,1)=data_csv(19,:,:)
     
     do bs_l=1,bs_samples

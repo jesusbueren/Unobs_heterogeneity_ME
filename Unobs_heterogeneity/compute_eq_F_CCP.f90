@@ -21,8 +21,8 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N
     do a_l=1,types_a;do u_l=1,unobs_types
         call expected_productivity((/params(1),params(2)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         !print*,'Type',u_l,a_l
-        !print*, 'private return',(Ef_v(1,2,1,a_l,v_l,u_l))/(1.0d0-beta*(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_s
-        !print*, 'social return',(Ef_v(1,2,1,a_l,v_l,u_l)-c_e),(Ef_v(1,2,1,a_l,v_l,u_l)-c_e)/(1.0d0-(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_s
+        !print*, 'private return',(ef_v(1,2,1,a_l,v_l,u_l))/(1.0d0-beta*(1.0d0-pi_f_v(1,2,1,v_l,u_l)))-c_s
+        !print*, 'social return',(ef_v(1,2,1,a_l,v_l,u_l)-c_e),(ef_v(1,2,1,a_l,v_l,u_l)-c_e)/(1.0d0-(1.0d0-pi_f_v(1,2,1,v_l,u_l)))-c_s
     end do;end do
 
 
@@ -46,6 +46,13 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N
                             ,P_l &
                             ,CCP(1:2*P_l-1,:,P_l,a_l,u_l),v_l,u_l &
                             ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l))
+        social=0
+        call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
+                            ,F(1:2*P_l-1,1:2*P_l-1,:,:,P_l) &
+                            ,P_l &
+                            ,CCP(1:2*P_l-1,:,P_l,a_l,u_l),CCP2(1:2*P_l-1,:,P_l,a_l,u_l),v_l,u_l &
+                            ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l),a_l)
+        social=1
         call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
                             ,F(1:2*P_l-1,1:2*P_l-1,:,:,P_l) &
                             ,P_l &
