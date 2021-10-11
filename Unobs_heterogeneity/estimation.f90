@@ -65,7 +65,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     print*,'iteration number',it
     if (it==1) then
-        p_g(1,1:3)=(/8.13d0,0.98d0,11.7d0/)
+        p_g(1,:)=(/18.13d0,0.6d0,0.2d0,8.4d0/)
         !p_g(1,4:16)=2.0d0
         !p_g(1,5)=1.0d0
     end if
@@ -79,8 +79,8 @@ subroutine estimation(params_MLE,log_likeli)
     !Change parameters to the (-Inf;Inf) real line
     do p_l=1,par+1
         p_g(p_l,1)=log(p_g(p_l,1))
-        p_g(p_l,2)=log(p_g(p_l,2)/(1.0d0-p_g(p_l,2)))
-        p_g(p_l,3)=log(p_g(p_l,3))
+        p_g(p_l,2:3)=log(p_g(p_l,2:3)/(1.0d0-p_g(p_l,2:3)))
+        p_g(p_l,4)=log(p_g(p_l,4))
         !p_g(p_l,4:16)=log(p_g(p_l,4:16))
         y(p_l)=log_likelihood(p_g(p_l,:))
         !print*,'press key to continue'
@@ -101,8 +101,9 @@ subroutine estimation(params_MLE,log_likeli)
 
     log_likeli=y(1)
     p_g(:,1)=exp(p_g(:,1))
-    p_g(:,2)=1.0d0/(1.0d0 + exp(-p_g(:,2))) 
-    p_g(:,3)=exp(p_g(:,3))
+    p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
+    p_g(:,4)=exp(p_g(:,4))
+
     !p_g(:,4:16)=exp(p_g(:,4:16))
     !print*,'likelihood powell',y(1)
     !print*,'parameter powell',p_g(1,:)
@@ -110,7 +111,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     !Compute CCP to check convergence
     params_MLE=p_g(1,:)
-    rho=p_g(1,3)
+    rho=p_g(1,4)
 
     !rho=reshape(p_g(1,4:7),(/2,2/))
     CCP_old=CCP_est
@@ -119,7 +120,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     do v_l=1,villages
         do u_l=1,unobs_types;do a_l=1,types_a
-            call expected_productivity((/params_MLE(1),params_MLE(2)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+            call expected_productivity(params_MLE(1:3),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         end do;end do
         do P_l=2,P_max; do a_l=1,types_a; do u_l=1,unobs_types 
             call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
@@ -166,7 +167,7 @@ function log_likelihood(params_MLE)
     double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::V_fct
     integer::i_l,t_l,type_l,a_l,p_l,v_l,ind,u_l,j_l,s_l,t,missing_x1
-    double precision::log_likelihood
+    double precision::log_likelihood,pr_non_zombie_II
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
     double precision,dimension(unobs_types)::likelihood_i,likelihood_it,P_N2_N1
     character::end_k
@@ -179,11 +180,14 @@ function log_likelihood(params_MLE)
     double precision,dimension(villages)::village_fe
     
     params(1)=exp(params_MLE(1))
-    params(2)=1.0d0/(1.0d0 + exp(-params_MLE(2))) 
-    params(3)=exp(params_MLE(3))
+    params(2:3)=1.0d0/(1.0d0 + exp(-params_MLE(2:3))) 
+    params(4)=exp(params_MLE(4))
+
+    
     !params(4:16)=exp(params_MLE(4:16))
     
-    rho=params(3)
+    rho=params(4)
+    pr_non_zombie_II=params(4)
     !village_fe(1)=1.0d0
     !village_fe(2:villages)=params(4:16)
     
@@ -196,7 +200,7 @@ function log_likelihood(params_MLE)
     missing_x1=0
     
     do a_l=1,types_a; do v_l=1,villages;do u_l=1,unobs_types
-        call expected_productivity((/params(1),params(2)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+        call expected_productivity(params(1:3),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         !if (v_l==1) then
         !    print*,'Type',u_l,a_l
         !    print*, 'private return',(Ef_v(1,2,1,a_l,v_l,u_l))/(1.0d0-beta*(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_s
@@ -227,6 +231,7 @@ function log_likelihood(params_MLE)
         !OPEN(UNIT=12, FILE=path_results//"likelihood.txt")
         do s_l=1,simulations
         do i_l=1,plots_i;
+ 
             if (impute_i(i_l)==0) then
                 UHE_type_model(:,i_l)=0.0d0
                 if (P_type(i_l)>1) then !more than one neighbor
@@ -255,7 +260,7 @@ function log_likelihood(params_MLE)
                                 UHE_type_model(:,i_l)=UHE_type_model(:,i_l)+Pr_u_X(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l) !Pr_N_data(:,t_l,i_l)
                             end do
                         end if
-                        P_N2_N1=1.0d0
+                        
 
                         do j_l=n_data(t_l,i_l),min(max_NFW+1,2*(P_type(i_l)-1)+n_data(t_l,i_l))
                             if (n_data(t_l,i_l)==1) then
@@ -280,63 +285,87 @@ function log_likelihood(params_MLE)
                             end if
                         end do
                         
-                        if (t_l<T_sim) then
-                            P_N2_N1=1.0d0
-                                if (n_data(t_l,i_l)==1.and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==1 ) then
-                                    
-                                    P_N2_N1=(1.0d0-PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l)))
-                                    
-                                elseif (n_data(t_l,i_l)==1.and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==2 ) then
-                                    
-                                    P_N2_N1=(PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l)))
-                                    
-                                elseif (n_data(t_l,i_l)==2.and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==1 ) then
-                                    
-                                    P_N2_N1=(PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))*Pr_N_data(j_l,t_l,i_l)
-                                    
-                                elseif (n_data(t_l,i_l)==2.and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==2 ) then
-                                    
-                                    P_N2_N1=(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))*Pr_N_data(j_l,t_l,i_l)
-                                    
-                                elseif (n_data(t_l,i_l)==2.and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==1 ) then
-                                    
-                                    P_N2_N1=(1.d0-PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l)))*PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
-                                    
-                                elseif (n_data(t_l,i_l)==2.and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==2 ) then
-                                    
-                                    P_N2_N1=((1.d0-PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l)))*(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))+&
-                                                     PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l))*PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))*Pr_N_data(j_l,t_l,i_l)
-                                
-                                elseif (n_data(t_l,i_l)==2.and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==3 ) then
-                                    
-                                    P_N2_N1=PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l))*(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))*Pr_N_data(j_l,t_l,i_l)
-                                    
-                                elseif (n_data(t_l,i_l)==3 .and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==1 ) then
-                                    
-                                    P_N2_N1=PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:)**2.0d0*Pr_N_data(j_l,t_l,i_l)
-                                
-                                elseif (n_data(t_l,i_l)==3 .and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==2 ) then
-                                    
-                                    P_N2_N1=2.0d0*PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:)*(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))*Pr_N_data(j_l,t_l,i_l)
-                                    
-                                elseif (n_data(t_l,i_l)==3 .and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==3 ) then
-                                    
-                                    P_N2_N1=(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))**2.0d0*Pr_N_data(j_l,t_l,i_l)
-                                    
+                        P_N2_N1=1.0d0
+                        do j_l=n_data(t_l,i_l),min(max_NFW+1,2*(P_type(i_l)-1)+n_data(t_l,i_l))
+                            if (n_data(t_l,i_l)==1) then
+                                ind=j_l !position in the state space wrt to the CCP, PI_s_v and ,PI_f_v
+                            elseif (n_data(t_l,i_l)==2) then
+                                ind=j_l-1
+                            elseif (n_data(t_l,i_l)==3) then
+                                ind=j_l-2
+                            else
+                                print*,'error in estimation'
+                            end if
+                        
+                            if (t_l<T_sim) then
+                                if (j_l==n_data(t_l,i_l)) then
+                                    P_N2_N1=0.0d0
                                 end if
+                                    if (n_data(t_l,i_l)==1.and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==1 ) then
+                                    
+                                        P_N2_N1=1.0d0
+                                        
+                                    elseif (n_data(t_l,i_l)==1.and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==1 ) then
+                                    
+                                        P_N2_N1=(1.0d0-PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l)))
+                                    
+                                    elseif (n_data(t_l,i_l)==1.and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==2 ) then
+                                    
+                                        P_N2_N1=(PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l)))
+                                    
+                                    elseif (n_data(t_l,i_l)==2.and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==1 ) then
+                                    
+                                        P_N2_N1=P_N2_N1+(PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))*Pr_N_data(j_l,t_l,i_l)
+                                    
+                                    elseif (n_data(t_l,i_l)==2.and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==2 ) then
+                                    
+                                        P_N2_N1=P_N2_N1+(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))*Pr_N_data(j_l,t_l,i_l)
+                                    
+                                    elseif (n_data(t_l,i_l)==2.and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==1 ) then
+                                    
+                                        P_N2_N1=P_N2_N1+(1.d0-PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l)))*PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
+                                    
+                                    elseif (n_data(t_l,i_l)==2.and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==2 ) then
+                                    
+                                        P_N2_N1=P_N2_N1+((1.d0-PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l)))*(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))+&
+                                                         PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l))*PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))*Pr_N_data(j_l,t_l,i_l)
+                                
+                                    elseif (n_data(t_l,i_l)==2.and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==3 ) then
+                                    
+                                        P_N2_N1=P_N2_N1+PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l))*(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))*Pr_N_data(j_l,t_l,i_l)
+                                    
+                                    elseif (n_data(t_l,i_l)==3 .and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==1 ) then
+                                    
+                                        P_N2_N1=P_N2_N1+PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:)**2.0d0
+                                
+                                    elseif (n_data(t_l,i_l)==3 .and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==2 ) then
+                                    
+                                        P_N2_N1=P_N2_N1+2.0d0*PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:)*(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))*Pr_N_data(j_l,t_l,i_l)
+                                    
+                                    elseif (n_data(t_l,i_l)==3 .and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==3 ) then
+                                    
+                                        P_N2_N1=P_N2_N1+(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))**2.0d0*Pr_N_data(j_l,t_l,i_l)
+                                    
+                                    end if
                                     
                             end if
+                        end do
+                        
+                        if (sum(P_N2_N1)==0.0d0) then
+                            print*,''
+                        end if
 
-                    
+
                         !write(12,*),sum(likelihood_it*(likelihood_i*pr_unobs_t/sum(likelihood_i*pr_unobs_t)))                    
 
-                        likelihood_i=likelihood_i*likelihood_it!*P_N2_N1
+                        likelihood_i=likelihood_i*likelihood_it*P_N2_N1
                         if (isnan(sum(likelihood_i))) then
                             print*,'pb in likelihood',i_l,ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),2),drilling_it(t_l,i_l,s_l)
                             read*,end_k
                         end if
                         
                     end do;
+
                     if (UHE_type_model(1,i_l)==-9.0d0) then
                         UHE_type_model(:,i_l)=1.0d0/dble(unobs_types)
                         print*,'gets here'
@@ -368,13 +397,13 @@ function log_likelihood(params_MLE)
                     !Model 5
                     if (sum(UHE_type_model(:,i_l))/=0.0d0)then !UHE_type_model(1,i_l)
                     !    !print*,i_l,likelihood_i(2),UHE_type_model(2,i_l),log_likelihood
-                    !    if (can_be_zombie_i(i_l)==0) then
+                        if (can_be_zombie_i(i_l)==0) then
                             log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l)))  
-                    !    else
-                    !        log_likelihood=log_likelihood+pr_non_zombie(V_type(i_l))*log(sum(likelihood_i*UHE_type_model(:,i_l)))+(1.0d0-pr_non_zombie(V_type(i_l))) !*UHE_type(:,i_l)
-                    !    end if
-                    !else
-                    !    missing_x1=missing_x1+1
+                        else
+                            log_likelihood=log_likelihood+pr_non_zombie_II*log(sum(likelihood_i*UHE_type_model(:,i_l)))+(1.0d0-pr_non_zombie_II) !*UHE_type(:,i_l)
+                        end if
+                    else
+                        missing_x1=missing_x1+1
                     end if
                     !likelihood_aux(i_l)=log(sum(likelihood_i*UHE_type_model(:,i_l)))
                     !if (log(sum(likelihood_i*UHE_type_model(:,i_l)))==-1.0/0.0) then
@@ -383,12 +412,12 @@ function log_likelihood(params_MLE)
                     !    read*,pause_k
                     !end if
                     do t_l=1,T_sim
-                        if (drilling_it(t_l,i_l,s_l)==1 .or. drilling_it(t_l,i_l,s_l)==0) then
-                            !if (can_be_zombie_i(i_l)==0) then
-                                av_CCP_it(t_l,i_l)=sum(av_CCP_uhe(t_l,i_l,:)*UHE_type(:,i_l))!sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t))) !sum(av_CCP_uhe(t_l,i_l,:)*pr_unobs_t)!
-                            !else
-                            !    av_CCP_it(t_l,i_l)=pr_non_zombie(V_type(i_l))*sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t))) !pr_non_zombie(V_type(i_l))*sum(av_CCP_uhe(t_l,i_l,:)*(pr_unobs_t))!
-                            !end if
+                        if (drilling_it(t_l,i_l,s_l)==1 .or. drilling_it(t_l,i_l,s_l)==0 .and. sum(UHE_type_model(:,i_l))/=0.0d0) then
+                            if (can_be_zombie_i(i_l)==0 .and. sum(UHE_type_model(:,i_l))/=0.0d0) then
+                                av_CCP_it(t_l,i_l)=sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t))) 
+                            else
+                                av_CCP_it(t_l,i_l)=pr_non_zombie_II*sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t)))  
+                            end if
                             !print*,(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t)) 
                             !print*,'paused'
                             !read*,pause_k
@@ -404,7 +433,7 @@ function log_likelihood(params_MLE)
         !close(12)
         
     log_likelihood=-log_likelihood
-    
+
     call compute_moments(av_CCP_it,"modl",moment_own_nxa_model)
     !GMM
     log_likelihood=sum(((moment_own_nxa_model-moment_own_nxa_data))**2)

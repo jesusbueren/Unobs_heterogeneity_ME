@@ -139,8 +139,8 @@ i=3
                 title("$a>4.0$",'Interpreter','latex')
             end
             data_gr=[data_own_n(j,:); modl_own_n(j,:)]'
-            yticks([0:0.05:0.15])
-            ylim([0 0.15])
+            yticks([0:0.05:0.5])
+            ylim([0 0.5])
             set(gca,'TickLabelInterpreter','latex')
         xticks([1 2])
         xticklabels({'$n=0$','$n=1$'})
@@ -181,8 +181,8 @@ i= 5
             title("Type III",'Interpreter','latex')
         end
             data_gr=[data_uhe(j,:); modl_uhe(j,:)]'
-            yticks([0:0.05:0.4])
-            ylim([0 .4])
+%             yticks([0:0.05:0.4])
+%             ylim([0 .4])
              set(gca,'TickLabelInterpreter','latex')
 
         xticks([1 2])
@@ -218,7 +218,7 @@ close all
 clear all
 cd("C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\Results")
 FS=9
-fileID = fopen('counterfactuals_noimp.txt','r');
+fileID = fopen('counterfactuals_noimp_ts.txt','r');
 counterfactuals = fscanf(fileID,'%f')
 fclose(fileID);
 
@@ -234,7 +234,7 @@ counterfactuals=reshape(counterfactuals(1:variables*nkk*villages),variables,nkk,
 % A=mean(counterfactuals(4,:,:),3)
 % B=mean(counterfactuals(5,:,:),3)
 A=counterfactuals(4,:,v_l)
-c_e=7
+c_e=11
 figure(1)
 set(1,'position',[50    500    550    200])
 subplot(1,2,1)
@@ -271,36 +271,35 @@ cd("C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\pr
 FS=9
 TAB = readtable('flow_fail_prob_r.csv');
 A=TAB{:,:}
-B=reshape(A(:,4:8),3,2,18,5)
+B=reshape(A(:,4:8),4,2,18,5)
 Q=[0.1;0.25;0.5;0.75;1];
 figure(7)
 set(7,'position',[50    150    450    200])
-plot((squeeze(B(1,1,:,:))*Q*0.5+squeeze(B(1,2,:,:))*Q*0.5)./(squeeze(B(1,1,1,:))'*Q*0.5+squeeze(B(1,2,1,:))'*Q*0.5),'linewidth',2)
+plot(squeeze(B(1,1,:,:))*Q*0.5+squeeze(B(1,2,:,:))*Q*0.5,'linewidth',2)
 hold on
-plot((squeeze(B(2,1,:,:))*Q*0.5+squeeze(B(2,2,:,:))*Q*0.5)./(squeeze(B(2,1,1,:))'*Q*0.5+squeeze(B(2,2,1,:))'*Q*0.5),'linewidth',2)
-plot((squeeze(B(3,1,:,:))*Q*0.5+squeeze(B(3,2,:,:))*Q*0.5)./(squeeze(B(3,1,1,:))'*Q*0.5+squeeze(B(3,2,1,:))'*Q*0.5),'linewidth',2)
-% hold on
+plot(squeeze(B(2,1,:,:))*Q*0.5+squeeze(B(2,2,:,:))*Q*0.5,'linewidth',2)
 % plot(squeeze(B(1,1,:,:))*Q*0.5+squeeze(B(1,2,:,:))*Q*0.5,'linewidth',2)
 % plot(squeeze(B(3,1,:,:))*Q*0.5+squeeze(B(3,2,:,:))*Q*0.5,'linewidth',2)
-% ylim([0 0.3])
+ylim([0.2 .7])
 xlim([1 10])
 xlabel('Number of Wells')
 set(gcf,'color','w') 
 set(gca,'FontName','Times New Roman','Fontsize',FS);
 print('flow_pr','-depsc')
 
-% figure(2)
-% set(2,'position',[50    150    225    200])
-% plot(TAB.Var9(TAB.Var3 == 2 & TAB.Var2 == 0)*0.5+...
-% TAB.Var9(TAB.Var3 == 2 & TAB.Var2 == 1)*0.5,'linewidth',2)
-% hold on
-% yticks([0:0.1:0.7])
-% ylim([0 0.7])
-% xlim([1 10])
-% xlabel('Number of Wells')
-% set(gca,'FontName','Times New Roman','Fontsize',FS);
-% set(gcf,'color','w') ;
-% print('failure_pr','-depsc')
+B=reshape(A(:,9),4,2,18)
+figure(2)
+set(2,'position',[50    150    225    200])
+plot(squeeze(B(1,1,:))*0.5+squeeze(B(1,2,:))*0.5,'linewidth',2)
+hold on
+plot(squeeze(B(2,1,:))*0.5+squeeze(B(2,2,:))*0.5,'linewidth',2)
+yticks([0:0.1:0.7])
+ylim([0 0.7])
+xlim([1 10])
+xlabel('Number of Wells')
+set(gca,'FontName','Times New Roman','Fontsize',FS);
+set(gcf,'color','w') ;
+print('failure_pr','-depsc')
 
 %% Transitional Dynamics
 

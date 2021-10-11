@@ -20,7 +20,7 @@ subroutine quantifiying_strategic_interactions(params)
     v_l=1
     !Compute expected productivity 
     do a_l=1,types_a;do u_l=1,unobs_types
-        call expected_productivity((/params(1),params(2)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+        call expected_productivity(params(1:3),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         print*,'Type',u_l,a_l
         print*, 'private return',(Ef_v(1,2,1,a_l,v_l,u_l))/(1.0d0-beta*(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_s
         print*, 'social return',(Ef_v(1,2,1,a_l,v_l,u_l)-c_e),(Ef_v(1,2,1,a_l,v_l,u_l)-c_e)/(1.0d0-beta*(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_s

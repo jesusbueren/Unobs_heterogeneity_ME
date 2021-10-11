@@ -19,10 +19,10 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N
 
     !Compute expected productivity 
     do a_l=1,types_a;do u_l=1,unobs_types
-        call expected_productivity((/params(1),params(2)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+        call expected_productivity(params(1:3),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         !print*,'Type',u_l,a_l
         !print*, 'private return',(ef_v(1,2,1,a_l,v_l,u_l))/(1.0d0-beta*(1.0d0-pi_f_v(1,2,1,v_l,u_l)))-c_s
-        !print*, 'social return',(ef_v(1,2,1,a_l,v_l,u_l)-c_e),(ef_v(1,2,1,a_l,v_l,u_l)-c_e)/(1.0d0-(1.0d0-pi_f_v(1,2,1,v_l,u_l)))-c_s
+        !print*, 'social return',(ef_v(1,2,1,a_l,v_l,u_l)-c_e),(ef_v(1,2,1,a_l,v_l,u_l)-c_e)/(1.0d0-beta*(1.0d0-pi_f_v(1,2,1,v_l,u_l)))-c_s
     end do;end do
 
 
@@ -75,7 +75,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N
     P_l2=P_max
     dist=0.0
     do P_l=2,P_max; do n_l=1,2;do ind=1,2*P_l-1; 
-        dist=dist+dble(sum(iterations(ind,n_l,1:3,P_l)))/dble(sum(iterations(:,1:2,1:3,:)))*sum(abs(CCP_old(ind,n_l,P_l,:,:)-CCP(ind,n_l,P_l,:,:))/CCP_old(ind,n_l,P_l,:,:))/dble(types_a)/dble(unobs_types)
+        dist=dist+dble(sum(iterations(ind,n_l,1:3,P_l)))/dble(sum(iterations(:,1:2,1:3,:)))*sum(abs(CCP_old(ind,n_l,P_l,:,:)-CCP(ind,n_l,P_l,:,:)))/dble(types_a)/dble(unobs_types)
     end do;end do; end do
     !print*,'village',v_l
     print*,'dist CCP',dist,'social_output',social_output
@@ -87,7 +87,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N
     
     !print*,'press any key to continue'
     !read*,pause_k
-    if (dist>6.0d-3) then !1.0d-4 
+    if (dist>1.0d-3) then !1.0d-4 
         go to 1 
     end if
     

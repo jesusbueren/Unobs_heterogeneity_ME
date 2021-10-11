@@ -67,7 +67,7 @@ subroutine solve_path(params,T_path,Sims,n_ini,F_in,v_l,V_in,mean_N,social_outpu
 
     !Compute expected productivity 
     do u_l=1,unobs_types;do a_l=1,types_a
-        call expected_productivity((/params(1),params(2)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+        call expected_productivity(params(1:3),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
     end do;end do
     
     !Taking as given the value function of the next period compute the value function and CCP of the next period

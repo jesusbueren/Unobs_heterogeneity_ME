@@ -26,7 +26,7 @@ subroutine compute_moments(data_in,string_name,moment_own_nxa)
     do i_l=1,plots_i
         if (impute_i(i_l)==0) then
             do t_l=1,T_sim
-                if (data_in(t_l,i_l)/=-9.0d0 .and. n_data(t_l,i_l)<3) then
+                if (data_in(t_l,i_l)/=-9.0d0 .and. n_data(t_l,i_l)<3 .and. can_be_zombie_i(i_l)==0) then
 
                         !Moments across number of functioning wells in adjacency
                         counter_N(modal_N(t_l,i_l))=counter_N(modal_N(t_l,i_l))+1.0d0
