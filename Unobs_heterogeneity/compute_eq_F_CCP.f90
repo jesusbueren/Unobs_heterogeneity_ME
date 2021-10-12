@@ -2,7 +2,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N
     use cadastral_maps; use dimensions; use primitives
     implicit none
     double precision,dimension(par),intent(in)::params
-    double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max),intent(out)::F
+    double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,unobs_types),intent(out)::F
     double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types),intent(inout)::CCP_mid
     integer,dimension(plots_in_map,1),intent(inout)::n_initial
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(inout)::V_fct,V_social
@@ -14,7 +14,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
     double precision::dist
     integer::p_l,a_l,n_l,P_l2,ind,counter_all,counter_bad,u_l
-    integer(8),dimension(2*P_max-1,3,3,P_max)::iterations
+    integer(8),dimension(2*P_max-1,3,3,P_max,unobs_types)::iterations
     character::pause_k
 
     !Compute expected productivity 
@@ -42,19 +42,19 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N
     counter_all=0
     do P_l=1,P_max; do u_l=1,unobs_types; do a_l=1,types_a
         call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
-                            ,F(1:2*P_l-1,1:2*P_l-1,:,:,P_l) &
+                            ,F(1:2*P_l-1,1:2*P_l-1,:,:,P_l,u_l) &
                             ,P_l &
                             ,CCP(1:2*P_l-1,:,P_l,a_l,u_l),v_l,u_l &
                             ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l))
         social=0
         call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
-                            ,F(1:2*P_l-1,1:2*P_l-1,:,:,P_l) &
+                            ,F(1:2*P_l-1,1:2*P_l-1,:,:,P_l,u_l) &
                             ,P_l &
                             ,CCP(1:2*P_l-1,:,P_l,a_l,u_l),CCP2(1:2*P_l-1,:,P_l,a_l,u_l),v_l,u_l &
                             ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l),a_l)
         social=1
         call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
-                            ,F(1:2*P_l-1,1:2*P_l-1,:,:,P_l) &
+                            ,F(1:2*P_l-1,1:2*P_l-1,:,:,P_l,u_l) &
                             ,P_l &
                             ,CCP(1:2*P_l-1,:,P_l,a_l,u_l),CCP2(1:2*P_l-1,:,P_l,a_l,u_l),v_l,u_l &
                             ,V_social(1:2*P_l-1,:,P_l,a_l,u_l),a_l)
@@ -75,7 +75,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N
     P_l2=P_max
     dist=0.0
     do P_l=2,P_max; do n_l=1,2;do ind=1,2*P_l-1; 
-        dist=dist+dble(sum(iterations(ind,n_l,1:3,P_l)))/dble(sum(iterations(:,1:2,1:3,:)))*sum(abs(CCP_old(ind,n_l,P_l,:,:)-CCP(ind,n_l,P_l,:,:)))/dble(types_a)/dble(unobs_types)
+        dist=dist+dble(sum(iterations(ind,n_l,1:3,P_l,:)))/dble(sum(iterations(:,1:2,1:3,:,:)))*sum(abs(CCP_old(ind,n_l,P_l,:,:)-CCP(ind,n_l,P_l,:,:)))/dble(types_a)/dble(unobs_types)
     end do;end do; end do
     !print*,'village',v_l
     print*,'dist CCP',dist,'social_output',social_output

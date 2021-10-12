@@ -61,10 +61,11 @@ fclose(fileID);
 
 scatter(modl_V,data_V)
 hold on
-P = polyfit(modl_V,data_V,1);
-yfit = P(1)*modl_V+P(2);
+% P = polyfit(modl_V,data_V,1);
+x=[0.02:0.01:0.11]
+yfit = 1*x+0;
 hold on;
-plot(modl_V,yfit,'r-.');
+plot(x,yfit,'r-.');
 % ylim([0 0.15])
 % xlim([0.05 0.1])
 xlabel('Model')
@@ -139,8 +140,8 @@ i=3
                 title("$a>4.0$",'Interpreter','latex')
             end
             data_gr=[data_own_n(j,:); modl_own_n(j,:)]'
-            yticks([0:0.05:0.5])
-            ylim([0 0.5])
+            yticks([0:0.05:0.15])
+            ylim([0 0.15])
             set(gca,'TickLabelInterpreter','latex')
         xticks([1 2])
         xticklabels({'$n=0$','$n=1$'})

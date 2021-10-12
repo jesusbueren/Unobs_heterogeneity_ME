@@ -65,9 +65,8 @@ subroutine estimation(params_MLE,log_likeli)
     
     print*,'iteration number',it
     if (it==1) then
-        p_g(1,:)=(/18.13d0,0.6d0,0.2d0,8.4d0,0.2d0/)
-        !p_g(1,4:16)=2.0d0
-        !p_g(1,5)=1.0d0
+        p_g(1,1:5)=(/18.13d0,0.6d0,0.26d0,7.4d0,0.72d0/)
+        !p_g(1,6:18)=1.0d0
     end if
     
     do p_l=2,par+1
@@ -82,7 +81,7 @@ subroutine estimation(params_MLE,log_likeli)
         p_g(p_l,2:3)=log(p_g(p_l,2:3)/(1.0d0-p_g(p_l,2:3)))
         p_g(p_l,4)=log(p_g(p_l,4))
         p_g(p_l,5)=log(p_g(p_l,5)/(1.0d0-p_g(p_l,5)))
-        !p_g(p_l,4:16)=log(p_g(p_l,4:16))
+        !p_g(p_l,6:18)=log(p_g(p_l,6:18))
         y(p_l)=log_likelihood(p_g(p_l,:))
         !print*,'press key to continue'
         !read*,pause_k 
@@ -105,7 +104,7 @@ subroutine estimation(params_MLE,log_likeli)
     p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
     p_g(:,4)=exp(p_g(:,4))
     p_g(:,5)=1.0d0/(1.0d0 + exp(-p_g(:,5))) 
-    !p_g(:,4:16)=exp(p_g(:,4:16))
+    !p_g(:,6:18)=exp(p_g(:,6:18))
     !print*,'likelihood powell',y(1)
     !print*,'parameter powell',p_g(1,:)
     
@@ -116,12 +115,12 @@ subroutine estimation(params_MLE,log_likeli)
 
     !rho=reshape(p_g(1,4:7),(/2,2/))
     CCP_old=CCP_est
-    !village_fe(1)=1.0d0
-    !village_fe(2:villages)=params_MLE(4:16)
+    village_fe=1.0d0
+    !village_fe(2:villages)=params_MLE(6:18)
     
     do v_l=1,villages
         do u_l=1,unobs_types;do a_l=1,types_a
-            call expected_productivity(params_MLE(1:3),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+            call expected_productivity((/params_MLE(1)*village_fe(v_l),params_MLE(2),params_MLE(3)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         end do;end do
         do P_l=2,P_max; do a_l=1,types_a; do u_l=1,unobs_types 
             call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
@@ -184,14 +183,12 @@ function log_likelihood(params_MLE)
     params(2:3)=1.0d0/(1.0d0 + exp(-params_MLE(2:3))) 
     params(4)=exp(params_MLE(4))
     params(5)=1.0d0/(1.0d0 + exp(-params_MLE(5))) 
-
-    
-    !params(4:16)=exp(params_MLE(4:16))
+    !params(6:18)=exp(params_MLE(6:18))
     
     rho=params(4)
     pr_non_zombie_II=params(5)
-    !village_fe(1)=1.0d0
-    !village_fe(2:villages)=params(4:16)
+    village_fe=1.0d0
+    !village_fe(2:villages)=params(6:18)
     
     CCP_aux=1.0d0/(1.0d0+exp(-(-PI_s_v(1:2*P_max-1,2,P_max,:)*c_s-(1.0d0-PI_s_v(1:2*P_max-1,2,P_max,:))*c_d)/rho(2)))
 
@@ -202,7 +199,7 @@ function log_likelihood(params_MLE)
     missing_x1=0
     
     do a_l=1,types_a; do v_l=1,villages;do u_l=1,unobs_types
-        call expected_productivity(params(1:3),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+        call expected_productivity((/params(1)*village_fe(v_l),params(2),params(3)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         !if (v_l==1) then
         !    print*,'Type',u_l,a_l
         !    print*, 'private return',(Ef_v(1,2,1,a_l,v_l,u_l))/(1.0d0-beta*(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_s
@@ -404,8 +401,8 @@ function log_likelihood(params_MLE)
                             if (can_be_zombie_i(i_l)==0) then
                                 av_CCP_it(t_l,i_l)=sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t))) 
                             else
-                                av_CCP_it(t_l,i_l)=pr_non_zombie_II*sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t)))  
-                            end if
+                                av_CCP_it(t_l,i_l)=sum(likelihood_i*UHE_type_model(:,i_l))*pr_non_zombie_II/(sum(likelihood_i*UHE_type_model(:,i_l)*pr_non_zombie_II+1)*sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t)))) 
+                            end if    
                             !print*,(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t)) 
                             !print*,'paused'
                             !read*,pause_k
