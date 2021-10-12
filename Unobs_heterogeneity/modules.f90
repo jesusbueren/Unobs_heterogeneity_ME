@@ -1,7 +1,7 @@
 module dimensions
     implicit none
     integer,parameter::P_max=6 ! Set the maximum number of plots in an adjacency
-    integer,parameter::K=5,par=4,M=2,types_a=2 !K: points of support of flow; M:types of moonzoons; type_a: types of areas
+    integer,parameter::K=5,par=5,M=2,types_a=2 !K: points of support of flow; M:types of moonzoons; type_a: types of areas
     integer::selected_type=4
 end
     
@@ -65,7 +65,7 @@ use cadastral_maps
     !Parameters of the simulated panel-> I: number of indv; T: number of periods
     integer,parameter::T_sim=5,plots_i=1052
     ! dec_it: drilling decision
-    double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,villages)::F_est
+    double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,villages,unobs_types)::F_est
     double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP_est
     double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP_final=0.0d0
     integer::bootstrap=0
