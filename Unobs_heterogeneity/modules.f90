@@ -8,7 +8,7 @@ end
 module cadastral_maps
     use dimensions
     implicit none
-    integer,parameter::plots_in_map=1909,villages=14,unobs_types=4
+    integer,parameter::plots_in_map=1909,villages=14,unobs_types=3
     integer,parameter,dimension(villages)::plots_v=(/1794,302,912,517,292,535,939,637,405,837,973,1844,443,1909/) !plots in each village
     double precision,dimension(villages):: mean_area
     integer,dimension(plots_in_map,plots_in_map,villages)::neighbors_map
@@ -47,7 +47,7 @@ module primitives
     double precision,dimension(types_a)::area=(/1.3d0,4.0d0/)!(/1.0d0,2.0d0,3.0d0,5.1d0/) 
     double precision,dimension(types_a-1)::area_lims=2.3d0 !(/1.3d0,2.3d0,4.0d0/) !
     !pr of unobserved heterogeneity type
-    double precision,dimension(unobs_types)::pr_unobs_t=(/0.25d0,0.25d0,0.25d0,0.25d0/)
+    double precision,dimension(unobs_types)::pr_unobs_t=1.0d0/dble(unobs_types)
     !Taxation parameters
     double precision::T_g=0.0d0,tau=0.0d0
     double precision,dimension(2*P_max-1,P_max,types_a,villages,unobs_types)::smthg=0.06d0

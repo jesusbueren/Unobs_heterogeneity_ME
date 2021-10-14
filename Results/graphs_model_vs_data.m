@@ -39,15 +39,15 @@ fclose(fileID);
 fileID = fopen('data_uhe.txt','r');
 data_uhe = fscanf(fileID,'%f')
 fclose(fileID);
-data_uhe=reshape(data_uhe,4,2)
+data_uhe=reshape(data_uhe,3,2)
 fileID = fopen('counter_uhe.txt','r');
 counter_uhe = fscanf(fileID,'%f')
 fclose(fileID);
-counter_uhe=reshape(counter_uhe,4,2)
+counter_uhe=reshape(counter_uhe,3,2)
 fileID = fopen('modl_uhe.txt','r');
 modl_uhe = fscanf(fileID,'%f')
 fclose(fileID);
-modl_uhe=reshape(modl_uhe,4,2)
+modl_uhe=reshape(modl_uhe,3,2)
 
 fileID = fopen('data_V.txt','r');
 data_V = fscanf(fileID,'%f')
