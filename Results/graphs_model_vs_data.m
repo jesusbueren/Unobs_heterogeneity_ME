@@ -140,8 +140,8 @@ i=3
                 title("$a>4.0$",'Interpreter','latex')
             end
             data_gr=[data_own_n(j,:); modl_own_n(j,:)]'
-            yticks([0:0.05:0.15])
-            ylim([0 0.15])
+            yticks([0:0.05:0.35])
+            ylim([0 0.35])
             set(gca,'TickLabelInterpreter','latex')
         xticks([1 2])
         xticklabels({'$n=0$','$n=1$'})

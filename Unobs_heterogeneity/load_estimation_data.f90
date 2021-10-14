@@ -26,8 +26,8 @@ subroutine load_estimation_data
     impute_i=data_csv(20,1,:)
     can_be_zombie_i=data_csv(21,1,:)
     print*,'no zombie in estimation data'
-    !impute_i=can_be_zombie_i
-    !can_be_zombie_i=0
+    impute_i=can_be_zombie_i
+    can_be_zombie_i=0
     
 
     !UHE_type(selected_type,:)=1.0d0

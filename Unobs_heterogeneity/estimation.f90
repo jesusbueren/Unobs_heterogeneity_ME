@@ -41,7 +41,7 @@ subroutine estimation(params_MLE,log_likeli)
     !Generate an initial well endowment: everyone has zero wells
 1   n_initial_all(1:plots_in_map,:)=1    
     call random_seed(GET=seed_c)
-    if (it>1) then
+    !if (it>1) then
         !$OMP PARALLEL default(shared) 
         !$OMP  DO
         do v_l=1,villages
@@ -53,11 +53,11 @@ subroutine estimation(params_MLE,log_likeli)
         open(unit=12, file=path_results//"beliefs_6.txt")
         write(12,*),F_est,Pr_u_X,iterations_all
         close(12)
-    else
-        open(unit=12, file=path_results//"beliefs_6.txt")
-            read(12,*),F_est,Pr_u_X,iterations_all
-        close(12)
-    end if
+    !else
+    !    open(unit=12, file=path_results//"beliefs_6.txt")
+    !        read(12,*),F_est,Pr_u_X,iterations_all
+    !    close(12)
+    !end if
     
     call random_seed(PUT=seed_c)
     !Fixing beliefs, estimate parameter
@@ -65,7 +65,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     print*,'iteration number',it
     if (it==1) then
-        p_g(1,1:5)=(/18.13d0,0.6d0,0.26d0,7.4d0,0.72d0/)
+        p_g(1,:)=(/21.13d0,0.36d0,0.13d0,7.6d0/)
         !p_g(1,6:18)=1.0d0
     end if
     
@@ -80,7 +80,7 @@ subroutine estimation(params_MLE,log_likeli)
         p_g(p_l,1)=log(p_g(p_l,1))
         p_g(p_l,2:3)=log(p_g(p_l,2:3)/(1.0d0-p_g(p_l,2:3)))
         p_g(p_l,4)=log(p_g(p_l,4))
-        p_g(p_l,5)=log(p_g(p_l,5)/(1.0d0-p_g(p_l,5)))
+        !p_g(p_l,5)=log(p_g(p_l,5)/(1.0d0-p_g(p_l,5)))
         !p_g(p_l,6:18)=log(p_g(p_l,6:18))
         y(p_l)=log_likelihood(p_g(p_l,:))
         !print*,'press key to continue'
@@ -103,7 +103,7 @@ subroutine estimation(params_MLE,log_likeli)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
     p_g(:,4)=exp(p_g(:,4))
-    p_g(:,5)=1.0d0/(1.0d0 + exp(-p_g(:,5))) 
+    !p_g(:,5)=1.0d0/(1.0d0 + exp(-p_g(:,5))) 
     !p_g(:,6:18)=exp(p_g(:,6:18))
     !print*,'likelihood powell',y(1)
     !print*,'parameter powell',p_g(1,:)
@@ -182,11 +182,11 @@ function log_likelihood(params_MLE)
     params(1)=exp(params_MLE(1))
     params(2:3)=1.0d0/(1.0d0 + exp(-params_MLE(2:3))) 
     params(4)=exp(params_MLE(4))
-    params(5)=1.0d0/(1.0d0 + exp(-params_MLE(5))) 
+    !params(5)=1.0d0/(1.0d0 + exp(-params_MLE(5))) 
     !params(6:18)=exp(params_MLE(6:18))
     
     rho=params(4)
-    pr_non_zombie_II=params(5)
+    pr_non_zombie_II=1.0d0!params(5)
     village_fe=1.0d0
     !village_fe(2:villages)=params(6:18)
     
@@ -384,7 +384,7 @@ function log_likelihood(params_MLE)
                         if (can_be_zombie_i(i_l)==0) then
                             log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l))*pr_non_zombie_II)  
                         else
-                            log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l))*pr_non_zombie_II+(1.0d0-pr_non_zombie_II)) !*UHE_type(:,i_l)
+                            log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l))*pr_non_zombie_II+(1.0d0-pr_non_zombie_II)) 
                         end if
                     else
                         missing_x1=missing_x1+1
@@ -403,9 +403,6 @@ function log_likelihood(params_MLE)
                             else
                                 av_CCP_it(t_l,i_l)=sum(likelihood_i*UHE_type_model(:,i_l))*pr_non_zombie_II/(sum(likelihood_i*UHE_type_model(:,i_l)*pr_non_zombie_II+1)*sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t)))) 
                             end if    
-                            !print*,(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t)) 
-                            !print*,'paused'
-                            !read*,pause_k
                         else
                             av_CCP_it(t_l,i_l)=-9.0d0
                         end if
