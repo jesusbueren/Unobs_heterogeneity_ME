@@ -61,7 +61,7 @@ do P_l=1,P_max
     CCP_est(1:2*P_l-1,1:2,P_l,:,:,:)=0.15d0
 end do
 
-call estimation(params_MLE,log_likeli)
+!call estimation(params_MLE,log_likeli)
 !print*,'end maximization'
 !
 !open(unit=12, file=path_results//"bootstrapped_parameters_85_nem.txt",status='replace')

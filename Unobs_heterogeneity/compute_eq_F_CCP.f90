@@ -20,9 +20,9 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N
     !Compute expected productivity 
     do a_l=1,types_a;do u_l=1,unobs_types
         call expected_productivity(params(1:3),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
-        print*,'Type',u_l,a_l
-        print*, 'private return',(ef_v(1,2,1,a_l,v_l,u_l))/(1.0d0-beta*(1.0d0-pi_f_v(1,2,1,v_l,u_l)))-c_s
-        print*, 'social return',(ef_v(1,2,1,a_l,v_l,u_l)-c_e),(ef_v(1,2,1,a_l,v_l,u_l)-c_e)/(1.0d0-beta*(1.0d0-pi_f_v(1,2,1,v_l,u_l)))-c_s
+        !print*,'Type',u_l,a_l
+        !print*, 'private return',(ef_v(1,2,1,a_l,v_l,u_l))/(1.0d0-beta*(1.0d0-pi_f_v(1,2,1,v_l,u_l)))-c_s
+        !print*, 'social return',(ef_v(1,2,1,a_l,v_l,u_l)-c_e),(ef_v(1,2,1,a_l,v_l,u_l)-c_e)/(1.0d0-beta*(1.0d0-pi_f_v(1,2,1,v_l,u_l)))-c_s
     end do;end do
 
 

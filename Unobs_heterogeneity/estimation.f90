@@ -41,7 +41,7 @@ subroutine estimation(params_MLE,log_likeli)
     !Generate an initial well endowment: everyone has zero wells
 1   n_initial_all(1:plots_in_map,:)=1    
     call random_seed(GET=seed_c)
-    !if (it>1) then
+    if (it>1) then
         !$OMP PARALLEL default(shared) 
         !$OMP  DO
         do v_l=1,villages
@@ -53,11 +53,11 @@ subroutine estimation(params_MLE,log_likeli)
         open(unit=12, file=path_results//"beliefs_6.txt")
         write(12,*),F_est,Pr_u_X,iterations_all
         close(12)
-    !else
-    !    open(unit=12, file=path_results//"beliefs_6.txt")
-    !        read(12,*),F_est,Pr_u_X,iterations_all
-    !    close(12)
-    !end if
+    else
+        open(unit=12, file=path_results//"beliefs_6.txt")
+            read(12,*),F_est,Pr_u_X,iterations_all
+        close(12)
+    end if
     
     call random_seed(PUT=seed_c)
     !Fixing beliefs, estimate parameter
@@ -147,7 +147,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     !New guess of the ccp is half way through
     CCP_mid=CCP_est*0.5d0+CCP_old*0.5d0
-    if (dist>5.0d-3) then
+    if (dist>1.0d-3) then
         it=it+1
         go to 1
     end if
@@ -362,14 +362,14 @@ function log_likelihood(params_MLE)
 
                         likelihood_i=likelihood_i*likelihood_it*P_N2_N1*P_BigN2_BigN1
 
-                        if (isnan(sum(likelihood_i))) then
-                            print*,'pb in likelihood',i_l,ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),2),drilling_it(t_l,i_l,s_l)
-                            read*,end_k
-                        end if
-                        if (sum(likelihood_i)==0.0d0) then
-                            print*,'pb in likelihood',i_l,ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),2),drilling_it(t_l,i_l,s_l)
-                            read*,end_k
-                        end if
+                        !if (isnan(sum(likelihood_i))) then
+                        !    print*,'pb in likelihood',i_l,ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),2),drilling_it(t_l,i_l,s_l)
+                        !    read*,end_k
+                        !end if
+                        !if (sum(likelihood_i)==0.0d0) then
+                        !    print*,'pb in likelihood',i_l,ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),2),drilling_it(t_l,i_l,s_l)
+                        !    read*,end_k
+                        !end if
                         
                     end do;
 
@@ -397,7 +397,7 @@ function log_likelihood(params_MLE)
                     !    read*,pause_k
                     !end if
                     do t_l=1,T_sim
-                        if (drilling_it(t_l,i_l,s_l)==1 .or. drilling_it(t_l,i_l,s_l)==0 .and. sum(likelihood_i*UHE_type_model(:,i_l))/=0.0d0) then
+                        if ((drilling_it(t_l,i_l,s_l)==1 .or. drilling_it(t_l,i_l,s_l)==0) .and. sum(likelihood_i*UHE_type_model(:,i_l))/=0.0d0) then
                             if (can_be_zombie_i(i_l)==0) then
                                 av_CCP_it(t_l,i_l)=sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t))) 
                             else
@@ -425,8 +425,7 @@ function log_likelihood(params_MLE)
         close(12)
         max_mle=log_likelihood
     end if
-    
-    
+        
     
     print*,'likelihood',log_likelihood
     print*,'missing_x1',missing_x1

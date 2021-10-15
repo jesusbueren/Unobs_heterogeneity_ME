@@ -272,7 +272,7 @@ cd("C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\pr
 FS=9
 TAB = readtable('flow_fail_prob_r.csv');
 A=TAB{:,:}
-B=reshape(A(:,4:8),4,2,18,5)
+B=reshape(A(:,4:8),3,2,18,5)
 Q=[0.1;0.25;0.5;0.75;1];
 figure(7)
 set(7,'position',[50    150    450    200])
@@ -288,7 +288,7 @@ set(gcf,'color','w')
 set(gca,'FontName','Times New Roman','Fontsize',FS);
 print('flow_pr','-depsc')
 
-B=reshape(A(:,9),4,2,18)
+B=reshape(A(:,9),3,2,18)
 figure(2)
 set(2,'position',[50    150    225    200])
 plot(squeeze(B(1,1,:))*0.5+squeeze(B(1,2,:))*0.5,'linewidth',2)
