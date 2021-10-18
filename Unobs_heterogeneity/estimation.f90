@@ -65,7 +65,8 @@ subroutine estimation(params_MLE,log_likeli)
     
     print*,'iteration number',it
     if (it==1) then
-        p_g(1,:)=(/21.13d0,0.36d0,0.13d0,7.6d0/)
+        p_g(1,1:4)=(/8.58d0,0.27d0,0.99d0,12.1d0/)
+        !p_g(1,5:12)=1.0d0
         !p_g(1,6:18)=1.0d0
     end if
     
@@ -120,7 +121,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     do v_l=1,villages
         do u_l=1,unobs_types;do a_l=1,types_a
-            call expected_productivity((/params_MLE(1)*village_fe(v_l),params_MLE(2),params_MLE(3)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+            call expected_productivity((/params_MLE(1)*village_fe(v_l),params_MLE(2),0.0d0/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         end do;end do
         do P_l=2,P_max; do a_l=1,types_a; do u_l=1,unobs_types 
             call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
@@ -178,15 +179,21 @@ function log_likelihood(params_MLE)
     double precision,dimension(types_a,2)::moment_own_nxa_model
     double precision,dimension(2*P_max-1,villages)::CCP_aux
     double precision,dimension(villages)::village_fe
+    double precision,dimension(unobs_types,COV)::Betas
+    double precision,dimension(COV,1)::X
+    double precision,dimension(unobs_types,1)::type_pr_u
     
     params(1)=exp(params_MLE(1))
     params(2:3)=1.0d0/(1.0d0 + exp(-params_MLE(2:3))) 
     params(4)=exp(params_MLE(4))
+    !params(5:12)=params_MLE(5:12)
+    Betas=0.0d0
+    !Betas(2:unobs_types,:)=reshape(params(5:12),(/unobs_types-1,COV/))
     !params(5)=1.0d0/(1.0d0 + exp(-params_MLE(5))) 
     !params(6:18)=exp(params_MLE(6:18))
     
     rho=params(4)
-    pr_non_zombie_II=1.0d0!params(5)
+    pr_non_zombie_II=params(3)
     village_fe=1.0d0
     !village_fe(2:villages)=params(6:18)
     
@@ -199,7 +206,7 @@ function log_likelihood(params_MLE)
     missing_x1=0
     
     do a_l=1,types_a; do v_l=1,villages;do u_l=1,unobs_types
-        call expected_productivity((/params(1)*village_fe(v_l),params(2),params(3)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+        call expected_productivity((/params(1)*village_fe(v_l),params(2),0.0d0/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         !if (v_l==1) then
         !    print*,'Type',u_l,a_l
         !    print*, 'private return',(Ef_v(1,2,1,a_l,v_l,u_l))/(1.0d0-beta*(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_s
@@ -230,6 +237,10 @@ function log_likelihood(params_MLE)
         !OPEN(UNIT=12, FILE=path_results//"likelihood.txt")
         do s_l=1,simulations
         do i_l=1,plots_i;
+            X(:,1)=(/1.0d0,N_bar(i_l),dble(A_type(i_l)-1),dble(P_type(i_l))/)
+            type_pr_u=exp(matmul(Betas,X))/sum(exp(matmul(Betas,X)))
+            
+            !type_pr_u=
             if (impute_i(i_l)==0) then
                 UHE_type_model(:,i_l)=0.0d0
                 if (P_type(i_l)>1) then !more than one neighbor
@@ -382,9 +393,9 @@ function log_likelihood(params_MLE)
                     if (sum(likelihood_i*UHE_type_model(:,i_l))/=0.0d0)then !UHE_type_model(1,i_l)
                     !    !print*,i_l,likelihood_i(2),UHE_type_model(2,i_l),log_likelihood
                         if (can_be_zombie_i(i_l)==0) then
-                            log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l))*pr_non_zombie_II)  
+                            log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l)*type_pr_u(:,1))*pr_non_zombie_II)  
                         else
-                            log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l))*pr_non_zombie_II+(1.0d0-pr_non_zombie_II)) 
+                            log_likelihood=log_likelihood+log(sum(likelihood_i*UHE_type_model(:,i_l)*type_pr_u(:,1))*pr_non_zombie_II+(1.0d0-pr_non_zombie_II)) 
                         end if
                     else
                         missing_x1=missing_x1+1
@@ -399,9 +410,9 @@ function log_likelihood(params_MLE)
                     do t_l=1,T_sim
                         if ((drilling_it(t_l,i_l,s_l)==1 .or. drilling_it(t_l,i_l,s_l)==0) .and. sum(likelihood_i*UHE_type_model(:,i_l))/=0.0d0) then
                             if (can_be_zombie_i(i_l)==0) then
-                                av_CCP_it(t_l,i_l)=sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t))) 
+                                av_CCP_it(t_l,i_l)=sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t*type_pr_u(:,1)*pr_non_zombie_II/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t*type_pr_u(:,1)*pr_non_zombie_II))) 
                             else
-                                av_CCP_it(t_l,i_l)=sum(likelihood_i*UHE_type_model(:,i_l))*pr_non_zombie_II/(sum(likelihood_i*UHE_type_model(:,i_l)*pr_non_zombie_II+1)*sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t)))) 
+                                av_CCP_it(t_l,i_l)=sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t*type_pr_u(:,1)*pr_non_zombie_II/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t*type_pr_u(:,1)*pr_non_zombie_II+(1-pr_non_zombie_II))))
                             end if    
                         else
                             av_CCP_it(t_l,i_l)=-9.0d0
@@ -418,7 +429,7 @@ function log_likelihood(params_MLE)
 
     call compute_moments(av_CCP_it,"modl",moment_own_nxa_model)
     !GMM
-    !log_likelihood=sum(((moment_own_nxa_model-moment_own_nxa_data))**2)
+    log_likelihood=sum(((moment_own_nxa_model-moment_own_nxa_data))**2)
     if (bootstrap==0 .and. log_likelihood<max_mle) then
         open(unit=12, file=path_results//"parameters.txt",status='replace')
             write(12,'(<par>f20.12,f20.12)'),params,log_likelihood

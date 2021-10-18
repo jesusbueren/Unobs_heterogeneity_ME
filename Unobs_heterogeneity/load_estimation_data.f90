@@ -26,8 +26,9 @@ subroutine load_estimation_data
     impute_i=data_csv(20,1,:)
     can_be_zombie_i=data_csv(21,1,:)
     print*,'no zombie in estimation data'
-    impute_i=can_be_zombie_i
-    can_be_zombie_i=0
+    !can_be_zombie_i=0
+    !impute_i=can_be_zombie_i
+    
     
 
     !UHE_type(selected_type,:)=1.0d0
@@ -41,6 +42,7 @@ subroutine load_estimation_data
     do i_l=1,plots_i;do t_l=1,T_sim
         modal_N(t_l,i_l)=maxloc(Pr_N_data(:,t_l,i_l),1)-(n_data(t_l,i_l)-1)
     end do;end do
+    N_bar=dble(sum(modal_N,1))/dble(T_sim)-1.0d0
     
     
     

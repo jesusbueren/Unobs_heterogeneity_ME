@@ -45,6 +45,7 @@ count if area_ac_`m'!=-9
 *Primitives on flow and failure by type and monsoon: I generate 4 different types of unobserved heterogeneity.
 clear all
 cd "C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME"
+*import excel using "primitives\allprobs_lnN_rho_median.xls",firstrow  
 import excel using "primitives\allprobs_lnN_rho.xls",firstrow  
 /*import excel using "primitives\flow_lnN_fail_N_prob_2T.xls",firstrow  
 sort T N M

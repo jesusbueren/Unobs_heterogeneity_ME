@@ -1,7 +1,7 @@
 module dimensions
     implicit none
     integer,parameter::P_max=6 ! Set the maximum number of plots in an adjacency
-    integer,parameter::K=5,par=4,M=2,types_a=2 !K: points of support of flow; M:types of moonzoons; type_a: types of areas
+    integer,parameter::K=5,par=4,M=2,types_a=2,COV=4 !K: points of support of flow; M:types of moonzoons; type_a: types of areas
     integer::selected_type=4
 end
     
@@ -79,6 +79,7 @@ use cadastral_maps
     integer,dimension(T_sim,plots_i)::n_data !number of wells in reference plot
     double precision,dimension(max_NFW+1,T_sim,plots_i)::Pr_N_data !pr of number of functioning wells in the adjacency
     integer,dimension(T_sim,plots_i)::modal_N !pr of number of functioning wells in the adjacency
+    double precision,dimension(plots_i)::N_bar
     double precision,dimension(types_a,2)::moment_own_nxa_data
     
     !Unobsverded heterogeneity from beliefs

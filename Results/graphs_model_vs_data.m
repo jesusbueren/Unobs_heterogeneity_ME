@@ -224,7 +224,7 @@ counterfactuals = fscanf(fileID,'%f')
 fclose(fileID);
 
 variables=5
-nkk=20
+nkk=18
 villages=floor(size(counterfactuals,1)/variables/nkk) %14
 beta=0.98
 
