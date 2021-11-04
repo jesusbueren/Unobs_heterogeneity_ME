@@ -184,5 +184,22 @@ bys big_N: sum drill if drill>=0
 
 bys a_type n: sum drill if drill>=0
 
+bys RespondentID: egen N_bar=mean(big_N)
+reg drill i.n big_N N_bar if can_be_zombie==0 & n<2
 
+bys RespondentID: egen total_d=total(drill)
+reg total_d N_bar n if year==2012 & can_be_zombie==0 
+
+clear all
+cd "C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\Unobs_heterogeneity"
+infix i_l 1-5 t_l 6-10 P 11-15 A 16-20 n_l 21-25 N 26-30 drill 31-35 using panel.txt
+replace N=N-1
+replace n_l=n_l-1
+replace drill=. if drill==-9
+sort i_l t_l
+by i_l: gen delta_n=n[_n+1]-n
+by i_l: egen total_d=total(drill)
+by i_l: egen N_bar=mean(N)
+reg drill i.n_l N N_bar 
+reg total_d N_bar n if t_l==1
 

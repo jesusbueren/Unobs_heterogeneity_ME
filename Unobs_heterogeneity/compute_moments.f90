@@ -9,6 +9,7 @@ subroutine compute_moments(data_in,string_name,moment_own_nxa)
     double precision,dimension(unobs_types,2)::counter_uhe,moment_uhe
     double precision,dimension(P_max)::counter_P,moment_P
     double precision,dimension(villages)::counter_v,moment_v
+    double precision,dimension(9)::counter_Nbar,moment_Nbar
     integer::i_l,t_l,u_l
     
     !Initialize to zero
@@ -22,16 +23,18 @@ subroutine compute_moments(data_in,string_name,moment_own_nxa)
     moment_P=0.0d0
     counter_v=0.0d0
     moment_v=0.0d0
+    counter_Nbar=0.0d0
+    moment_Nbar=0.0d0
     
     do i_l=1,plots_i
         if (impute_i(i_l)==0) then
             do t_l=1,T_sim
                 if (data_in(t_l,i_l)/=-9.0d0 .and. n_data(t_l,i_l)<3 ) then
 
-                        !Moments across number of functioning wells in adjacency
-                        counter_N(modal_N(t_l,i_l))=counter_N(modal_N(t_l,i_l))+1.0d0
-                        moment_N(modal_N(t_l,i_l))=(counter_N(modal_N(t_l,i_l))-1.0)/counter_N(modal_N(t_l,i_l))*moment_N(modal_N(t_l,i_l))&
-                                                    +1.0d0/counter_N(modal_N(t_l,i_l))*data_in(t_l,i_l)
+                    !Moments across number of functioning wells in adjacency
+                    counter_N(modal_N(t_l,i_l))=counter_N(modal_N(t_l,i_l))+1.0d0
+                    moment_N(modal_N(t_l,i_l))=(counter_N(modal_N(t_l,i_l))-1.0)/counter_N(modal_N(t_l,i_l))*moment_N(modal_N(t_l,i_l))&
+                                                +1.0d0/counter_N(modal_N(t_l,i_l))*data_in(t_l,i_l)
 
                     !Moments across number of owned functioning wells and owned wells
                     counter_own_nxa(A_type(i_l),n_data(t_l,i_l))=counter_own_nxa(A_type(i_l),n_data(t_l,i_l))+1.0d0
@@ -55,11 +58,20 @@ subroutine compute_moments(data_in,string_name,moment_own_nxa)
                         counter_v(V_type(i_l))=counter_v(V_type(i_l))+1.0d0
                         moment_v(V_type(i_l))=(counter_v(V_type(i_l))-1.0)/counter_v(V_type(i_l))*moment_v(V_type(i_l))&
                                                 +1.0d0/counter_v(V_type(i_l))*data_in(t_l,i_l)  
+                        
+                        !Moments across N_bar
+                        counter_Nbar(NINT(N_bar(i_l)))=counter_Nbar(NINT(N_bar(i_l)))+1.0d0
+                        moment_Nbar(NINT(N_bar(i_l)))=(counter_Nbar(NINT(N_bar(i_l)))-1.0)/counter_Nbar(NINT(N_bar(i_l)))*moment_Nbar(NINT(N_bar(i_l)))&
+                                                +1.0d0/counter_Nbar(NINT(N_bar(i_l)))*data_in(t_l,i_l)  
 
+
+                        
                 end if 
+                
             end do
         end if
     end do
+    
     
     
     OPEN(UNIT=12, FILE=path_results//string_name//"_N.txt")
@@ -100,6 +112,14 @@ subroutine compute_moments(data_in,string_name,moment_own_nxa)
     
     OPEN(UNIT=12, FILE=path_results//"counter_V.txt")
         write(12,*),counter_v
+    close(12)
+    
+    OPEN(UNIT=12, FILE=path_results//string_name//"_Nbar.txt")
+        write(12,*),moment_Nbar
+    close(12)
+    
+    OPEN(UNIT=12, FILE=path_results//"counter_Nbar.txt")
+        write(12,*),counter_Nbar
     close(12)
     
     

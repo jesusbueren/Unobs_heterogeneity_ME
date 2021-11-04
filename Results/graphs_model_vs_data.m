@@ -49,6 +49,19 @@ modl_uhe = fscanf(fileID,'%f')
 fclose(fileID);
 modl_uhe=reshape(modl_uhe,3,2)
 
+fileID = fopen('data_Nbar.txt','r');
+data_Nbar = fscanf(fileID,'%f')
+fclose(fileID);
+
+fileID = fopen('counter_Nbar.txt','r');
+counter_Nbar = fscanf(fileID,'%f')
+fclose(fileID);
+
+fileID = fopen('modl_Nbar.txt','r');
+modl_Nbar = fscanf(fileID,'%f')
+fclose(fileID);
+
+
 fileID = fopen('data_V.txt','r');
 data_V = fscanf(fileID,'%f')
 fclose(fileID);
@@ -62,7 +75,7 @@ fclose(fileID);
 scatter(modl_V,data_V)
 hold on
 % P = polyfit(modl_V,data_V,1);
-x=[0.02:0.01:0.11]
+x=[0.02:0.01:0.21]
 yfit = 1*x+0;
 hold on;
 plot(x,yfit,'r-.');
@@ -75,7 +88,7 @@ clrs = [0.9 0.9 0.9;0 0 0];
 
 FS=9
 set(groot,'defaultAxesTickLabelInterpreter','latex');  
-for i=[2 4 6]
+for i=[2 4 6 7]
     figure(i)
     if i==2
         title("Functioning Wells in Adjacency")
@@ -92,6 +105,9 @@ for i=[2 4 6]
         title("Villages")
         data_gr=[data_V(:) modl_V(:)]
         xticks(1:14)
+    elseif i==7
+        title("N bar: ML")
+        data_gr=[data_Nbar modl_Nbar]
 %         xticklabels({'P=2','P=3','P=4','P=5'})
     end
     yticks([0:0.05:0.40])
@@ -112,6 +128,8 @@ for i=[2 4 6]
                 errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_P(2:6)) , 'k', 'linestyle', 'none');
             elseif i==6
                 errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_V(:)) , 'k', 'linestyle', 'none');
+            elseif i==7
+                errorbar(x,data_gr(:,i2), 2*sqrt((data_gr(:,i2)).*(1-data_gr(:,i2))./counter_Nbar) , 'k', 'linestyle', 'none');
             end
         end
     set(hB,{'FaceColor'},{clrs(1,:),clrs(2,:)}.')

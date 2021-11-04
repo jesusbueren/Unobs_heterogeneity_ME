@@ -62,11 +62,7 @@ do P_l=1,P_max
 end do
 
 call estimation(params_MLE,log_likeli)
-!print*,'end maximization'
-!
-!open(unit=12, file=path_results//"bootstrapped_parameters_85_nem.txt",status='replace')
-!    write(12,'(<par>f20.12,f20.12)'),params_mle,log_likeli
-!close(12)
+
 
 open(unit=12, file=path_results//"parameters.txt")
     read(12,'(<par>f20.12)'),params_mle
@@ -77,8 +73,8 @@ close(12)
 !    read(12,*),params_mle
 !close(12)
 print*,'estimated parameters',params_MLE
-
-call counterfactual_2(params_MLE)
+call generate_panel_sample(params_MLE)
+!call counterfactual_2(params_MLE)
 !call counterfactual_1(params_MLE)
 
 !call transitional_dynamics(params_MLE)

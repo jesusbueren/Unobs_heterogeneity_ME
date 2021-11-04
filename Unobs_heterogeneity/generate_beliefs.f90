@@ -42,7 +42,7 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
     counter_u=0
     
     !Store the state for each plot and simulate decision to drill
-    
+    OPEN(UNIT=9, FILE="panel.txt")
     do t_l=1,T-1;   
         !print*,t_l
         !simulate monsoon next period
@@ -201,6 +201,18 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
                     NPV_PV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV_PV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*0.0d0
                 end if
             end if
+            if (t_l>T-6) then
+                if (n_l==1 .or. n_l==2) then
+                    if (u_d<CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))) then
+                        write(9,'(<7>I5)'),i_l,t_l-(T-6),P,A,n_l,ind,1
+                    else
+                        write(9,'(<7>I5)'),i_l,t_l-(T-6),P,A,n_l,ind,0
+                    end if
+                else
+                    write(9,'(<7>I5)'),i_l,t_l-(T-6),P,A,n_l,ind,-9
+                end if
+            end if
+                    
         end do
         !Store current state
         state_old=state
@@ -229,9 +241,11 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
         end if
         it=it+1
     end do
-    
+
+    close(9)
     !close(13)
-    
+    !print*,'end panel'
+    !read*,continue_k
 
     ! In case I don't have observations for a given state, I consider that the transition pr 
     ! is the same for all possible future states
@@ -270,8 +284,9 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
     !close(12)
     
     !call random_seed(PUT=seed2)
-
-!print*,'press key to continue'    
-!read*,continue_k
+if (v_l==1) then
+print*,'press key to continue'    
+read*,continue_k
+end if
 end subroutine
     

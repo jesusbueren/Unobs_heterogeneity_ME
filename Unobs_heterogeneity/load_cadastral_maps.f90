@@ -90,8 +90,6 @@ subroutine load_cadastral_maps()
     
 
     !Generate permanent unobserved heterogeneity type
-    !pr_unobs_t=0.0d0
-    !pr_unobs_t(selected_type)=1.0d0
     do v_l=1,villages;do i_l=1,plots_v(v_l)
         call RANDOM_NUMBER(u_m)
         if (u_m<pr_unobs_t(1)) then

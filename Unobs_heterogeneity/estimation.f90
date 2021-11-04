@@ -41,7 +41,7 @@ subroutine estimation(params_MLE,log_likeli)
     !Generate an initial well endowment: everyone has zero wells
 1   n_initial_all(1:plots_in_map,:)=1    
     call random_seed(GET=seed_c)
-    if (it>1) then
+    !if (it>1) then
         !$OMP PARALLEL default(shared) 
         !$OMP  DO
         do v_l=1,villages
@@ -53,11 +53,11 @@ subroutine estimation(params_MLE,log_likeli)
         open(unit=12, file=path_results//"beliefs_6.txt")
         write(12,*),F_est,Pr_u_X,iterations_all
         close(12)
-    else
-        open(unit=12, file=path_results//"beliefs_6.txt")
-            read(12,*),F_est,Pr_u_X,iterations_all
-        close(12)
-    end if
+    !else
+    !    open(unit=12, file=path_results//"beliefs_6.txt")
+    !        read(12,*),F_est,Pr_u_X,iterations_all
+    !    close(12)
+    !end if
     
     call random_seed(PUT=seed_c)
     !Fixing beliefs, estimate parameter
@@ -65,9 +65,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     print*,'iteration number',it
     if (it==1) then
-        p_g(1,1:4)=(/8.58d0,0.27d0,0.99d0,12.1d0/)
-        !p_g(1,5:12)=1.0d0
-        !p_g(1,6:18)=1.0d0
+        p_g(1,1:4)=(/8.58d0,0.27d0,0.6d0,12.1d0/)
     end if
     
     do p_l=2,par+1
@@ -81,8 +79,6 @@ subroutine estimation(params_MLE,log_likeli)
         p_g(p_l,1)=log(p_g(p_l,1))
         p_g(p_l,2:3)=log(p_g(p_l,2:3)/(1.0d0-p_g(p_l,2:3)))
         p_g(p_l,4)=log(p_g(p_l,4))
-        !p_g(p_l,5)=log(p_g(p_l,5)/(1.0d0-p_g(p_l,5)))
-        !p_g(p_l,6:18)=log(p_g(p_l,6:18))
         y(p_l)=log_likelihood(p_g(p_l,:))
         !print*,'press key to continue'
         !read*,pause_k 
@@ -104,11 +100,6 @@ subroutine estimation(params_MLE,log_likeli)
     p_g(:,1)=exp(p_g(:,1))
     p_g(:,2:3)=1.0d0/(1.0d0 + exp(-p_g(:,2:3))) 
     p_g(:,4)=exp(p_g(:,4))
-    !p_g(:,5)=1.0d0/(1.0d0 + exp(-p_g(:,5))) 
-    !p_g(:,6:18)=exp(p_g(:,6:18))
-    !print*,'likelihood powell',y(1)
-    !print*,'parameter powell',p_g(1,:)
-    
     
     !Compute CCP to check convergence
     params_MLE=p_g(1,:)
@@ -121,7 +112,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     do v_l=1,villages
         do u_l=1,unobs_types;do a_l=1,types_a
-            call expected_productivity((/params_MLE(1)*village_fe(v_l),params_MLE(2),0.0d0/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+            call expected_productivity((/params_MLE(1)*village_fe(v_l),params_MLE(2),params_MLE(3)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         end do;end do
         do P_l=2,P_max; do a_l=1,types_a; do u_l=1,unobs_types 
             call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
@@ -186,14 +177,14 @@ function log_likelihood(params_MLE)
     params(1)=exp(params_MLE(1))
     params(2:3)=1.0d0/(1.0d0 + exp(-params_MLE(2:3))) 
     params(4)=exp(params_MLE(4))
-    !params(5:12)=params_MLE(5:12)
+
     Betas=0.0d0
     !Betas(2:unobs_types,:)=reshape(params(5:12),(/unobs_types-1,COV/))
     !params(5)=1.0d0/(1.0d0 + exp(-params_MLE(5))) 
     !params(6:18)=exp(params_MLE(6:18))
     
     rho=params(4)
-    pr_non_zombie_II=params(3)
+    pr_non_zombie_II=1.0d0!params(3)
     village_fe=1.0d0
     !village_fe(2:villages)=params(6:18)
     
@@ -206,7 +197,7 @@ function log_likelihood(params_MLE)
     missing_x1=0
     
     do a_l=1,types_a; do v_l=1,villages;do u_l=1,unobs_types
-        call expected_productivity((/params(1)*village_fe(v_l),params(2),0.0d0/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+        call expected_productivity((/params(1)*village_fe(v_l),params(2),params(3)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         !if (v_l==1) then
         !    print*,'Type',u_l,a_l
         !    print*, 'private return',(Ef_v(1,2,1,a_l,v_l,u_l))/(1.0d0-beta*(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_s
@@ -429,7 +420,7 @@ function log_likelihood(params_MLE)
 
     call compute_moments(av_CCP_it,"modl",moment_own_nxa_model)
     !GMM
-    log_likelihood=sum(((moment_own_nxa_model-moment_own_nxa_data))**2)
+    !log_likelihood=sum(((moment_own_nxa_model-moment_own_nxa_data))**2)
     if (bootstrap==0 .and. log_likelihood<max_mle) then
         open(unit=12, file=path_results//"parameters.txt",status='replace')
             write(12,'(<par>f20.12,f20.12)'),params,log_likelihood
