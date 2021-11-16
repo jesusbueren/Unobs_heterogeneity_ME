@@ -3,7 +3,7 @@ subroutine load_cadastral_maps()
     implicit none
     character(LEN=1)::s_c1
     character(LEN=2)::s_c2
-    integer::v_l,i,j,ind,a_l,i_l!,x,y
+    integer::v_l,i,j,ind,a_l,i_l,j2,ind2!,x,y
     double precision::u,u_m
     double precision,dimension(villages,plots_in_map)::areas
     integer,dimension(villages,plots_in_map)::area_type
@@ -43,23 +43,42 @@ subroutine load_cadastral_maps()
         !Store which are my neighbors
         do i=1,plots_in_map;
             neighbors_map(i,i,v_l)=1
-            ind=0
+            ind=1
+            neighbors(i,ind,v_l)=i
+            ind=ind+1
             do j=1,plots_in_map
-                if (neighbors_map(i,j,v_l)==1 .and. ind<P_max) then !the number of neighbors cannot be greater than P_max ortherwise I select the firt P_max neighbors
-                    ind=ind+1
+                if (neighbors_map(i,j,v_l)==1 .and. j/=i .and. ind>P_max) then
+                    neighbors_map(i,j,v_l)=0
+                    neighbors_map(j,i,v_l)=0
+                    if (j<i) then
+                        ind2=2
+                        do j2=1,plots_in_map
+                            if (neighbors_map(j,j2,v_l)==1 .and. j/=j2 .and. ind2<=P_max) then !the number of neighbors cannot be greater than P_max ortherwise I select the firt P_max neighbors
+                                neighbors(j,ind2,v_l)=j2
+                                ind2=ind2+1
+                            end if
+                        end do
+                    end if                        
+                end if 
+                if (neighbors_map(i,j,v_l)==1 .and. j/=i .and. ind<=P_max) then !the number of neighbors cannot be greater than P_max ortherwise I select the firt P_max neighbors !neighbors(3,:,v_l)
                     neighbors(i,ind,v_l)=j
-                end if
+                    ind=ind+1
+                end if                  
             end do
-            !I need to make sure that the reference plot is a neighbor plot for plots whose
-            !number of neighboring plots is larger than P_max in the data so in case it is not, I force the last neighbor to be the reference plot
-            if (ind==P_max .and. ind<i) then
-                neighbors(i,P_max,v_l)=i
-            end if    
         end do
         !number of neighbors
-        PA_type(1:plots_v(v_l),1,v_l)=min(sum(neighbors_map(1:plots_v(v_l),1:plots_v(v_l),v_l),2),P_max)        
+        PA_type(1:plots_v(v_l),1,v_l)=min(sum(neighbors_map(1:plots_v(v_l),1:plots_v(v_l),v_l),2),P_max)
+        if (v_l<10) then
+            Write( s_c1, '(I1)' )  v_l
+            OPEN(UNIT=12, FILE=file_map//"new_map_"//s_c1//".txt")
+        else
+            Write( s_c2, '(I2)' )  v_l
+            OPEN(UNIT=12, FILE=file_map//"new_map_"//s_c2//".txt")
+        end if
+            write(12,*),neighbors_map(1:plots_v(v_l),1:plots_v(v_l),v_l)
+        close(12)
     end do
-    
+    !PA_type(:,1,1)
     !Area Type
     mean_area=0.0d0
     do v_l=1,villages
@@ -103,6 +122,7 @@ subroutine load_cadastral_maps()
         end if
     end do;end do
     
+    !call simulate_spatial_correlation()
     
 
 end subroutine

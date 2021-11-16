@@ -10,16 +10,16 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
     integer(8),dimension(2*P_max-1,3,3,P_max,unobs_types),intent(out)::iterations
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(out)::Pr_u_x !Pr_u_x(1,1,3,4,:) counter_u(1,1,3,4,:)
     integer(8),dimension(2*P_max-1,3,P_max,types_a,unobs_types)::counter_u
-    integer(8),parameter::T=100000!150000
+    integer(8),parameter::T=10000!0!150000
     integer(8),dimension(plots_in_map,3)::state,state_old
     integer(8)::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min,a_l,u_l
     double precision::u_d,u_s,u_f,u_m,it2
-    integer(8),parameter:: its=10000!0
+    integer(8),parameter:: its=1000!0
     double precision,dimension(its)::NPV,total_N,NPV_PV,CCP_av
     double precision,intent(out)::mean_N,social_output,private_output
     integer(8),dimension(2*P_max-1,2*P_max-1,3,3,P_max,unobs_types)::beliefs_c
     integer(8),dimension(1)::seed=321,seed2
-    integer(8),parameter::burn_t=10000
+    integer(8),parameter::burn_t=1000!0
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,unobs_types)::F
     double precision,dimension(P_max)::dist
     double precision,dimension(2*P_max-1)::CCP_aux
@@ -67,7 +67,7 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
                 N_all=1 !Indicates the number of wells in the adjacency
                 !Loop over all neighbors
                 do j_l=1,PA_type(i_l,1,v_l) !PA_type(i_l,1) stores the number of plots in the adjacency
-                    if (state(neighbors(i_l,j_l,v_l),1)==2)  then
+                    if (state(neighbors(i_l,j_l,v_l),1)==2)  then !neighbors(42,:,v_l)
                         N_all=N_all+1 !number of wells (there is one well)
                     elseif (state(neighbors(i_l,j_l,v_l),1)==3)  then
                         N_all=N_all+2 !number of wells (there is two wells)
@@ -88,7 +88,12 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
                     ind=N_all-2
                 else
                     print*,'error generating beliefs'
-                end if         
+                end if 
+                if (ind==0) then
+                    print*,'paused'
+                    print'(<P_max+2>I6)',i_l,PA_type(i_l,1,v_l),neighbors(i_l,:,v_l)
+                    read*,continue_k
+                end if
                 state(i_l,3)=ind
                 !Count transitions (in the first iteration state_old is undefined: no problem)
                 if (t_l>=burn_t) then
@@ -284,9 +289,13 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
     !close(12)
     
     !call random_seed(PUT=seed2)
-if (v_l==1) then
-print*,'press key to continue'    
-read*,continue_k
-end if
+!if (v_l==1) then
+!print*,'press key to continue'    
+!read*,continue_k
+!end if
+    ! do ind=1,P_max*2-1;do u_l=1,unobs_types
+    !    print*,'N other',ind-1
+    !    print*,u_l,dble(sum(counter_u(ind,:,:,:,u_l)))/dble(sum(counter_u(:,:,:,:,u_l)))
+    !end do;end do
 end subroutine
     

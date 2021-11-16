@@ -44,6 +44,7 @@
 		<File RelativePath=".\policy_fct_it.f90"/>
 		<File RelativePath=".\quantifiying_strategic_interactions.f90"/>
 		<File RelativePath=".\simulate_panel.f90"/>
+		<File RelativePath=".\simulate_spatial_correlation.f90"/>
 		<File RelativePath=".\transitional_dynamics.f90"/>
 		<File RelativePath=".\update_CCP.f90"/>
 		<File RelativePath=".\valuation.f90"/>

@@ -1,6 +1,6 @@
 module dimensions
     implicit none
-    integer,parameter::P_max=6 ! Set the maximum number of plots in an adjacency
+    integer,parameter::P_max=8 ! Set the maximum number of plots in an adjacency
     integer,parameter::K=5,par=4,M=2,types_a=2,COV=4 !K: points of support of flow; M:types of moonzoons; type_a: types of areas
     integer::selected_type=4
 end
@@ -8,6 +8,7 @@ end
 module cadastral_maps
     use dimensions
     implicit none
+    double precision:: rho_sc=0.99d0
     integer,parameter::plots_in_map=1909,villages=14,unobs_types=3
     integer,parameter,dimension(villages)::plots_v=(/1794,302,912,517,292,535,939,637,405,837,973,1844,443,1909/) !plots in each village
     double precision,dimension(villages):: mean_area
@@ -16,7 +17,7 @@ module cadastral_maps
     integer,dimension(plots_in_map,villages)::unobs_types_i
     integer,dimension(plots_in_map,P_max,villages)::neighbors !identify neighbors for each plot in the map
     !Zombie pr
-    double precision,dimension(villages):: pr_non_zombie=(/0.454545468,0.954918027,0.525423706,0.778947353,0.805970132,0.632911384,0.666666687,0.847826064,0.762162149,0.749077499,0.401544392,0.722857118,0.78772378,0.639024377/)
+    double precision,dimension(villages):: pr_non_zombie=1.0d0!(/0.454545468,0.954918027,0.525423706,0.778947353,0.805970132,0.632911384,0.666666687,0.847826064,0.762162149,0.749077499,0.401544392,0.722857118,0.78772378,0.639024377/)
     integer,dimension(plots_in_map,villages)::active_plots
     character(len=103)::file_map="C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\cadastral_maps\fortran_files\"
 end
