@@ -88,7 +88,7 @@ clrs = [0.9 0.9 0.9;0 0 0;0.5 0.5 0.5];
 
 FS=9
 set(groot,'defaultAxesTickLabelInterpreter','latex');  
-for i=[2 4 6 7]
+for i=[2 4 7]
     figure(i)
     if i==2
         title("Functioning Wells in Adjacency")
