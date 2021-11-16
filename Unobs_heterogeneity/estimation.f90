@@ -16,12 +16,12 @@ subroutine estimation(params_MLE,log_likeli)
         end function log_likelihood
     end interface
     integer,dimension(plots_in_map,villages)::n_initial_all
-    double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP_old,CCP_mid
-    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::V_fct,V_social
-    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
+    double precision,dimension(3*P_max-2,3,P_max,types_a,villages,unobs_types)::CCP_old,CCP_mid
+    double precision,dimension(3*P_max-2,4,P_max,types_a,villages,unobs_types)::V_fct,V_social
+    double precision,dimension(3*P_max-2,4,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
     double precision::dist
     integer::it
-    integer(8),dimension(2*P_max-1,3,3,P_max,villages,unobs_types)::iterations_all
+    integer(8),dimension(3*P_max-2,4,4,P_max,villages,unobs_types)::iterations_all
     double precision,dimension(par,par)::xi
     integer,dimension(1)::seed_c
     double precision, dimension(villages)::mean_N,mean_NPV,mean_budget
@@ -42,17 +42,17 @@ subroutine estimation(params_MLE,log_likeli)
 1   n_initial_all(1:plots_in_map,:)=1    
     call random_seed(GET=seed_c)
     !if (it>1) then
-        !$OMP PARALLEL default(shared) 
-        !$OMP  DO
+        !!$OMP PARALLEL default(shared) 
+        !!$OMP  DO
         do v_l=1,villages
             print*,'village ',v_l,' out of ',villages
             call generate_beliefs(CCP_mid(:,:,:,:,v_l,:),V_fct(:,:,:,:,v_l,:),V_social(:,:,:,:,v_l,:),Ef_v(:,:,:,:,v_l,:),n_initial_all(:,v_l),F_est(:,:,:,:,:,v_l,:),v_l,iterations_all(:,:,:,:,v_l,:),mean_N(v_l),mean_NPV(v_l),mean_budget(v_l),Pr_u_X(:,:,:,:,v_l,:))
         end do
-        !$OMP END DO  
-        !$OMP END PARALLEL  
-    !    open(unit=12, file=path_results//"beliefs_6.txt")
-    !    write(12,*),F_est,Pr_u_X,iterations_all
-    !    close(12)
+        !!$OMP END DO  
+        !!$OMP END PARALLEL  
+        open(unit=12, file=path_results//"beliefs_6.txt")
+        write(12,*),F_est,Pr_u_X,iterations_all
+        close(12)
     !else
     !    open(unit=12, file=path_results//"beliefs_6.txt")
     !        read(12,*),F_est,Pr_u_X,iterations_all
@@ -64,9 +64,9 @@ subroutine estimation(params_MLE,log_likeli)
     !print*,'Initial Conditions'
     
     print*,'iteration number',it
-    if (it==1) then
-        p_g(1,1:4)=(/8.58d0,0.27d0,0.6d0,12.1d0/)
-    end if
+    !if (it==1) then
+        p_g(1,1:4)=(/30.58d0,0.8d0,0.6d0,12.1d0/)
+    !end if
     
     do p_l=2,par+1
         p_g(p_l,:)=p_g(1,:)
@@ -80,8 +80,8 @@ subroutine estimation(params_MLE,log_likeli)
         p_g(p_l,2:3)=log(p_g(p_l,2:3)/(1.0d0-p_g(p_l,2:3)))
         p_g(p_l,4)=log(p_g(p_l,4))
         y(p_l)=log_likelihood(p_g(p_l,:))
-        !print*,'press key to continue'
-        !read*,pause_k 
+        print*,'press key to continue'
+        read*,pause_k 
 
     end do 
     !print*,'likelihood_ini',y(1)
@@ -115,11 +115,11 @@ subroutine estimation(params_MLE,log_likeli)
             call expected_productivity((/params_MLE(1)*village_fe(v_l),params_MLE(2),params_MLE(3)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         end do;end do
         do P_l=2,P_max; do a_l=1,types_a; do u_l=1,unobs_types 
-            call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
-                            ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l,u_l) &
+            call value_fct_it(Ef_v(1:3*P_l-2,:,P_l,a_l,v_l,u_l)&
+                            ,F_est(1:3*P_l-2,1:3*P_l-2,:,:,P_l,v_l,u_l) &
                             ,P_l &
-                            ,CCP_est(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l &
-                            ,V_fct(1:2*P_l-1,:,P_l,a_l,v_l,u_l)) 
+                            ,CCP_est(1:3*P_l-2,:,P_l,a_l,v_l,u_l),v_l,u_l &
+                            ,V_fct(1:3*P_l-2,:,P_l,a_l,v_l,u_l)) 
             !call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
             !                ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
             !                ,P_l &
@@ -132,7 +132,7 @@ subroutine estimation(params_MLE,log_likeli)
     
 
     dist=0.0
-    do P_l=1,P_max; do n_l=1,2;do ind=1,2*P_l-1; do v_l=1,villages
+    do P_l=1,P_max; do n_l=1,3;do ind=1,3*P_l-2; do v_l=1,villages
         dist=dist+dble(sum(iterations_all(ind,n_l,1:3,P_l,v_l,:)))/dble(sum(iterations_all(:,1:2,1:3,:,:,:)))*sum(abs(CCP_old(ind,n_l,P_l,:,v_l,:)-CCP_est(ind,n_l,P_l,:,v_l,:)))/dble(types_a)/dble(unobs_types)
     end do;end do; end do;end do
     print*,'dist',dist
@@ -156,19 +156,19 @@ function log_likelihood(params_MLE)
     implicit none
     double precision,dimension(par),intent(in)::params_MLE
     double precision,dimension(par)::params
-    double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP
-    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::V_fct
+    double precision,dimension(3*P_max-2,3,P_max,types_a,villages,unobs_types)::CCP
+    double precision,dimension(3*P_max-2,4,P_max,types_a,villages,unobs_types)::V_fct
     integer::i_l,t_l,type_l,a_l,p_l,v_l,ind,u_l,j_l,s_l,t,missing_x1,j_l2,ind2
     double precision::log_likelihood,pr_non_zombie_II
-    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
+    double precision,dimension(3*P_max-2,4,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
     double precision,dimension(unobs_types)::likelihood_i,likelihood_it,P_N2_N1,P_BigN2_BigN1
     character::end_k
     double precision,dimension(T_sim,plots_i,unobs_types)::av_CCP_uhe
     double precision,dimension(T_sim,plots_i)::av_CCP_it
     double precision,dimension(plots_i)::likelihood_aux
     character::pause_k
-    double precision,dimension(types_a,2)::moment_own_nxa_model
-    double precision,dimension(2*P_max-1,villages)::CCP_aux
+    double precision,dimension(types_a,3)::moment_own_nxa_model
+    double precision,dimension(3*P_max-2,villages)::CCP_aux
     double precision,dimension(villages)::village_fe
     double precision,dimension(unobs_types,COV)::Betas
     double precision,dimension(COV,1)::X
@@ -188,7 +188,7 @@ function log_likelihood(params_MLE)
     village_fe=1.0d0
     !village_fe(2:villages)=params(6:18)
     
-    CCP_aux=1.0d0/(1.0d0+exp(-(-PI_s_v(1:2*P_max-1,2,P_max,:)*c_s-(1.0d0-PI_s_v(1:2*P_max-1,2,P_max,:))*c_d)/rho(2)))
+    CCP_aux=1.0d0/(1.0d0+exp(-(-PI_s_v(1:3*P_max-2,2,P_max,:)*c_s-(1.0d0-PI_s_v(1:3*P_max-2,2,P_max,:))*c_d)/rho(2)))
 
     !rho=reshape(params(4:7),(/2,2/))
     print*,' parameters',params
@@ -208,7 +208,7 @@ function log_likelihood(params_MLE)
 
         !$OMP PARALLEL default(shared) 
         !$OMP  DO
-        do P_l=2,P_max; do a_l=1,types_a;do v_l=1,villages ; do u_l=1,unobs_types
+        do P_l=3,P_max; do a_l=1,types_a;do v_l=1,villages ; do u_l=1,unobs_types
             !call policy_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
             !                ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l) &
             !                ,P_l &
@@ -216,11 +216,11 @@ function log_likelihood(params_MLE)
             !if(CCP(1,1,P_l,a_l,v_l,u_l)<CCP(1,2,P_l,a_l,v_l,u_l)) then
             !    print*,'watch out: lower pr of drilling when n=0 than n=1'
             !end if
-            call value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
-                                ,F_est(1:2*P_l-1,1:2*P_l-1,:,:,P_l,v_l,u_l) &
+            call value_fct_it(Ef_v(1:3*P_l-2,:,P_l,a_l,v_l,u_l)&
+                                ,F_est(1:3*P_l-2,1:3*P_l-2,:,:,P_l,v_l,u_l) &
                                 ,P_l &
-                                ,CCP(1:2*P_l-1,:,P_l,a_l,v_l,u_l),v_l,u_l & 
-                                ,V_fct(1:2*P_l-1,:,P_l,a_l,v_l,u_l)) 
+                                ,CCP(1:3*P_l-2,:,P_l,a_l,v_l,u_l),v_l,u_l & 
+                                ,V_fct(1:3*P_l-2,:,P_l,a_l,v_l,u_l)) 
         end do; end do;end do; end do
         !$OMP END DO  
         !$OMP END PARALLEL
@@ -247,13 +247,15 @@ function log_likelihood(params_MLE)
                 
                         !Set distribution of unobserved heterogeneity
                         if (t_l==1) then
-                            do j_l=n_data(t_l,i_l),min(max_NFW+1,2*(P_type(i_l)-1)+n_data(t_l,i_l))
+                            do j_l=n_data(t_l,i_l),min(max_NFW+1,3*(P_type(i_l)-1)+n_data(t_l,i_l))
                                 if (n_data(t_l,i_l)==1) then
                                     ind=j_l !position in the state space wrt to the CCP, PI_s_v and ,PI_f_v
                                 elseif (n_data(t_l,i_l)==2) then
                                     ind=j_l-1
                                 elseif (n_data(t_l,i_l)==3) then
                                     ind=j_l-2
+                                elseif (n_data(t_l,i_l)==4) then
+                                    ind=j_l-3
                                 else
                                     print*,'error in estimation'
                                 end if 
@@ -263,7 +265,7 @@ function log_likelihood(params_MLE)
                         
                         P_N2_N1=1.0d0
                         P_BigN2_BigN1=1.0d0
-                        do j_l=n_data(t_l,i_l),min(max_NFW+1,2*(P_type(i_l)-1)+n_data(t_l,i_l))
+                        do j_l=n_data(t_l,i_l),min(max_NFW+1,3*(P_type(i_l)-1)+n_data(t_l,i_l))
                             !position in the state space wrt to the CCP, PI_s_v and ,PI_f_v
                             if (n_data(t_l,i_l)==1) then
                                 ind=j_l 
@@ -271,13 +273,15 @@ function log_likelihood(params_MLE)
                                 ind=j_l-1
                             elseif (n_data(t_l,i_l)==3) then
                                 ind=j_l-2
+                            elseif (n_data(t_l,i_l)==4) then
+                                ind=j_l-3
                             else
                                 print*,'error in estimation'
                             end if
-                            if (drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l,i_l)<3) then 
+                            if (drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l,i_l)<4) then 
                                 likelihood_it=likelihood_it+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
                                 av_CCP_uhe(t_l,i_l,:)=av_CCP_uhe(t_l,i_l,:)+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
-                            elseif (drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l,i_l)<3) then
+                            elseif (drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l,i_l)<4) then
                                 likelihood_it=likelihood_it+(1.0d0-CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:))*Pr_N_data(j_l,t_l,i_l)
                                 av_CCP_uhe(t_l,i_l,:)=av_CCP_uhe(t_l,i_l,:)+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
                             !elseif (drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l,i_l)==3) then
@@ -334,15 +338,51 @@ function log_likelihood(params_MLE)
                                     
                                     P_N2_N1=P_N2_N1+(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))**2.0d0*Pr_N_data(j_l,t_l,i_l)
                                     
+                                elseif (n_data(t_l,i_l)==3 .and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==1 ) then
+                                    
+                                    P_N2_N1=P_N2_N1+PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:)**2.0d0*(1-PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l)))
+                                
+                                elseif (n_data(t_l,i_l)==3 .and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==2 ) then
+                                    
+                                    P_N2_N1=P_N2_N1+(2.0d0*PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:)*(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))*(1-PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l))) + &
+                                                     PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:)**2.0d0*PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l)))*Pr_N_data(j_l,t_l,i_l)
+                                    
+                                elseif (n_data(t_l,i_l)==3 .and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==3 ) then
+                                    
+                                    P_N2_N1=P_N2_N1+((1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))**2.0d0*(1-PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l))) + &
+                                                      2.0d0*PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:)*(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))*PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l)))*Pr_N_data(j_l,t_l,i_l)
+                                
+                                elseif (n_data(t_l,i_l)==3 .and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==4 ) then
+                                    
+                                    P_N2_N1=P_N2_N1+((1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))**2.0d0*PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l)))*Pr_N_data(j_l,t_l,i_l)
+                                    
+                                elseif (n_data(t_l,i_l)==4 .and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==1 ) then
+                                    
+                                    P_N2_N1=P_N2_N1+(PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:)**3.0d0)*Pr_N_data(j_l,t_l,i_l)
+                                    
+                                elseif (n_data(t_l,i_l)==4 .and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==2 ) then
+                                    
+                                    P_N2_N1=P_N2_N1+(3.0d0*PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:)**2.0d0*(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:)))*Pr_N_data(j_l,t_l,i_l)
+                                    
+                                elseif (n_data(t_l,i_l)==4 .and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==3 ) then
+                                    
+                                    P_N2_N1=P_N2_N1+(3.0d0*PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:)*(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))**2.0d0)*Pr_N_data(j_l,t_l,i_l)
+                                    
+                                elseif (n_data(t_l,i_l)==4 .and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==4 ) then
+                                    
+                                    P_N2_N1=P_N2_N1+((1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))**3.0d0)*Pr_N_data(j_l,t_l,i_l)
+                                    
                                 end if
                                     
-                                do j_l2=n_data(t_l+1,i_l),min(max_NFW+1,2*(P_type(i_l)-1)+n_data(t_l+1,i_l))
+                                do j_l2=n_data(t_l+1,i_l),min(max_NFW+1,3*(P_type(i_l)-1)+n_data(t_l+1,i_l))
                                     if (n_data(t_l+1,i_l)==1) then
                                         ind2=j_l2 !position in the state space wrt to the CCP, PI_s_v and ,PI_f_v
                                     elseif (n_data(t_l+1,i_l)==2) then
                                         ind2=j_l2-1
                                     elseif (n_data(t_l+1,i_l)==3) then
                                         ind2=j_l2-2
+                                    elseif (n_data(t_l+1,i_l)==4) then
+                                        ind2=j_l2-3
                                     else
                                         print*,'error in estimation'
                                     end if

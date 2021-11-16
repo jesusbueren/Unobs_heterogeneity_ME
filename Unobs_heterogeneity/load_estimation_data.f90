@@ -1,7 +1,7 @@
 subroutine load_estimation_data
     use simulation
     implicit none
-    double precision,dimension(21,T_sim,plots_i)::data_csv
+    double precision,dimension(22,T_sim,plots_i)::data_csv
     integer::i_l,t_l
     double precision,dimension(types_a)::moment_a
     double precision,dimension(max_NFW+1)::moment_N
@@ -20,11 +20,11 @@ subroutine load_estimation_data
 
     A_type=data_csv(3,1,:)
     n_data=data_csv(4,:,:)+1
-    Pr_N_data=data_csv(5:15,:,:)
+    Pr_N_data=data_csv(5:16,:,:)
     UHE_type=1.0d0/dble(unobs_types)
-    drilling_it(:,:,1)=data_csv(19,:,:) 
+    drilling_it(:,:,1)=data_csv(20,:,:) 
     impute_i=0!data_csv(20,1,:)
-    can_be_zombie_i=data_csv(21,1,:)
+    can_be_zombie_i=data_csv(22,1,:)
     print*,'no zombie in estimation data'
     impute_i=can_be_zombie_i
     can_be_zombie_i=0
@@ -44,7 +44,7 @@ subroutine load_estimation_data
         modal_N(t_l,i_l)=maxloc(Pr_N_data(:,t_l,i_l),1)-(n_data(t_l,i_l)-1)
     end do;end do
     N_bar=dble(sum(modal_N,1))/dble(T_sim)
-    
+
     
     
 end subroutine

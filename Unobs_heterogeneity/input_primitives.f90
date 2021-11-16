@@ -2,7 +2,7 @@ subroutine input_primitives()
     use primitives;use dimensions
     implicit none
     integer::P,n_l,N,v_l,u_l
-    double precision,dimension(2*P_max)::PI_f
+    double precision,dimension(3*P_max)::PI_f
     double precision,dimension(3,villages)::rain_success_csv
     double precision,dimension(9,unobs_types,2,17)::flow_fail_prob_csv 
     double precision,dimension(1)::prueba
@@ -35,6 +35,8 @@ subroutine input_primitives()
         end if
         PI_fm(1:2*P_max,1,u_l)=flow_fail_prob_csv(9,u_l,1,1:2*P_max) 
         PI_fm(1:2*P_max,2,u_l)=flow_fail_prob_csv(9,u_l,2,1:2*P_max)
+        PI_fm(2*P_max+1:3*P_max,1,u_l)=flow_fail_prob_csv(9,u_l,1,2*P_max) 
+        PI_fm(2*P_max+1:3*P_max,2,u_l)=flow_fail_prob_csv(9,u_l,2,2*P_max)
 
         PI_f=PI_fm(:,1,u_l)*PI_m(1,v_l)+PI_fm(:,2,u_l)*PI_m(2,v_l)   
         
@@ -43,8 +45,15 @@ subroutine input_primitives()
         PI_s(:,v_l)=PI_s(1,v_l)       
     
         !Discharge pr. depends of moonsoon and in number of wells in the adjacency
-        PI_k(:,:,1,u_l)=transpose(flow_fail_prob_csv(4:8,u_l,1,1:2*P_max)) 
-        PI_k(:,:,2,u_l)=transpose(flow_fail_prob_csv(4:8,u_l,2,1:2*P_max))
+        PI_k(1:2*P_max,:,1,u_l)=transpose(flow_fail_prob_csv(4:8,u_l,1,1:2*P_max)) 
+        PI_k(1:2*P_max,:,2,u_l)=transpose(flow_fail_prob_csv(4:8,u_l,2,1:2*P_max))
+        do N=2*P_max+1,3*P_max
+            PI_k(N,:,1,u_l)=PI_k(2*P_max,:,1,u_l)
+            PI_k(N,:,2,u_l)=PI_k(2*P_max,:,2,u_l)
+        end do
+        !PI_k(2*P_max+1:3*P_max-2,:,1,u_l)=PI_k(2*P_max,:,1,u_l)
+        !PI_k(2*P_max+1:3*P_max-2,:,2,u_l)=PI_k(2*P_max,:,2,u_l)
+        
         !print*,'change this'
         !do P=1,2*P_max
         !    PI_k(:,P,1,u_l)=PI_k(:,1,1,u_l)
@@ -52,7 +61,7 @@ subroutine input_primitives()
         !end do
         
         !Adjust to sum exactly one
-        do N=1,2*P_max
+        do N=1,3*P_max
             PI_k(N,:,1,u_l)=PI_k(N,:,1,u_l)/sum(PI_k(N,:,1,u_l))
             PI_k(N,:,2,u_l)=PI_k(N,:,2,u_l)/sum(PI_k(N,:,2,u_l))
         end do
@@ -61,19 +70,24 @@ subroutine input_primitives()
         PI_s_v(:,:,:,v_l)=sqrt(-1.0d0)
         PI_f_v(:,:,:,v_l,u_l)=sqrt(-1.0d0)
         do P=1,P_max       
-            do n_l=1,3
+            do n_l=1,4
                 !No own wells
                 if (n_l==1) then
-                    PI_s_v(1:P*2-1,n_l,P,v_l)=PI_s(1:P*2-1,v_l)
+                    PI_s_v(1:3*P-2,n_l,P,v_l)=PI_s(1:3*P-2,v_l)
                 end if
                 !One own well
                 if (n_l==2) then 
-                    PI_s_v(1:P*2-1,n_l,P,v_l)=PI_s(2:P*2,v_l)
-                    PI_f_v(1:P*2-1,n_l,P,v_l,u_l)=PI_f(1:2*P-1)
+                    PI_s_v(1:3*P-2,n_l,P,v_l)=PI_s(2:3*P-1,v_l)
+                    PI_f_v(1:3*P-2,n_l,P,v_l,u_l)=PI_f(1:3*P-2)
                 end if
                 !Two own wells
                 if (n_l==3) then
-                    PI_f_v(1:P*2-1,n_l,P,v_l,u_l)=PI_f(2:2*P)
+                    PI_s_v(1:3*P-2,n_l,P,v_l)=PI_s(3:3*P,v_l)
+                    PI_f_v(1:3*P-2,n_l,P,v_l,u_l)=PI_f(2:3*P-1)
+                end if
+                !Three own wells
+                if (n_l==4) then
+                    PI_f_v(1:3*P-2,n_l,P,v_l,u_l)=PI_f(3:3*P)
                 end if
             end do
         end do

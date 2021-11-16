@@ -3,9 +3,9 @@ use dimensions; use cadastral_maps; use simulation
 implicit none
 integer,dimension(1)::seed=321
 double precision,dimension(par)::params_true,params_MLE
-double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,villages)::F_true
-double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP_true
-double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types)::V_fct
+double precision,dimension(3*P_max-2,3*P_max-2,4,4,P_max,villages)::F_true
+double precision,dimension(3*P_max-2,3,P_max,types_a,villages,unobs_types)::CCP_true
+double precision,dimension(3*P_max-2,4,P_max,types_a,unobs_types)::V_fct
 integer,dimension(plots_in_map,villages)::n_dist
 double precision,dimension(villages)::mean_N,mean_NPV,mean_budget
 double precision::log_likeli
@@ -58,7 +58,7 @@ print*,'Start estimation'
 !Generate a random CCP for computing initial beliefs
 CCP_est=sqrt(-1.0d0)
 do P_l=1,P_max
-    CCP_est(1:2*P_l-1,1:2,P_l,:,:,:)=0.15d0
+    CCP_est(1:3*P_l-2,1:3,P_l,:,:,:)=0.15d0
 end do
 
 call estimation(params_MLE,log_likeli)

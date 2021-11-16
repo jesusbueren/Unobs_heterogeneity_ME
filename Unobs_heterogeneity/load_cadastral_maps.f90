@@ -68,15 +68,15 @@ subroutine load_cadastral_maps()
         end do
         !number of neighbors
         PA_type(1:plots_v(v_l),1,v_l)=min(sum(neighbors_map(1:plots_v(v_l),1:plots_v(v_l),v_l),2),P_max)
-        if (v_l<10) then
-            Write( s_c1, '(I1)' )  v_l
-            OPEN(UNIT=12, FILE=file_map//"new_map_"//s_c1//".txt")
-        else
-            Write( s_c2, '(I2)' )  v_l
-            OPEN(UNIT=12, FILE=file_map//"new_map_"//s_c2//".txt")
-        end if
-            write(12,*),neighbors_map(1:plots_v(v_l),1:plots_v(v_l),v_l)
-        close(12)
+        !if (v_l<10) then
+        !    Write( s_c1, '(I1)' )  v_l
+        !    OPEN(UNIT=12, FILE=file_map//"new_map_"//s_c1//".txt")
+        !else
+        !    Write( s_c2, '(I2)' )  v_l
+        !    OPEN(UNIT=12, FILE=file_map//"new_map_"//s_c2//".txt")
+        !end if
+        !    write(12,*),neighbors_map(1:plots_v(v_l),1:plots_v(v_l),v_l)
+        !close(12)
     end do
     !PA_type(:,1,1)
     !Area Type
@@ -122,7 +122,7 @@ subroutine load_cadastral_maps()
         end if
     end do;end do
     
-    !call simulate_spatial_correlation()
+    call simulate_spatial_correlation()
     
 
 end subroutine

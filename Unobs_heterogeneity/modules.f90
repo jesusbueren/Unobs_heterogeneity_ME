@@ -29,15 +29,15 @@ module primitives
     !q: Discharge distribution (flow for each point of the support)
     double precision,dimension(K,1)::q
     !PI_k: Discharge pr. (first position indicates 1 well) depending on n0 of wells
-    double precision,dimension(2*P_max,K,M,unobs_types)::PI_k
+    double precision,dimension(3*P_max,K,M,unobs_types)::PI_k
     !PI_m: unconditional pr of high and low monzoon
     double precision,dimension(M,villages)::PI_m
     !PI_f: Pr. of failure (first position indicates 1 well; last position indicates all plots have 2 wells)
-    double precision,dimension(2*P_max,M,unobs_types)::PI_fm
-    double precision,dimension(2*P_max-1,3,P_max,villages,unobs_types)::PI_f_v
+    double precision,dimension(3*P_max,M,unobs_types)::PI_fm
+    double precision,dimension(3*P_max-2,4,P_max,villages,unobs_types)::PI_f_v
     !PI_s: Pr. of success (first position indicates no wells; last position indicates all plots 2 wells but one with one well)
-    double precision,dimension(2*P_max,villages)::PI_s
-    double precision,dimension(2*P_max-1,3,P_max,villages)::PI_s_v
+    double precision,dimension(3*P_max,villages)::PI_s
+    double precision,dimension(3*P_max-2,4,P_max,villages)::PI_s_v
     !c_d: fixed cost of failing to drill;c_s: fixed cost of succeeding to drill; c_e: cost of electricity by well
     double precision::c_s=72.3d0,beta=0.95d0,c_d=35.2d0,c_e=11.7d0
     !extreme value distribution shocks
@@ -51,7 +51,7 @@ module primitives
     double precision,dimension(unobs_types)::pr_unobs_t=1.0d0/dble(unobs_types)
     !Taxation parameters
     double precision::T_g=0.0d0,tau=0.0d0
-    double precision,dimension(2*P_max-1,P_max,types_a,villages,unobs_types)::smthg=0.06d0
+    double precision,dimension(3*P_max-2,P_max,types_a,villages,unobs_types)::smthg=0.06d0
     integer::social
     
 end
@@ -62,13 +62,13 @@ use cadastral_maps
     character(len=79)::path_estimation="C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\data\"
     character(len=82)::path_results="C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\Results\"
     !maximum number of functioning wells seen in the data drill_export_.xls
-    integer,parameter::max_NFW=10,simulations=1
+    integer,parameter::max_NFW=11,simulations=1
     !Parameters of the simulated panel-> I: number of indv; T: number of periods
     integer,parameter::T_sim=5,plots_i=1052
     ! dec_it: drilling decision
-    double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,villages,unobs_types)::F_est
-    double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP_est
-    double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types)::CCP_final=0.0d0
+    double precision,dimension(3*P_max-2,3*P_max-2,4,4,P_max,villages,unobs_types)::F_est
+    double precision,dimension(3*P_max-2,3,P_max,types_a,villages,unobs_types)::CCP_est
+    double precision,dimension(3*P_max-2,3,P_max,types_a,villages,unobs_types)::CCP_final=0.0d0
     integer::bootstrap=0
     
     !Data
@@ -81,10 +81,10 @@ use cadastral_maps
     double precision,dimension(max_NFW+1,T_sim,plots_i)::Pr_N_data !pr of number of functioning wells in the adjacency
     integer,dimension(T_sim,plots_i)::modal_N !pr of number of functioning wells in the adjacency
     double precision,dimension(plots_i)::N_bar
-    double precision,dimension(types_a,2)::moment_own_nxa_data
+    double precision,dimension(types_a,3)::moment_own_nxa_data
     
     !Unobsverded heterogeneity from beliefs
-    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Pr_u_X
+    double precision,dimension(3*P_max-2,4,P_max,types_a,villages,unobs_types)::Pr_u_X
     
     double precision:: max_mle=99999999.0d0
     
