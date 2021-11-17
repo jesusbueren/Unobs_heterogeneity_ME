@@ -3,10 +3,10 @@ subroutine transitional_dynamics(params_MLE)
     implicit none
     integer,parameter::T=500,Sims=1000
     double precision,dimension(par)::params_true,params_MLE
-    double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,unobs_types,T)::F_in,F_out
-    double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,unobs_types)::slope,intercept
-    double precision,dimension(2*P_max-1,2,P_max,types_a,villages,unobs_types,T)::CCP_true
-    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,T)::V_fct,V_fct2
+    double precision,dimension(P_max,P_max,2,2,P_max,unobs_types,T)::F_in,F_out
+    double precision,dimension(P_max,P_max,2,2,P_max,unobs_types)::slope,intercept
+    double precision,dimension(P_max,1,P_max,types_a,villages,unobs_types,T)::CCP_true
+    double precision,dimension(P_max,2,P_max,types_a,unobs_types,T)::V_fct,V_fct2
     integer,dimension(plots_in_map,T)::n_dist
     integer,dimension(plots_in_map,Sims)::n_ini
     double precision,dimension(T)::mean_N,social_output,private_output,ccp_mean,diss_N
@@ -49,17 +49,17 @@ subroutine solve_path(params,T_path,Sims,n_ini,F_in,v_l,V_in,mean_N,social_outpu
     integer,intent(in)::T_path,Sims
     double precision,dimension(par),intent(in)::params
     integer,dimension(plots_in_map,Sims),intent(inout)::n_ini
-    double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,unobs_types,T_path),intent(inout)::F_in
+    double precision,dimension(P_max,P_max,2,2,P_max,unobs_types,T_path),intent(inout)::F_in
     integer,intent(in)::v_l  
-    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,T_path),intent(in)::V_in
-    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types,T_path)::V_fct
+    double precision,dimension(P_max,2,P_max,types_a,unobs_types,T_path),intent(in)::V_in
+    double precision,dimension(P_max,2,P_max,types_a,unobs_types,T_path)::V_fct
     double precision,dimension(T_path),intent(out)::mean_N,social_output,ccp_mean,diss_N
     
-    double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types,T_path)::CCP_old,CCP,CCP_mid
-    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
+    double precision,dimension(P_max,1,P_max,types_a,unobs_types,T_path)::CCP_old,CCP,CCP_mid
+    double precision,dimension(P_max,2,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
     double precision::dist
     integer::p_l,a_l,n_l,P_l2,ind,counter_all,counter_bad,u_l,t_l
-    integer(8),dimension(2*P_max-1,3,3,P_max,T_path)::iterations
+    integer(8),dimension(2*P_max-1,2,2,P_max,T_path)::iterations
     
     print*,'got into solve path'
     !Set scale parameter Gumbel distribution of shocks
@@ -79,26 +79,26 @@ subroutine solve_path(params,T_path,Sims,n_ini,F_in,v_l,V_in,mean_N,social_outpu
             tau=0.0d0
         end if        
         if (t_l==T_path) then
-            call one_step_value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
-                            ,F_in(1:2*P_l-1,1:2*P_l-1,:,:,P_l,u_l,t_l) &
+            call one_step_value_fct_it(Ef_v(1:P_l,:,P_l,a_l,v_l,u_l)&
+                            ,F_in(1:P_l,1:P_l,:,:,P_l,u_l,t_l) &
                             ,P_l &
-                            ,CCP(1:2*P_l-1,:,P_l,a_l,u_l,t_l),v_l,u_l &
-                            ,V_in(1:2*P_l-1,:,P_l,a_l,u_l,t_l) &
-                            ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l,t_l))
+                            ,CCP(1:P_l,:,P_l,a_l,u_l,t_l),v_l,u_l &
+                            ,V_in(1:P_l,:,P_l,a_l,u_l,t_l) &
+                            ,V_fct(1:P_l,:,P_l,a_l,u_l,t_l))
         elseif (t_l<=20) then
-            call one_step_value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
-                                ,F_in(1:2*P_l-1,1:2*P_l-1,:,:,P_l,u_l,t_l) &
+            call one_step_value_fct_it(Ef_v(1:P_l,:,P_l,a_l,v_l,u_l)&
+                                ,F_in(1:P_l,1:P_l,:,:,P_l,u_l,t_l) &
                                 ,P_l &
-                                ,CCP(1:2*P_l-1,:,P_l,a_l,u_l,t_l),v_l,u_l &
-                                ,V_in(1:2*P_l-1,:,P_l,a_l,u_l,1) &
-                                ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l,t_l))
+                                ,CCP(1:P_l,:,P_l,a_l,u_l,t_l),v_l,u_l &
+                                ,V_in(1:P_l,:,P_l,a_l,u_l,1) &
+                                ,V_fct(1:P_l,:,P_l,a_l,u_l,t_l))
         else           
-            call one_step_value_fct_it(Ef_v(1:2*P_l-1,:,P_l,a_l,v_l,u_l)&
-                                ,F_in(1:2*P_l-1,1:2*P_l-1,:,:,P_l,u_l,t_l) &
+            call one_step_value_fct_it(Ef_v(1:P_l,:,P_l,a_l,v_l,u_l)&
+                                ,F_in(1:P_l,1:P_l,:,:,P_l,u_l,t_l) &
                                 ,P_l &
-                                ,CCP(1:2*P_l-1,:,P_l,a_l,u_l,t_l),v_l,u_l &
-                                ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l,t_l+1) &
-                                ,V_fct(1:2*P_l-1,:,P_l,a_l,u_l,t_l))
+                                ,CCP(1:P_l,:,P_l,a_l,u_l,t_l),v_l,u_l &
+                                ,V_fct(1:P_l,:,P_l,a_l,u_l,t_l+1) &
+                                ,V_fct(1:P_l,:,P_l,a_l,u_l,t_l))
         end if
      end do; end do;end do;end do
     
@@ -108,7 +108,7 @@ subroutine solve_path(params,T_path,Sims,n_ini,F_in,v_l,V_in,mean_N,social_outpu
     print*,'NPV at end',social_output(T_path)
     dist=0.0
     t_l=1
-    do P_l=2,P_max; do n_l=1,2;do ind=1,2*P_l-1; do t_l=1,T_path;
+    do P_l=2,P_max; do n_l=1,2;do ind=1,P_l; do t_l=1,T_path;
         dist=dist+dble(sum(iterations(ind,n_l,1:3,P_l,t_l)))/dble(sum(iterations(:,1:2,1:3,:,:)))*sum(abs(CCP_old(ind,n_l,P_l,:,:,t_l)-CCP(ind,n_l,P_l,:,:,t_l)))/dble(types_a)/dble(unobs_types)
     end do;end do; end do;end do
     

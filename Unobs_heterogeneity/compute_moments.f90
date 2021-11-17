@@ -2,14 +2,14 @@ subroutine compute_moments(data_in,string_name,moment_own_nxa)
     use simulation
     implicit none
     double precision,dimension(T_sim,plots_i),intent(in)::data_in
-    double precision,dimension(types_a,2),intent(out)::moment_own_nxa
+    double precision,dimension(types_a,1),intent(out)::moment_own_nxa
     CHARACTER (LEN=4),intent(in) ::string_name
     double precision,dimension(max_NFW+1)::counter_N,moment_N
-    double precision,dimension(types_a,2)::counter_own_nxa
-    double precision,dimension(unobs_types,2)::counter_uhe,moment_uhe
+    double precision,dimension(types_a,1)::counter_own_nxa
+    double precision,dimension(unobs_types,1)::counter_uhe,moment_uhe
     double precision,dimension(P_max)::counter_P,moment_P
     double precision,dimension(villages)::counter_v,moment_v
-    double precision,dimension(9)::counter_Nbar,moment_Nbar
+    double precision,dimension(10)::counter_Nbar,moment_Nbar
     integer::i_l,t_l,u_l
     
     !Initialize to zero
@@ -29,7 +29,7 @@ subroutine compute_moments(data_in,string_name,moment_own_nxa)
     do i_l=1,plots_i
         if (impute_i(i_l)==0) then
             do t_l=1,T_sim
-                if (data_in(t_l,i_l)/=-9.0d0 .and. n_data(t_l,i_l)<3 ) then
+                if (data_in(t_l,i_l)/=-9.0d0 .and. n_data(t_l,i_l)<2 ) then
 
                     !Moments across number of functioning wells in adjacency
                     counter_N(modal_N(t_l,i_l))=counter_N(modal_N(t_l,i_l))+1.0d0
@@ -63,9 +63,7 @@ subroutine compute_moments(data_in,string_name,moment_own_nxa)
                         counter_Nbar(NINT(N_bar(i_l)))=counter_Nbar(NINT(N_bar(i_l)))+1.0d0
                         moment_Nbar(NINT(N_bar(i_l)))=(counter_Nbar(NINT(N_bar(i_l)))-1.0)/counter_Nbar(NINT(N_bar(i_l)))*moment_Nbar(NINT(N_bar(i_l)))&
                                                 +1.0d0/counter_Nbar(NINT(N_bar(i_l)))*data_in(t_l,i_l)  
-
-
-                        
+     
                 end if 
                 
             end do
