@@ -16,15 +16,15 @@ fclose(fileID);
 fileID = fopen('data_own_nxa.txt','r');
 data_own_n = fscanf(fileID,'%f')
 fclose(fileID);
-data_own_n=reshape(data_own_n,2,3)
+data_own_n=reshape(data_own_n,2,2)
 fileID = fopen('counter_own_nxa.txt','r');
 counter_own_n = fscanf(fileID,'%f')
 fclose(fileID);
-counter_own_n=reshape(counter_own_n,2,3)
+counter_own_n=reshape(counter_own_n,2,2)
 fileID = fopen('modl_own_nxa.txt','r');
 modl_own_n = fscanf(fileID,'%f')
 fclose(fileID);
-modl_own_n=reshape(modl_own_n,2,3)
+modl_own_n=reshape(modl_own_n,2,2)
 
 fileID = fopen('data_P.txt','r');
 data_P = fscanf(fileID,'%f')
@@ -39,15 +39,15 @@ fclose(fileID);
 fileID = fopen('data_uhe.txt','r');
 data_uhe = fscanf(fileID,'%f')
 fclose(fileID);
-data_uhe=reshape(data_uhe,3,3)
+data_uhe=reshape(data_uhe,3,2)
 fileID = fopen('counter_uhe.txt','r');
 counter_uhe = fscanf(fileID,'%f')
 fclose(fileID);
-counter_uhe=reshape(counter_uhe,3,3)
+counter_uhe=reshape(counter_uhe,3,2)
 fileID = fopen('modl_uhe.txt','r');
 modl_uhe = fscanf(fileID,'%f')
 fclose(fileID);
-modl_uhe=reshape(modl_uhe,3,3)
+modl_uhe=reshape(modl_uhe,3,2)
 
 fileID = fopen('data_Nbar.txt','r');
 data_Nbar = fscanf(fileID,'%f')
@@ -84,11 +84,11 @@ plot(x,yfit,'r-.');
 xlabel('Model')
 ylabel('Data')
 
-clrs = [0.9 0.9 0.9;0 0 0;0.5 0.5 0.5];
+clrs = [0.9 0.9 0.9;0 0 0];
 
 FS=9
 set(groot,'defaultAxesTickLabelInterpreter','latex');  
-for i=[2 4 7]
+for i=[2 4 6 7]
     figure(i)
     if i==2
         title("Functioning Wells in Adjacency")

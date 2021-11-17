@@ -1,7 +1,7 @@
 subroutine bootstrap_se()
     use simulation
     implicit none
-    double precision,dimension(21,T_sim,plots_i)::data_csv
+    double precision,dimension(20,T_sim,plots_i)::data_csv
     integer,dimension(plots_i)::V_type_or,P_type_or,A_type_or
     double precision,dimension(unobs_types,plots_i)::UHE_type_or
     integer,dimension(T_sim,plots_i,simulations)::drilling_it_or
@@ -23,9 +23,9 @@ subroutine bootstrap_se()
     P_type_or=data_csv(2,1,:)
     A_type_or=data_csv(3,1,:)
     n_data_or=data_csv(4,:,:)+1
-    Pr_N_data_or=data_csv(5:16,:,:)
+    Pr_N_data_or=data_csv(5:15,:,:)
     UHE_type_or=0.25d0!data_csv(16:18,1,:)
-    drilling_it_or(:,:,1)=data_csv(20,:,:)
+    drilling_it_or(:,:,1)=data_csv(19,:,:)
     
     do bs_l=1,bs_samples
         print*,'Sample ',bs_l,' out of ',bs_samples
