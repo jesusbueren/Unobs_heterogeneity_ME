@@ -29,7 +29,7 @@ subroutine counterfactual_2(params_MLE)
         print*,'village,',v_l 
         tau=tau_grid(p_l)
         if (p_l==1) then
-            CCP_true(:,:,:,:,v_l,:)=0.15d0
+            CCP_true(:,:,:,:,v_l,:)=0.07d0
             n_dist(:,v_l)=1
             V_fct=0.0d0
             V_social=0.0d0

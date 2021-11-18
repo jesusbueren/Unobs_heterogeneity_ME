@@ -58,10 +58,10 @@ print*,'Start estimation'
 !Generate a random CCP for computing initial beliefs
 CCP_est=sqrt(-1.0d0)
 do P_l=1,P_max
-    CCP_est(1:2*P_l-1,1:2,P_l,:,:,:)=0.15d0
+    CCP_est(1:2*P_l-1,1:2,P_l,:,:,:)=0.07d0
 end do
 
-call estimation(params_MLE,log_likeli)
+!call estimation(params_MLE,log_likeli)
 
 
 open(unit=12, file=path_results//"parameters.txt")
