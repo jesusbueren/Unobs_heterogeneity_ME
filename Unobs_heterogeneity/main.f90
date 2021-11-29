@@ -61,7 +61,7 @@ do P_l=1,P_max
     CCP_est(1:2*P_l-1,1:2,P_l,:,:,:)=0.07d0
 end do
 
-!call estimation(params_MLE,log_likeli)
+call estimation(params_MLE,log_likeli)
 
 
 open(unit=12, file=path_results//"parameters.txt")
@@ -74,7 +74,7 @@ close(12)
 !close(12)
 print*,'estimated parameters',params_MLE
 !call generate_panel_sample(params_MLE)
-call counterfactual_2(params_MLE)
+!call counterfactual_2(params_MLE)
 !call counterfactual_1(params_MLE)
 
 !call transitional_dynamics(params_MLE)
