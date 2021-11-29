@@ -122,7 +122,7 @@ subroutine load_cadastral_maps()
         end if
     end do;end do
     
-    !call simulate_spatial_correlation()
+    call simulate_spatial_correlation()
     
 
 end subroutine
