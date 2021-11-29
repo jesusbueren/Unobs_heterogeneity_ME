@@ -9,7 +9,7 @@ subroutine compute_moments(data_in,string_name,moment_own_nxa)
     double precision,dimension(unobs_types,2)::counter_uhe,moment_uhe
     double precision,dimension(P_max)::counter_P,moment_P
     double precision,dimension(villages)::counter_v,moment_v
-    double precision,dimension(9)::counter_Nbar,moment_Nbar
+    double precision,dimension(10)::counter_Nbar,moment_Nbar
     integer::i_l,t_l,u_l
     
     !Initialize to zero

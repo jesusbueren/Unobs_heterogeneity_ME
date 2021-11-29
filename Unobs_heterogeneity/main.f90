@@ -74,7 +74,7 @@ close(12)
 !close(12)
 print*,'estimated parameters',params_MLE
 !call generate_panel_sample(params_MLE)
-!call counterfactual_2(params_MLE)
+call counterfactual_2(params_MLE)
 !call counterfactual_1(params_MLE)
 
 !call transitional_dynamics(params_MLE)
