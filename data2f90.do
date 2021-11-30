@@ -46,7 +46,7 @@ count if area_ac_`m'!=-9
 clear all
 cd "C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME"
 *import excel using "primitives\allprobs_lnN_rho_median.xls",firstrow  
-import excel using "primitives\allprobs_lnN_rho.xls",firstrow  
+import excel using "primitives\flow_lnN_fail_N_prob.xls",firstrow  
 /*import excel using "primitives\flow_lnN_fail_N_prob_2T.xls",firstrow  
 sort T N M
 forval i=3/4{
@@ -167,7 +167,7 @@ sort RespondentID year
 *replace n=1 if n==2 & a_type==1
 replace P_type=3  if P_type==2
 
-export delimited nb P_type a_type n f0_N - f11_N P_T1 P_T2 P_T3 drill IMPUTE can_be_zombie using "drill_export_r.csv",replace novarnames nolabel 
+export delimited nb P_type a_type n f0_N - f10_N P_T1 P_T2 P_T3 drill IMPUTE can_be_zombie using "drill_export_r.csv",replace novarnames nolabel 
 
 *statistics by area en number of wells around
 bys a_type: sum drill if drill>=0

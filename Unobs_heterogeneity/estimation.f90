@@ -65,7 +65,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     print*,'iteration number',it
     if (it==1) then
-        p_g(1,1:4)=(/-4.0d0,25.26d0,0.2d0,6.7d0/)
+        p_g(1,1:3)=(/1.6d0,1.2d0,0.93d0/)
     end if
     
     do p_l=2,par+1
@@ -77,10 +77,8 @@ subroutine estimation(params_MLE,log_likeli)
     !Change parameters to the (-Inf;Inf) real line
     do p_l=1,par+1
         p_g(p_l,1:3)=p_g(p_l,1:3)
-        p_g(p_l,4)=log(p_g(p_l,4))
+        !p_g(p_l,4)=log(p_g(p_l,4))
         y(p_l)=log_likelihood(p_g(p_l,:))
-        print*,'press key to continue'
-        read*,pause_k 
     end do 
     !print*,'likelihood_ini',y(1)
     
@@ -93,15 +91,17 @@ subroutine estimation(params_MLE,log_likeli)
         call amoeba(p_g,y,ftol,log_likelihood,iter)
     !end if
     print*,'likelihood amoeba',y(1)
+    print*,'press key to continue'
+        read*,pause_k 
     
 
     log_likeli=y(1)
     p_g(:,1:3)=p_g(:,1:3)
-    p_g(:,4)=exp(p_g(:,4))
+    !p_g(:,4)=exp(p_g(:,4))
     
     !Compute CCP to check convergence
     params_MLE=p_g(1,:)
-    rho=p_g(1,4)
+    rho=7.0d0 !p_g(1,4)
 
     !rho=reshape(p_g(1,4:7),(/2,2/))
     CCP_old=CCP_est
@@ -173,14 +173,14 @@ function log_likelihood(params_MLE)
     double precision,dimension(unobs_types,1)::type_pr_u
     
     params(1:3)=params_MLE(1:3)
-    params(4)=exp(params_MLE(4))
+    !params(4)=exp(params_MLE(4))
 
     Betas=0.0d0
     !Betas(2:unobs_types,:)=reshape(params(5:12),(/unobs_types-1,COV/))
     !params(5)=1.0d0/(1.0d0 + exp(-params_MLE(5))) 
     !params(6:18)=exp(params_MLE(6:18))
     
-    rho=params(4)
+    rho=7.0d0!params(4)
     pr_non_zombie_II=1.0d0!params(3)
     village_fe=1.0d0
     !village_fe(2:villages)=params(6:18)
@@ -194,7 +194,7 @@ function log_likelihood(params_MLE)
     missing_x1=0
     
     do a_l=1,types_a; do v_l=1,villages;do u_l=1,unobs_types
-        call expected_productivity((/params(1)*village_fe(v_l),params(2),params(3),params(4)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+        call expected_productivity((/params(1)*village_fe(v_l),params(2),params(3)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         !if (v_l==1) then
         !    print*,'Type',u_l,a_l
         !    print*, 'private return',(Ef_v(1,2,1,a_l,v_l,u_l))/(1.0d0-beta*(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_s
@@ -271,7 +271,7 @@ function log_likelihood(params_MLE)
                             else
                                 print*,'error in estimation'
                             end if
-                            if (drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l,i_l)<2) then 
+                            if (drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l,i_l)<3) then 
                                 likelihood_it=likelihood_it+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
                                 av_CCP_uhe(t_l,i_l,:)=av_CCP_uhe(t_l,i_l,:)+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
                             elseif (drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l,i_l)<3) then
@@ -359,9 +359,12 @@ function log_likelihood(params_MLE)
                         end if
 
 
-                        !write(12,*),sum(likelihood_it*(likelihood_i*pr_unobs_t/sum(likelihood_i*pr_unobs_t)))                    
+                        !write(12,*),sum(likelihood_it*(likelihood_i*pr_unobs_t/sum(likelihood_i*pr_unobs_t)))      
+                        
+                        if (n_data(t_l,i_l)==1) then
+                            likelihood_i=likelihood_i*likelihood_it*P_N2_N1*P_BigN2_BigN1
+                        end if
 
-                        likelihood_i=likelihood_i*likelihood_it*P_N2_N1*P_BigN2_BigN1
 
                         !if (isnan(sum(likelihood_i))) then
                         !    print*,'pb in likelihood',i_l,ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),2),drilling_it(t_l,i_l,s_l)
@@ -373,7 +376,9 @@ function log_likelihood(params_MLE)
                         !end if
                         
                     end do;
+
                     likelihood_i=likelihood_i*UHE_type_model(:,i_l)
+
 
                     if (UHE_type_model(1,i_l)==-9.0d0) then
                         UHE_type_model(:,i_l)=1.0d0/dble(unobs_types)
@@ -381,7 +386,7 @@ function log_likelihood(params_MLE)
                     end if
                
                     !Model 5
-                    if (sum(likelihood_i*UHE_type_model(:,i_l))/=0.0d0)then !UHE_type_model(1,i_l)
+                    if (sum(likelihood_i*UHE_type_model(:,i_l))/=0.0d0 )then !UHE_type_model(1,i_l)
                     !    !print*,i_l,likelihood_i(2),UHE_type_model(2,i_l),log_likelihood
                         if (can_be_zombie_i(i_l)==0) then
                             log_likelihood=log_likelihood+log(sum(likelihood_i*type_pr_u(:,1))*pr_non_zombie_II)  
