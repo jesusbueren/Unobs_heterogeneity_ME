@@ -98,13 +98,10 @@ br
 *Estimation data
 clear all
 cd "C:\Users\jbueren\Google Drive\overdrilling\fortran\Unobs_heterogeneity_ME\data"
-import excel using "drill_export_lnN_3T.xls",firstrow   
+import excel using "drill_export_zombie_TC3.xls",firstrow   
 encode map_village,g(nb)
 drop if nb==.
 br
-*Number of well in the plot
-gen n=ref1well+2*ref2well
-replace drill=0 if n==2
 
 sort RespondentID year
 by RespondentID: gen delta_n=n-n[_n-1]
@@ -114,9 +111,10 @@ by RespondentID: gen delta_n=n-n[_n-1]
 tab delta_n if drill[_n-1]==0
 by RespondentID:  replace drill=1 if delta_n[_n+1]==1 & drill==0
 
+replace n=2 if n==3
 *Measurement error taking into account knowledge of number of well in own plot
-gen f9=0
 gen f10=0
+
 forval i=0/10{
 gen f`i'_N=0
 }
@@ -132,6 +130,7 @@ local j=`i'-2
 replace f`i'_N=f`j' if n==2
 }
 
+
 local q=4
 xtile a_type=area,n(`q')
 
@@ -140,13 +139,13 @@ recode a_type (1/2=1)(3/4=2)
 
 bys a_type: sum area,d
 
-gen P_type=min(Nplots_adj,6)
+gen P_type=min(Nplots_adj,8)
 
 sort RespondentID year
 
-rename Pflow_T1 P_T1
-rename Pflow_T2 P_T2
-rename Pflow_T3 P_T3
+gen P_T1=1/3
+gen P_T2=1/3
+gen P_T3=1/3
 
 by RespondentID: egen Total_n=total(n)
 *drop if Total_n==10
@@ -159,17 +158,16 @@ replace P_T3=1/3 if IMPUTE==1
 by RespondentID: egen total_attempts=total(drill) if drill!=-9
 by RespondentID: egen total_attempts_2=mean(total_attempts)
 
-replace IMPUTE=0
+gen IMPUTE=can_be_zombie
 *replace IMPUTE=1 if total_attempts_2==0 & n==0
 
 sort RespondentID year
-gen can_be_zombie=0
-by RespondentID: replace can_be_zombie=1 if total_attempts_2==0 & n[1]==0
 
 *replace drill=0 if n==1 & a_type==1
 *replace n=1 if n==2 & a_type==1
 replace P_type=3  if P_type==2
-export delimited nb P_type a_type n f0_N - f10_N P_T1 P_T2 P_T3 drill IMPUTE can_be_zombie using "drill_export_r.csv",replace novarnames nolabel 
+
+export delimited nb P_type a_type n f0_N - f11_N P_T1 P_T2 P_T3 drill IMPUTE can_be_zombie using "drill_export_r.csv",replace novarnames nolabel 
 
 *statistics by area en number of wells around
 bys a_type: sum drill if drill>=0
@@ -185,7 +183,7 @@ bys big_N: sum drill if drill>=0
 bys a_type n: sum drill if drill>=0
 
 bys RespondentID: egen N_bar=mean(big_N)
-reg drill i.n big_N N_bar if can_be_zombie==0 & n==0
+reg drill i.n big_N N_bar if can_be_zombie==0 & n<2
 
 bys RespondentID: egen total_d=total(drill)
 reg total_d N_bar n if year==2012 & can_be_zombie==0 
