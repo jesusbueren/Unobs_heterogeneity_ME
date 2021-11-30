@@ -14,12 +14,12 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
     integer(8),dimension(plots_in_map,3)::state,state_old
     integer(8)::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min,a_l,u_l
     double precision::u_d,u_s,u_f,u_m,it2
-    integer(8),parameter:: its=1000!0
+    integer(8),parameter:: its=9000!0
     double precision,dimension(its)::NPV,total_N,NPV_PV,CCP_av
     double precision,intent(out)::mean_N,social_output,private_output
     integer(8),dimension(2*P_max-1,2*P_max-1,3,3,P_max,unobs_types)::beliefs_c
     integer(8),dimension(1)::seed=321,seed2
-    integer(8),parameter::burn_t=1000!0
+    integer(8),parameter::burn_t=1000
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,unobs_types)::F
     double precision,dimension(P_max)::dist
     double precision,dimension(2*P_max-1)::CCP_aux

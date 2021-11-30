@@ -31,10 +31,12 @@ subroutine input_primitives()
         
         !Probability of failure (first position indicates one well, last position indicates all plots with 2 wells)
         if (v_l==1 .and. u_l==1) then
-            !print*,'kill changes in failure pr with N and heterogeneous across types'
+            !print*,'kill heterogeneous failure across types'
         end if
         PI_fm(1:2*P_max,1,u_l)=flow_fail_prob_csv(9,u_l,1,1:2*P_max) 
         PI_fm(1:2*P_max,2,u_l)=flow_fail_prob_csv(9,u_l,2,1:2*P_max)
+        !PI_fm(1:2*P_max,1,u_l)=flow_fail_prob_csv(9,2,1,1:2*P_max) 
+        !PI_fm(1:2*P_max,2,u_l)=flow_fail_prob_csv(9,2,2,1:2*P_max)
 
         PI_f=PI_fm(:,1,u_l)*PI_m(1,v_l)+PI_fm(:,2,u_l)*PI_m(2,v_l)   
         
@@ -43,13 +45,14 @@ subroutine input_primitives()
         PI_s(:,v_l)=PI_s(1,v_l)       
     
         !Discharge pr. depends of moonsoon and in number of wells in the adjacency
+        if (v_l==1 .and. u_l==1) then
+            !print*,'kill heterogeneous flow across types'
+        end if
         PI_k(:,:,1,u_l)=transpose(flow_fail_prob_csv(4:8,u_l,1,1:2*P_max)) 
         PI_k(:,:,2,u_l)=transpose(flow_fail_prob_csv(4:8,u_l,2,1:2*P_max))
-        !print*,'change this'
-        !do P=1,2*P_max
-        !    PI_k(:,P,1,u_l)=PI_k(:,1,1,u_l)
-        !    PI_k(:,P,2,u_l)=PI_k(:,1,2,u_l)
-        !end do
+        !PI_k(:,:,1,u_l)=transpose(flow_fail_prob_csv(4:8,2,1,1:2*P_max)) 
+        !PI_k(:,:,2,u_l)=transpose(flow_fail_prob_csv(4:8,2,2,1:2*P_max))
+
         
         !Adjust to sum exactly one
         do N=1,2*P_max

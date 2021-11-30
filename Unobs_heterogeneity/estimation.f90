@@ -42,14 +42,14 @@ subroutine estimation(params_MLE,log_likeli)
 1   n_initial_all(1:plots_in_map,:)=1    
     call random_seed(GET=seed_c)
     if (it>1) then
-        !$OMP PARALLEL default(shared) 
-        !$OMP  DO
+        !!$OMP PARALLEL default(shared) 
+        !!$OMP  DO
         do v_l=1,villages
             print*,'village ',v_l,' out of ',villages
             call generate_beliefs(CCP_mid(:,:,:,:,v_l,:),V_fct(:,:,:,:,v_l,:),V_social(:,:,:,:,v_l,:),Ef_v(:,:,:,:,v_l,:),n_initial_all(:,v_l),F_est(:,:,:,:,:,v_l,:),v_l,iterations_all(:,:,:,:,v_l,:),mean_N(v_l),mean_NPV(v_l),mean_budget(v_l),Pr_u_X(:,:,:,:,v_l,:))
         end do
-        !$OMP END DO  
-        !$OMP END PARALLEL  
+        !!$OMP END DO  
+        !!$OMP END PARALLEL  
         open(unit=12, file=path_results//"beliefs_6.txt")
         write(12,*),F_est,Pr_u_X,iterations_all
         close(12)
@@ -65,7 +65,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     print*,'iteration number',it
     if (it==1) then
-        p_g(1,1:4)=(/2.58d0,15.0d0,0.5d0,3.1d0/)
+        p_g(1,1:4)=(/-4.0d0,25.26d0,0.2d0,6.7d0/)
     end if
     
     do p_l=2,par+1
@@ -81,7 +81,6 @@ subroutine estimation(params_MLE,log_likeli)
         y(p_l)=log_likelihood(p_g(p_l,:))
         print*,'press key to continue'
         read*,pause_k 
-
     end do 
     !print*,'likelihood_ini',y(1)
     
@@ -94,6 +93,7 @@ subroutine estimation(params_MLE,log_likeli)
         call amoeba(p_g,y,ftol,log_likelihood,iter)
     !end if
     print*,'likelihood amoeba',y(1)
+    
 
     log_likeli=y(1)
     p_g(:,1:3)=p_g(:,1:3)
@@ -158,7 +158,7 @@ function log_likelihood(params_MLE)
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::V_fct
     integer::i_l,t_l,type_l,a_l,p_l,v_l,ind,u_l,j_l,s_l,t,missing_x1,j_l2,ind2
     double precision::log_likelihood,pr_non_zombie_II
-    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity Ef_v(1:2*1-1,:,1,1,1,1)
+    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity Ef_v(1,:,1,1,1,1)
     double precision,dimension(unobs_types)::likelihood_i,likelihood_it,P_N2_N1,P_BigN2_BigN1
     character::end_k
     double precision,dimension(T_sim,plots_i,unobs_types)::av_CCP_uhe
@@ -194,7 +194,7 @@ function log_likelihood(params_MLE)
     missing_x1=0
     
     do a_l=1,types_a; do v_l=1,villages;do u_l=1,unobs_types
-        call expected_productivity((/params(1)*village_fe(v_l),params(2),params(3)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
+        call expected_productivity((/params(1)*village_fe(v_l),params(2),params(3),params(4)/),area(a_l),Ef_v(:,:,:,a_l,v_l,u_l),v_l,u_l)
         !if (v_l==1) then
         !    print*,'Type',u_l,a_l
         !    print*, 'private return',(Ef_v(1,2,1,a_l,v_l,u_l))/(1.0d0-beta*(1.0d0-PI_f_v(1,2,1,v_l,u_l)))-c_s
@@ -254,7 +254,7 @@ function log_likelihood(params_MLE)
                                 else
                                     print*,'error in estimation'
                                 end if 
-                                UHE_type_model(:,i_l)=UHE_type_model(:,i_l)+Pr_u_X(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l) !Pr_N_data(:,t_l,i_l)
+                                UHE_type_model(:,i_l)=UHE_type_model(:,i_l)+Pr_u_X(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)  !Pr_u_X(1:2*4-1,1,4,1,1,:)
                             end do
                         end if
                         
@@ -271,7 +271,7 @@ function log_likelihood(params_MLE)
                             else
                                 print*,'error in estimation'
                             end if
-                            if (drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l,i_l)<3) then 
+                            if (drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l,i_l)<2) then 
                                 likelihood_it=likelihood_it+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
                                 av_CCP_uhe(t_l,i_l,:)=av_CCP_uhe(t_l,i_l,:)+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
                             elseif (drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l,i_l)<3) then
@@ -361,7 +361,7 @@ function log_likelihood(params_MLE)
 
                         !write(12,*),sum(likelihood_it*(likelihood_i*pr_unobs_t/sum(likelihood_i*pr_unobs_t)))                    
 
-                        likelihood_i=likelihood_i*likelihood_it!*P_N2_N1*P_BigN2_BigN1
+                        likelihood_i=likelihood_i*likelihood_it*P_N2_N1*P_BigN2_BigN1
 
                         !if (isnan(sum(likelihood_i))) then
                         !    print*,'pb in likelihood',i_l,ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),2),drilling_it(t_l,i_l,s_l)
@@ -373,7 +373,7 @@ function log_likelihood(params_MLE)
                         !end if
                         
                     end do;
-                    likelihood_i=likelihood_i!*UHE_type_model(:,i_l)
+                    likelihood_i=likelihood_i*UHE_type_model(:,i_l)
 
                     if (UHE_type_model(1,i_l)==-9.0d0) then
                         UHE_type_model(:,i_l)=1.0d0/dble(unobs_types)
