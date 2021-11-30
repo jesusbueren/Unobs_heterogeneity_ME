@@ -185,7 +185,7 @@ bys big_N: sum drill if drill>=0
 bys a_type n: sum drill if drill>=0
 
 bys RespondentID: egen N_bar=mean(big_N)
-reg drill i.n big_N N_bar if can_be_zombie==0 & n<2
+reg drill i.n big_N N_bar if can_be_zombie==0 & n==0
 
 bys RespondentID: egen total_d=total(drill)
 reg total_d N_bar n if year==2012 & can_be_zombie==0 
