@@ -10,7 +10,7 @@ subroutine generate_panel_sample(params_MLE)
     integer::v_l,it
     character::end_key
     
-    rho=params_MLE(4)
+    rho=7.0d0!params_MLE(4)
     v_l=1
     CCP_true(:,:,:,:,v_l,:)=0.15d0
     n_dist(:,v_l)=1

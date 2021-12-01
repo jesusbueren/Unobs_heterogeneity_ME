@@ -8,7 +8,7 @@ end
 module cadastral_maps
     use dimensions
     implicit none
-    double precision:: rho_sc=0.99d0
+    double precision:: rho_sc=0.8d0
     integer,parameter::plots_in_map=1909,villages=14,unobs_types=3
     integer,parameter,dimension(villages)::plots_v=(/1794,302,912,517,292,535,939,637,405,837,973,1844,443,1909/) !plots in each village
     double precision,dimension(villages):: mean_area
@@ -39,11 +39,11 @@ module primitives
     double precision,dimension(2*P_max,villages)::PI_s
     double precision,dimension(2*P_max-1,3,P_max,villages)::PI_s_v
     !c_d: fixed cost of failing to drill;c_s: fixed cost of succeeding to drill; c_e: cost of electricity by well
-    double precision::c_s=72.3d0,beta=0.95d0,c_d=35.2d0,c_e=11.7d0
+    double precision::c_s=72.3d0,beta=0.95d0,c_d=35.2d0,c_e=5.0d0!11.7d0
     !extreme value distribution shocks
     double precision,parameter::gamma=0.577215664901533d0
     double precision::v_nod=0.0d0
-    double precision,dimension(2)::rho=1.0d0
+    double precision,dimension(2)::rho=10.0d0
     !area of plots
     double precision,dimension(types_a)::area=(/1.3d0,4.0d0/)!(/1.0d0,2.0d0,3.0d0,5.1d0/) 
     double precision,dimension(types_a-1)::area_lims=2.3d0 !(/1.3d0,2.3d0,4.0d0/) !

@@ -10,11 +10,11 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
     integer(8),dimension(2*P_max-1,3,3,P_max,unobs_types),intent(out)::iterations
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(out)::Pr_u_x !Pr_u_x(1,1,3,4,:) counter_u(1,1,3,4,:)
     integer(8),dimension(2*P_max-1,3,P_max,types_a,unobs_types)::counter_u
-    integer(8),parameter::T=10000!0!150000
+    integer(8),parameter::T=50000!0!150000
     integer(8),dimension(plots_in_map,3)::state,state_old
     integer(8)::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min,a_l,u_l
     double precision::u_d,u_s,u_f,u_m,it2
-    integer(8),parameter:: its=9000!0
+    integer(8),parameter:: its=48000!0
     double precision,dimension(its)::NPV,total_N,NPV_PV,CCP_av
     double precision,intent(out)::mean_N,social_output,private_output
     integer(8),dimension(2*P_max-1,2*P_max-1,3,3,P_max,unobs_types)::beliefs_c

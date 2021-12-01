@@ -87,7 +87,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N
     
     !print*,'press any key to continue'
     !read*,pause_k
-    if (dist>1.0d-4) then !1.0d-4 
+    if (dist>1.0d-3) then !1.0d-4 
         go to 1 
     end if
     

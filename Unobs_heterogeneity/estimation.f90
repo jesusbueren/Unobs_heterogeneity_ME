@@ -50,9 +50,9 @@ subroutine estimation(params_MLE,log_likeli)
         end do
         !!$OMP END DO  
         !!$OMP END PARALLEL  
-        open(unit=12, file=path_results//"beliefs_6.txt")
-        write(12,*),F_est,Pr_u_X,iterations_all
-        close(12)
+        !open(unit=12, file=path_results//"beliefs_6.txt")
+        !write(12,*),F_est,Pr_u_X,iterations_all
+        !close(12)
     else
         open(unit=12, file=path_results//"beliefs_6.txt")
             read(12,*),F_est,Pr_u_X,iterations_all
@@ -65,7 +65,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     print*,'iteration number',it
     if (it==1) then
-        p_g(1,1:3)=(/1.6d0,1.2d0,0.93d0/)
+        p_g(1,1:3)=(/4.35d0,8.18d0,1.02d0/)
     end if
     
     do p_l=2,par+1
@@ -101,7 +101,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     !Compute CCP to check convergence
     params_MLE=p_g(1,:)
-    rho=7.0d0 !p_g(1,4)
+    !rho=p_g(1,4)
 
     !rho=reshape(p_g(1,4:7),(/2,2/))
     CCP_old=CCP_est
@@ -180,7 +180,7 @@ function log_likelihood(params_MLE)
     !params(5)=1.0d0/(1.0d0 + exp(-params_MLE(5))) 
     !params(6:18)=exp(params_MLE(6:18))
     
-    rho=7.0d0!params(4)
+    !rho=params(4)
     pr_non_zombie_II=1.0d0!params(3)
     village_fe=1.0d0
     !village_fe(2:villages)=params(6:18)
@@ -361,9 +361,9 @@ function log_likelihood(params_MLE)
 
                         !write(12,*),sum(likelihood_it*(likelihood_i*pr_unobs_t/sum(likelihood_i*pr_unobs_t)))      
                         
-                        if (n_data(t_l,i_l)==1) then
+                        !if (n_data(t_l,i_l)==1) then
                             likelihood_i=likelihood_i*likelihood_it*P_N2_N1*P_BigN2_BigN1
-                        end if
+                        !end if
 
 
                         !if (isnan(sum(likelihood_i))) then

@@ -75,12 +75,12 @@ fclose(fileID);
 scatter(modl_V,data_V)
 hold on
 % P = polyfit(modl_V,data_V,1);
-x=[0.02:0.01:0.21]
+x=[0.02:0.01:0.14]
 yfit = 1*x+0;
 hold on;
 plot(x,yfit,'r-.');
-% ylim([0 0.15])
-% xlim([0.05 0.1])
+ylim([0 0.15])
+xlim([0 0.15])
 xlabel('Model')
 ylabel('Data')
 
@@ -242,7 +242,7 @@ counterfactuals = fscanf(fileID,'%f')
 fclose(fileID);
 
 variables=5
-nkk=18
+nkk=20
 villages=floor(size(counterfactuals,1)/variables/nkk) %14
 beta=0.98
 
@@ -253,7 +253,7 @@ counterfactuals=reshape(counterfactuals(1:variables*nkk*villages),variables,nkk,
 % A=mean(counterfactuals(4,:,:),3)
 % B=mean(counterfactuals(5,:,:),3)
 A=counterfactuals(4,:,v_l)
-c_e=11
+c_e=5
 figure(1)
 set(1,'position',[50    500    550    200])
 subplot(1,2,1)
