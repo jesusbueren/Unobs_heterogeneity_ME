@@ -65,7 +65,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     print*,'iteration number',it
     if (it==1) then
-        p_g(1,1:3)=(/4.35d0,0.5d0,0.5d0/)
+        p_g(1,1:3)=(/13.4d0,0.2d0,0.2d0/)
     end if
     
     do p_l=2,par+1
@@ -80,6 +80,8 @@ subroutine estimation(params_MLE,log_likeli)
         p_g(p_l,2:3)=log(p_g(p_l,2:3)/(1.0d0-p_g(p_l,2:3)))
         !p_g(p_l,4)=log(p_g(p_l,4))
         y(p_l)=log_likelihood(p_g(p_l,:))
+        !print*,'press key to continue'
+        !read*,pause_k 
     end do 
     !print*,'likelihood_ini',y(1)
     
@@ -92,12 +94,12 @@ subroutine estimation(params_MLE,log_likeli)
         call amoeba(p_g,y,ftol,log_likelihood,iter)
     !end if
     print*,'likelihood amoeba',y(1)
-    print*,'press key to continue'
-        read*,pause_k 
+    
     
 
     log_likeli=y(1)
-    p_g(:,1:3)=p_g(:,1:3)
+    p_g(:,1)=exp(p_g(:,1))
+    p_g(:,2:3)=1.0d0/(1.0d0+exp(-p_g(:,2:3)))
     !p_g(:,4)=exp(p_g(:,4))
     
     !Compute CCP to check convergence
@@ -173,7 +175,8 @@ function log_likelihood(params_MLE)
     double precision,dimension(COV,1)::X
     double precision,dimension(unobs_types,1)::type_pr_u
     
-    params(1:3)=params_MLE(1:3)
+    params(1)=exp(params_MLE(1))
+    params(2:3)=1.0d0/(1.0d0 + exp(-params_MLE(2:3))) 
     !params(4)=exp(params_MLE(4))
 
     Betas=0.0d0
