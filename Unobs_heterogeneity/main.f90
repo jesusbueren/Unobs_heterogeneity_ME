@@ -63,7 +63,7 @@ do P_l=1,P_max
     CCP_est(1:2*P_l-1,1:2,P_l,:,:,3)=0.12d0
 end do
 
-!call estimation(params_MLE,log_likeli)
+call estimation(params_MLE,log_likeli)
 
 
 open(unit=12, file=path_results//"parameters.txt")
