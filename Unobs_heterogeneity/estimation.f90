@@ -65,7 +65,7 @@ subroutine estimation(params_MLE,log_likeli)
     
     print*,'iteration number',it
     if (it==1) then
-        p_g(1,1:3)=(/4.35d0,8.18d0,1.02d0/)
+        p_g(1,1:3)=(/4.35d0,0.5d0,0.5d0/)
     end if
     
     do p_l=2,par+1
@@ -76,7 +76,8 @@ subroutine estimation(params_MLE,log_likeli)
         
     !Change parameters to the (-Inf;Inf) real line
     do p_l=1,par+1
-        p_g(p_l,1:3)=p_g(p_l,1:3)
+        p_g(p_l,1)=log(p_g(p_l,1))
+        p_g(p_l,2:3)=log(p_g(p_l,2:3)/(1.0d0-p_g(p_l,2:3)))
         !p_g(p_l,4)=log(p_g(p_l,4))
         y(p_l)=log_likelihood(p_g(p_l,:))
     end do 
