@@ -42,7 +42,7 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
     counter_u=0
     
     !Store the state for each plot and simulate decision to drill
-    OPEN(UNIT=9, FILE="panel.txt")
+    !OPEN(UNIT=9, FILE="panel.txt")
     do t_l=1,T-1;   
         !print*,t_l
         !simulate monsoon next period
@@ -206,17 +206,17 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
                     NPV_PV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV_PV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*0.0d0
                 end if
             end if
-            if (t_l>T-6) then
-                if (n_l==1 .or. n_l==2) then
-                    if (u_d<CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))) then
-                        write(9,'(<7>I5)'),i_l,t_l-(T-6),P,A,n_l,ind,1
-                    else
-                        write(9,'(<7>I5)'),i_l,t_l-(T-6),P,A,n_l,ind,0
-                    end if
-                else
-                    write(9,'(<7>I5)'),i_l,t_l-(T-6),P,A,n_l,ind,-9
-                end if
-            end if
+            !if (t_l>T-6) then
+            !    if (n_l==1 .or. n_l==2) then
+            !        if (u_d<CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))) then
+            !            write(9,'(<7>I5)'),i_l,t_l-(T-6),P,A,n_l,ind,1
+            !        else
+            !            write(9,'(<7>I5)'),i_l,t_l-(T-6),P,A,n_l,ind,0
+            !        end if
+            !    else
+            !        write(9,'(<7>I5)'),i_l,t_l-(T-6),P,A,n_l,ind,-9
+            !    end if
+            !end if
                     
         end do
         !Store current state
@@ -247,7 +247,7 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
         it=it+1
     end do
 
-    close(9)
+    !close(9)
     !close(13)
     !print*,'end panel'
     !read*,continue_k
@@ -277,7 +277,7 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
     private_output=sum(NPV_PV)/dble(its)/mean_area(v_l)/pr_non_zombie(v_l)!/(1.0d0-beta)
     mean_N=sum(total_N)/(its)/dble(plots_v(v_l))
     
-    print*,'av drilling',sum(CCP_av)/dble(its),'private_output',private_output,'social_output',social_output,'in village',v_l
+    !print*,'av drilling',sum(CCP_av)/dble(its),'private_output',private_output,'social_output',social_output,'in village',v_l
     
 
     do ind=1,2*P_max-1; do n_l=1,3; do P_l=1,P_max; do a_l=1,types_a; do u_l=1,unobs_types

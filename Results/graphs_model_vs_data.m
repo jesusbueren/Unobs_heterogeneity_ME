@@ -158,8 +158,8 @@ i=3
                 title("$a>4.0$",'Interpreter','latex')
             end
             data_gr=[data_own_n(j,:); modl_own_n(j,:)]'
-            yticks([0:0.05:0.35])
-            ylim([0 0.35])
+            yticks([0:0.03:0.15])
+            ylim([0 0.15])
             set(gca,'TickLabelInterpreter','latex')
         xticks([1 2])
         xticklabels({'$n=0$','$n=1$'})
@@ -242,7 +242,7 @@ counterfactuals = fscanf(fileID,'%f')
 fclose(fileID);
 
 variables=5
-nkk=11
+nkk=20
 villages=floor(size(counterfactuals,1)/variables/nkk) %14
 beta=0.98
 
