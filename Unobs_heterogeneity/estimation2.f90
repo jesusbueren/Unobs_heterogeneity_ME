@@ -33,12 +33,10 @@ subroutine estimation2(params_MLE,log_likeli)
     !print*,'Initial Conditions'
     
 
-    p_g(1,1:4)=(/13.2d0,0.19d0,0.14d0,10.9d0/)
-
-    
+    p_g(1,1:4)=(/12.33d0,0.24d0,0.35d0,10.5d0/) !(/16.36d0,0.33d0,0.14d0,8.0d0/)
     do p_l=2,par+1
         p_g(p_l,:)=p_g(1,:)
-        p_g(p_l,p_l-1)=p_g(1,p_l-1)!*0.8d0
+        p_g(p_l,p_l-1)=p_g(1,p_l-1)*0.8d0
     end do
 
         
@@ -47,11 +45,10 @@ subroutine estimation2(params_MLE,log_likeli)
         p_g(p_l,1)=log(p_g(p_l,1))
         p_g(p_l,2:3)=log(p_g(p_l,2:3)/(1.0d0-p_g(p_l,2:3)))
         p_g(p_l,4)=log(p_g(p_l,4))
-        y(p_l)=log_likelihood2(p_g(p_l,:))
-        
+        y(p_l)=log_likelihood2(p_g(p_l,:))  
+        read*,pause_k
     end do 
-    print*,'press key to continue'
-    read*,pause_k 
+
     !print*,'likelihood_ini',y(1)
         
     ftol=1.0d-7
@@ -97,7 +94,8 @@ function log_likelihood2(params_MLE)
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,villages,unobs_types)::F
     integer,dimension(plots_in_map,villages)::n_dist
     double precision,dimension(villages)::mean_N,social_output,private_output
-    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Pr_u_X_new
+    double precision,dimension(3,3,2*P_max-1,2,P_max,types_a,villages,unobs_types)::joint_pr
+    double precision,dimension(unobs_types)::expost_types
     
     params(1)=exp(params_MLE(1))
     params(2:3)=1.0d0/(1.0d0 + exp(-params_MLE(2:3))) 
@@ -118,23 +116,32 @@ function log_likelihood2(params_MLE)
     log_likelihood2=0.0d0
     missing_x1=0
     
-    open(unit=12, file=path_results//"initial_conditions.txt")
-        read(12,*),CCP,n_dist
-    close(12)
-    !$OMP PARALLEL default(shared) 
+
+    CCP=0.07d0
+    n_dist=1
+    !$OMP PARALLEL default(shared)
     !$OMP  DO
-    do v_l=1,villages
+    do v_l=1,1!villages
         print*,'village',v_l        
-        call compute_eq_F_CCP(params,F(:,:,:,:,:,v_l,:),CCP(:,:,:,:,v_l,:),V_fct(:,:,:,:,v_l,:),V_social(:,:,:,:,v_l,:),n_dist(:,v_l),v_l,mean_N(v_l),social_output(v_l),private_output(v_l),Pr_u_X_new(:,:,:,:,v_l,:))
+        call compute_eq_F_CCP(params,F(:,:,:,:,:,v_l,:),CCP(:,:,:,:,v_l,:),V_fct(:,:,:,:,v_l,:),V_social(:,:,:,:,v_l,:),n_dist(:,v_l),v_l,mean_N(v_l),social_output(v_l),private_output(v_l),joint_pr(:,:,:,:,:,:,v_l,:))
     end do
     !$OMP END DO  
-    !$OMP END PARALLEL         
+    !$OMP END PARALLEL 
+     open(unit=12, file=path_results//"init_cond.txt")   
+        write(12,*),joint_pr,CCP
+    close(12)
+    !do v_l=1,villages
+    !    CCP(:,:,:,:,v_l,:)=CCP(:,:,:,:,1,:)
+    !    joint_pr(:,:,:,:,:,:,v_l,:)=joint_pr(:,:,:,:,:,:,1,:)
+    !end do
+
+
     
-    !OPEN(UNIT=12, FILE=path_results//"likelihood.txt")
+
+    
     do s_l=1,simulations
     do i_l=1,plots_i;
         X(:,1)=(/1.0d0,N_bar(i_l),dble(A_type(i_l)-1),dble(P_type(i_l))/)
-
         if (impute_i(i_l)==0) then
             UHE_type_model(:,i_l)=0.0d0
             if (P_type(i_l)>1) then !more than one neighbor
@@ -142,30 +149,7 @@ function log_likelihood2(params_MLE)
                 do t_l=1,T_sim
                     likelihood_it=0.0d0
                     av_CCP_uhe(t_l,i_l,:)=0.0d0
-                    !if (sum(Pr_N_data(n_data(t_l,i_l):min(max_NFW+1,2*(P_type(i_l)-1)+n_data(t_l,i_l)),t_l,i_l))<0.98d0) then
-                    !    print*,'error in estimation'
-                    !    print*,Pr_N_data(n_data(t_l,i_l):min(max_NFW+1,2*(P_type(i_l)-1)+n_data(t_l,i_l)),t_l,i_l)
-                    !    read*,pause_k
-                    !end if
-                
-                    !Set distribution of unobserved heterogeneity
-                    if (t_l==1) then
-                        do j_l=n_data(t_l,i_l),min(max_NFW+1,2*(P_type(i_l)-1)+n_data(t_l,i_l))
-                            if (n_data(t_l,i_l)==1) then
-                                ind=j_l !position in the state space wrt to the CCP, PI_s_v and ,PI_f_v
-                            elseif (n_data(t_l,i_l)==2) then
-                                ind=j_l-1
-                            elseif (n_data(t_l,i_l)==3) then
-                                ind=j_l-2
-                            else
-                                print*,'error in estimation'
-                            end if 
-                            UHE_type_model(:,i_l)=UHE_type_model(:,i_l)+Pr_u_X_new(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)  
-                        end do
-                    end if
-                        
-                    P_N2_N1=1.0d0
-                    P_BigN2_BigN1=1.0d0
+
                     do j_l=n_data(t_l,i_l),min(max_NFW+1,2*(P_type(i_l)-1)+n_data(t_l,i_l))
                         !position in the state space wrt to the CCP, PI_s_v and ,PI_f_v
                         if (n_data(t_l,i_l)==1) then
@@ -178,98 +162,37 @@ function log_likelihood2(params_MLE)
                             print*,'error in estimation'
                         end if
                         if (drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l,i_l)<3) then 
-                            likelihood_it=likelihood_it+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
-                            av_CCP_uhe(t_l,i_l,:)=av_CCP_uhe(t_l,i_l,:)+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
+                            likelihood_it=likelihood_it+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)* &
+                                            sum(reshape(joint_pr(n_data(t_l,i_l),:,ind,:,P_type(i_l),A_type(i_l),V_type(i_l),:),(/3*2,unobs_types/)),1)
+                            av_CCP_uhe(t_l,i_l,:)=av_CCP_uhe(t_l,i_l,:)+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)* &
+                                            sum(reshape(joint_pr(n_data(t_l,i_l),:,ind,:,P_type(i_l),A_type(i_l),V_type(i_l),:),(/3*2,unobs_types/)),1)
                         elseif (drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l,i_l)<3) then
-                            likelihood_it=likelihood_it+(1.0d0-CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:))*Pr_N_data(j_l,t_l,i_l)
-                            av_CCP_uhe(t_l,i_l,:)=av_CCP_uhe(t_l,i_l,:)+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
+                            likelihood_it=likelihood_it+(1.0d0-CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:))*&
+                                            sum(reshape(joint_pr(n_data(t_l,i_l),:,ind,:,P_type(i_l),A_type(i_l),V_type(i_l),:),(/3*2,unobs_types/)),1)
+                            av_CCP_uhe(t_l,i_l,:)=av_CCP_uhe(t_l,i_l,:)+CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)* &
+                                            sum(reshape(joint_pr(n_data(t_l,i_l),:,ind,:,P_type(i_l),A_type(i_l),V_type(i_l),:),(/3*2,unobs_types/)),1)
                         !elseif (drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l,i_l)==3) then
                         !    likelihood_it=likelihood_it+(1.0d0-CCP_aux(ind,V_type(i_l)))*Pr_N_data(j_l,t_l,i_l)
                         else
                             likelihood_it=1.0d0 !so that if drilling_it is missing likelihood_it is one
                         end if
-                        if (t_l<T_sim) then
-                            if (j_l==n_data(t_l,i_l)) then
-                                P_N2_N1=0.0d0
-                            end if
-                            if (n_data(t_l,i_l)==1.and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==1 ) then
-                                    
-                                P_N2_N1=1.0d0
-                                        
-                            elseif (n_data(t_l,i_l)==1.and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==1 ) then
-                                    
-                                P_N2_N1=P_N2_N1+(1.0d0-PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l)))*Pr_N_data(j_l,t_l,i_l)
-                                    
-                            elseif (n_data(t_l,i_l)==1.and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==2 ) then
-                                    
-                                P_N2_N1=P_N2_N1+(PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l)))*Pr_N_data(j_l,t_l,i_l)
-                                    
-                            elseif (n_data(t_l,i_l)==2.and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==1 ) then
-                                    
-                                P_N2_N1=P_N2_N1+(PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))*Pr_N_data(j_l,t_l,i_l)
-                                    
-                            elseif (n_data(t_l,i_l)==2.and. drilling_it(t_l,i_l,s_l)==0 .and. n_data(t_l+1,i_l)==2 ) then
-                                    
-                                P_N2_N1=P_N2_N1+(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))*Pr_N_data(j_l,t_l,i_l)
-                                    
-                            elseif (n_data(t_l,i_l)==2.and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==1 ) then
-                                    
-                                P_N2_N1=P_N2_N1+(1.d0-PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l)))*PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)
-                                    
-                            elseif (n_data(t_l,i_l)==2.and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==2 ) then
-                                    
-                                P_N2_N1=P_N2_N1+((1.d0-PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l)))*(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))+&
-                                                    PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l))*PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))*Pr_N_data(j_l,t_l,i_l)
-                                
-                            elseif (n_data(t_l,i_l)==2.and. drilling_it(t_l,i_l,s_l)==1 .and. n_data(t_l+1,i_l)==3 ) then
-                                    
-                                P_N2_N1=P_N2_N1+PI_s_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l))*(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))*Pr_N_data(j_l,t_l,i_l)
-                                    
-                            elseif (n_data(t_l,i_l)==3 .and. n_data(t_l+1,i_l)==1 ) then
-                                    
-                                P_N2_N1=P_N2_N1+PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:)**2.0d0
-                                
-                            elseif (n_data(t_l,i_l)==3  .and. n_data(t_l+1,i_l)==2 ) then
-                                    
-                                P_N2_N1=P_N2_N1+2.0d0*PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:)*(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))*Pr_N_data(j_l,t_l,i_l)
-                                    
-                            elseif (n_data(t_l,i_l)==3 .and. n_data(t_l+1,i_l)==3 ) then
-                                    
-                                P_N2_N1=P_N2_N1+(1.0d0-PI_f_v(ind,n_data(t_l,i_l),P_type(i_l),V_type(i_l),:))**2.0d0*Pr_N_data(j_l,t_l,i_l)
-                                    
-                            end if
-                                    
-                            do j_l2=n_data(t_l+1,i_l),min(max_NFW+1,2*(P_type(i_l)-1)+n_data(t_l+1,i_l))
-                                if (n_data(t_l+1,i_l)==1) then
-                                    ind2=j_l2 !position in the state space wrt to the CCP, PI_s_v and ,PI_f_v
-                                elseif (n_data(t_l+1,i_l)==2) then
-                                    ind2=j_l2-1
-                                elseif (n_data(t_l+1,i_l)==3) then
-                                    ind2=j_l2-2
-                                else
-                                    print*,'error in estimation'
-                                end if
-                                !Initialize
-                                if (j_l==n_data(t_l,i_l) .and. j_l2==n_data(t_l+1,i_l)) then
-                                    P_BigN2_BigN1=0.0d0
-                                end if
-                                P_BigN2_BigN1=P_BigN2_BigN1+F(ind,ind2,n_data(t_l,i_l),n_data(t_l+1,i_l),P_type(i_l),V_type(i_l),:)*Pr_N_data(j_l,t_l,i_l)*Pr_N_data(j_l2,t_l+1,i_l)
-                            end do                                   
-                        end if
                     end do
-                        
-                        
-                        
-                    if (sum(P_N2_N1)==0.0d0) then
+                    
+                    if (t_l>1) then
+                        if (n_data(t_l-1,i_l)<3) then
+                            likelihood_it=likelihood_it*sum(joint_pr(n_data(t_l-1,i_l),n_data(t_l,i_l),:,drilling_it(t_l-1,i_l,s_l)+1,P_type(i_l),A_type(i_l),V_type(i_l),:),1)
+                        else
+                            likelihood_it=likelihood_it*sum(joint_pr(n_data(t_l-1,i_l),n_data(t_l,i_l),:,1,P_type(i_l),A_type(i_l),V_type(i_l),:),1)
+                        end if
+                    else
+                        likelihood_it=likelihood_it*sum(reshape(joint_pr(:,n_data(t_l,i_l),:,:,P_type(i_l),A_type(i_l),V_type(i_l),:),(/3*(2*P_max-1)*2,3/)),1)
+                    end if   
+
+                    likelihood_i=likelihood_i*likelihood_it
+
+                    if (likelihood_i(1)==0.0d0)then
                         print*,''
                     end if
-
-
-                    !write(12,*),sum(likelihood_it*(likelihood_i*pr_unobs_t/sum(likelihood_i*pr_unobs_t)))      
-                        
-                    !if (n_data(t_l,i_l)==1) then
-                        likelihood_i=likelihood_i*likelihood_it*P_N2_N1*P_BigN2_BigN1
-                    !end if
 
 
                     !if (isnan(sum(likelihood_i))) then
@@ -282,18 +205,10 @@ function log_likelihood2(params_MLE)
                     !end if
                         
                 end do;
+                
 
-                likelihood_i=likelihood_i*UHE_type_model(:,i_l)
-
-
-                if (UHE_type_model(1,i_l)==-9.0d0) then
-                    UHE_type_model(:,i_l)=1.0d0/dble(unobs_types)
-                    print*,'gets here'
-                end if
-               
                 !Model 5
-                if (sum(likelihood_i*UHE_type_model(:,i_l))/=0.0d0 )then !UHE_type_model(1,i_l)
-                !    !print*,i_l,likelihood_i(2),UHE_type_model(2,i_l),log_likelihood
+                if (sum(likelihood_i)/=0.0d0 )then 
                     if (can_be_zombie_i(i_l)==0) then
                         log_likelihood2=log_likelihood2+log(sum(likelihood_i*pr_unobs_t)*pr_non_zombie_II)  
                     else
@@ -303,18 +218,13 @@ function log_likelihood2(params_MLE)
                     missing_x1=missing_x1+1
                 end if
 
-                !likelihood_aux(i_l)=log(sum(likelihood_i*UHE_type_model(:,i_l)))
-                !if (log(sum(likelihood_i*UHE_type_model(:,i_l)))==-1.0/0.0) then
-                !    print*,CCP(ind,n_data(t_l,i_l),P_type(i_l),A_type(i_l),V_type(i_l),:)
-                !    print*,'paused'
-                !    read*,pause_k
-                !end if
+
                 do t_l=1,T_sim
-                    if ((drilling_it(t_l,i_l,s_l)==1 .or. drilling_it(t_l,i_l,s_l)==0) .and. sum(likelihood_i*UHE_type_model(:,i_l))/=0.0d0) then
+                    if ((drilling_it(t_l,i_l,s_l)==1 .or. drilling_it(t_l,i_l,s_l)==0) .and. sum(likelihood_i)/=0.0d0) then
                         if (can_be_zombie_i(i_l)==0) then
-                            av_CCP_it(t_l,i_l)=sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t*pr_unobs_t*pr_non_zombie_II/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t*pr_unobs_t*pr_non_zombie_II))) 
+                            av_CCP_it(t_l,i_l)=sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i/sum(likelihood_i))) 
                         else
-                            av_CCP_it(t_l,i_l)=sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t*pr_unobs_t*pr_non_zombie_II/sum(likelihood_i*UHE_type_model(:,i_l)*pr_unobs_t*pr_unobs_t*pr_non_zombie_II+(1-pr_non_zombie_II))))
+                            av_CCP_it(t_l,i_l)=sum(av_CCP_uhe(t_l,i_l,:)*(likelihood_i*pr_unobs_t*pr_non_zombie_II/sum(likelihood_i*pr_unobs_t*pr_non_zombie_II+(1-pr_non_zombie_II))))
                         end if    
                     else
                         av_CCP_it(t_l,i_l)=-9.0d0
@@ -326,16 +236,17 @@ function log_likelihood2(params_MLE)
     end do
     end do
         !close(12)
-        
+
     log_likelihood2=-log_likelihood2
 
-    call compute_moments(av_CCP_it,"modl",moment_own_nxa_model)
+    
     !GMM
     !log_likelihood=sum(((moment_own_nxa_model-moment_own_nxa_data))**2)
     if (bootstrap==0 .and. log_likelihood2<max_mle) then
         open(unit=12, file=path_results//"parameters.txt",status='replace')
             write(12,'(<par>f20.12,f20.12)'),params,log_likelihood2
         close(12)
+        call compute_moments(av_CCP_it,"modl",moment_own_nxa_model)
         max_mle=log_likelihood2
     end if
         

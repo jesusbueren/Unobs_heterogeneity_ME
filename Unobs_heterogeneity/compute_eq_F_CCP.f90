@@ -1,4 +1,4 @@
-subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N,social_output,private_output,Pr_u_X)
+subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N,social_output,private_output,joint_pr)
     use cadastral_maps; use dimensions; use primitives
     implicit none
     double precision,dimension(par),intent(in)::params
@@ -8,7 +8,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(inout)::V_fct,V_social
     integer,intent(in)::v_l    
     double precision,intent(out)::mean_N,social_output,private_output
-    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(out)::Pr_u_X
+    double precision,dimension(3,3,2*P_max-1,2,P_max,types_a,unobs_types),intent(out)::joint_pr
     double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types)::CCP_old,CCP,CCP2
     
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
@@ -25,7 +25,6 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N
         !print*, 'social return',(ef_v(1,2,1,a_l,v_l,u_l)-c_e),(ef_v(1,2,1,a_l,v_l,u_l)-c_e)/(1.0d0-beta*(1.0d0-pi_f_v(1,2,1,v_l,u_l)))-c_s
     end do;end do
 
-
     !Generate beliefs consitent with CCP
     F=1.0d0
     CCP=CCP_mid !
@@ -33,7 +32,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N
 !   print*,'generating beliefs'
     it=0
     n_initial=1
-1    call generate_beliefs(CCP_mid,V_fct,V_social,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,social_output,private_output,Pr_u_X)
+1    call generate_beliefs(CCP_mid,V_fct,V_social,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,social_output,private_output,joint_pr)
     
     !For each plot type obtain a new CCP given beliefs
     !print*,'policy step'
@@ -59,9 +58,14 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N
                             ,P_l &
                             ,CCP(1:2*P_l-1,:,P_l,a_l,u_l),CCP2(1:2*P_l-1,:,P_l,a_l,u_l),v_l,u_l &
                             ,V_social(1:2*P_l-1,:,P_l,a_l,u_l),a_l)
-    end do; end do;end do
+    end do;
+    if (minval(CCP(1:2*P_l-1,:,P_l,2,u_l)-CCP(1:2*P_l-1,:,P_l,1,u_l))<0.0d0) then
+        print*,'ufff',minval(CCP(1:2*P_l-1,:,P_l,2,u_l)-CCP(1:2*P_l-1,:,P_l,1,u_l))
+    end if
+    end do;end do
+    
 
-    !V_fct(1,3,2:7,1,1)
+    !CCP(1,1,8,:,1)
    
     !V_fct(1,3,1,:,4)
     !P_l2=P_max
@@ -75,11 +79,15 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N
     
     P_l2=P_max
     dist=0.0
-    do P_l=2,P_max; do n_l=1,2;do ind=1,2*P_l-1; 
-        dist=dist+dble(sum(iterations(ind,n_l,1:3,P_l,:)))/dble(sum(iterations(:,1:2,1:3,:,:)))*sum(abs(CCP_old(ind,n_l,P_l,:,:)-CCP(ind,n_l,P_l,:,:)))/dble(types_a)/dble(unobs_types)
-    end do;end do; end do
+    dist=maxval(abs(CCP_old(1,:,6,:,:)-CCP(1,:,6,:,:)))
+    !if (v_l==1) then
+       ! print*,dist
+    !end if
+    !do P_l=2,P_max; do n_l=1,2;do ind=1,2*P_l-1; 
+    !    dist=dist+dble(sum(iterations(ind,n_l,1:3,P_l,:)))/dble(sum(iterations(:,1:2,1:3,:,:)))*sum(abs(CCP_old(ind,n_l,P_l,:,:)-CCP(ind,n_l,P_l,:,:)))/dble(types_a)/dble(unobs_types)
+    !end do;end do; end do
     !print*,'village',v_l
-    !print*,'dist CCP',dist,'social_output',social_output
+    !print*,'dist CCP',dist!,'social_output',social_output
     
     !New guess of the ccp is half way through
     CCP_mid=CCP*0.5d0+CCP_old*0.5d0
@@ -89,9 +97,14 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N
     !print*,'press any key to continue'
     !read*,pause_k
     it=it+1
-    if (dist>1.0d-3 .and. it<4) then !1.0d-4 
+    if (dist>1.0d-3 .and. it<5) then !1.0d-4 
         go to 1 
     end if
+    
+    if (it==10 .and. dist>1.0d-3) then
+        print*,'equilibrium not reached in village',v_l,dist
+    end if
+    
     
     !call generate_beliefs(CCP_mid,V_fct,Ef_v(:,:,:,:,v_l,:),n_initial,F,v_l,iterations,mean_N,social_output,private_output,Pr_u_X)
     !print*,'dist CCP',dist,'social_output',social_output

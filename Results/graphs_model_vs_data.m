@@ -249,11 +249,11 @@ beta=0.98
 counterfactuals=reshape(counterfactuals(1:variables*nkk*villages),variables,nkk,villages)
 
 
- v_l=1
+ v_l=8
 % A=mean(counterfactuals(4,:,:),3)
 % B=mean(counterfactuals(5,:,:),3)
 A=counterfactuals(4,:,v_l)
-c_e=5
+c_e=11
 figure(1)
 set(1,'position',[50    500    550    200])
 subplot(1,2,1)

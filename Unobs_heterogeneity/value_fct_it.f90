@@ -11,11 +11,12 @@ subroutine value_fct_it(Ef_v,F,P,CCP,v_l,u_l,V_new)
     double precision,dimension(2*P-1,2),intent(out)::CCP
     double precision,dimension(2*P-1,3),intent(out)::V_new
     character::pause_k
+    integer::ind
 
     !Define intial guess of value function
     V_old=0.0d0
     dist=1.0d0
-    crit=1.0d-10
+    crit=1.0d-12
         
     do while (dist>crit)
         call one_step_value_fct_it(Ef_v,F,P,CCP,v_l,u_l,V_old,V_new)
@@ -32,7 +33,20 @@ subroutine value_fct_it(Ef_v,F,P,CCP,v_l,u_l,V_new)
             if (dist>crit)then
                 V_old=V_new
             end if
-    end do   
+    end do  
+    
+    !do ind=2,2*P-1
+    !    if (V_new(ind-1,1)<V_new(ind,1)) then
+    !        print*,'hi there 1'
+    !    end if
+    !    if (V_new(ind-1,2)<V_new(ind,2)) then
+    !        print*,'hi there 2'
+    !    end if
+    !    if (V_new(ind-1,3)<V_new(ind,3)) then
+    !        print*,'hi there 3'
+    !    end if
+    !    !F(3,:,3,1)
+    !end do
 end subroutine
     
         
@@ -48,6 +62,7 @@ subroutine one_step_value_fct_it(Ef_v,F,P,CCP,v_l,u_l,V_old,V_new)
     double precision,dimension((2*P-1)*3)::Vec_old,Vec_new
     double precision,dimension(2*P-1)::v_00,v_0I,v_10,v_1I,CCP_aux
     double precision,dimension(2*P-1,2),intent(out)::CCP
+    integer::ind
     character::pause_k
     
     V_new=0.0d0
@@ -87,11 +102,12 @@ subroutine one_step_value_fct_it(Ef_v,F,P,CCP,v_l,u_l,V_old,V_new)
                 CCP(1:2*P-1,2)=1.0d0/(1.0d0+exp(v_10(1:2*P-1)/rho(2)-v_1I(1:2*P-1)/rho(2)))
                 
                 V_new(1:2*P-1,3)=T_g+Ef_v(1:2*P-1,3)-2.0d0*tau &
-                                +CCP_aux(1:2*P-1)*(rho(2)*gamma-rho(2)*log(CCP_aux(1:2*P-1))) & !-c_s*PI_s_v(1:2*P-1,2,P,v_l)-c_d*(1.0d0-PI_s_v(1:2*P-1,2,P,v_l))
+                                +CCP_aux(1:2*P-1)*(rho(2)*gamma-rho(2)*log(CCP_aux(1:2*P-1))-c_s*PI_s_v(1:2*P-1,2,P,v_l)-c_d*(1.0d0-PI_s_v(1:2*P-1,2,P,v_l))) & !
                                 +(1.0d0-CCP_aux(1:2*P-1))*(rho(2)*gamma-rho(2)*log(1.0d0-CCP_aux(1:2*P-1))) &
                                 + beta*(1.0d0-PI_f_v(1:2*P-1,3,P,v_l,u_l))**2.0d0*matmul(F(1:2*P-1,1:2*P-1,3,3),V_old(1:2*P-1,3)) & !none fails
                                 + 2.0d0*beta*(1.0d0-PI_f_v(1:2*P-1,3,P,v_l,u_l))*PI_f_v(1:2*P-1,3,P,v_l,u_l)*matmul(F(1:2*P-1,1:2*P-1,3,2),V_old(1:2*P-1,2)) & !one fails
                                 + beta*PI_f_v(1:2*P-1,3,P,v_l,u_l)**2.0d0*matmul(F(1:2*P-1,1:2*P-1,3,1),V_old(1:2*P-1,1))  !both fail
+                
     
     
     if (isnan(sum(CCP))) then

@@ -1,4 +1,4 @@
-subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iterations,mean_N,social_output,private_output,Pr_u_x)
+subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iterations,mean_N,social_output,private_output,joint_pr)
     use cadastral_maps; use primitives
     implicit none
     double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types),intent(in)::CCP
@@ -8,13 +8,14 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,unobs_types),intent(out)::F_new
     integer,intent(in)::v_l
     integer(8),dimension(2*P_max-1,3,3,P_max,unobs_types),intent(out)::iterations
-    double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(out)::Pr_u_x !Pr_u_x(1,1,3,4,:) counter_u(1,1,3,4,:)
-    integer(8),dimension(2*P_max-1,3,P_max,types_a,unobs_types)::counter_u
-    integer(8),parameter::T=50000!0!150000
+    double precision,dimension(3,3,2*P_max-1,2,P_max,types_a,unobs_types),intent(out)::joint_pr
+    integer(8),dimension(3,3,2*P_max-1,2,P_max,types_a,unobs_types)::counter_u
+    integer(8),parameter::T=10000
     integer(8),dimension(plots_in_map,3)::state,state_old
-    integer(8)::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min,a_l,u_l
+    integer(8),dimension(plots_in_map)::drill_old
+    integer(8)::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min,a_l,u_l,ind2,N_all2,i
     double precision::u_d,u_s,u_f,u_m,it2
-    integer(8),parameter:: its=48000!0
+    integer(8),parameter:: its=9900
     double precision,dimension(its)::NPV,total_N,NPV_PV,CCP_av
     double precision,intent(out)::mean_N,social_output,private_output
     integer(8),dimension(2*P_max-1,2*P_max-1,3,3,P_max,unobs_types)::beliefs_c
@@ -24,6 +25,7 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
     double precision,dimension(P_max)::dist
     double precision,dimension(2*P_max-1)::CCP_aux
     character::continue_k
+    integer ( kind = 4 ) seed_new
     
     
     
@@ -31,9 +33,9 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
     !print*,'smthg'
     !Call seed number
     
-    !call random_seed(GET=seed2)
-    call random_seed(PUT=seed)
+    seed_new=123456789
     
+
     
     beliefs_c=0
     iterations=0
@@ -43,10 +45,11 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
     
     !Store the state for each plot and simulate decision to drill
     !OPEN(UNIT=9, FILE="panel.txt")
+    !OPEN(UNIT=12, FILE="checks.txt")
     do t_l=1,T-1;   
         !print*,t_l
         !simulate monsoon next period
-        call RANDOM_NUMBER(u_m)
+        call random_value( seed_new, u_m )
         if (u_m<PI_m(1,v_l))then
             m_l=1
         else
@@ -97,10 +100,10 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
                 state(i_l,3)=ind
                 !Count transitions (in the first iteration state_old is undefined: no problem)
                 if (t_l>=burn_t) then
-                    beliefs_c(state_old(i_l,3),state(i_l,3),state_old(i_l,1),state(i_l,1),P,unobs_types_i(i_l,v_l))=&
-                    beliefs_c(state_old(i_l,3),state(i_l,3),state_old(i_l,1),state(i_l,1),P,unobs_types_i(i_l,v_l))+1
+                    beliefs_c(state_old(i_l,3),state(i_l,3),state_old(i_l,1),1,P,unobs_types_i(i_l,v_l))=&
+                    beliefs_c(state_old(i_l,3),state(i_l,3),state_old(i_l,1),1,P,unobs_types_i(i_l,v_l))+1
                     !Compute joint distribution state variables and unobserved heterogeneity type
-                    counter_u(ind,n_l,P,A,unobs_types_i(i_l,v_l))=counter_u(ind,n_l,P,A,unobs_types_i(i_l,v_l))+1
+                    counter_u(state_old(i_l,1),state(i_l,1),state_old(i_l,3),drill_old(i_l),P,A,unobs_types_i(i_l,v_l))=counter_u(state_old(i_l,1),state(i_l,1),state_old(i_l,3),drill_old(i_l),P,A,unobs_types_i(i_l,v_l))+1
                 end if
                 !Compute NPV
                 if (t_l>T-(its+1)) then  
@@ -149,10 +152,12 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
                     NPV(t_l-(T-(its+1)))=dble(i_l-1)/dble(i_l)*NPV(t_l-(T-(its+1)))+1.0d0/dble(i_l)*(V_social(ind,n_l,P,A,unobs_types_i(i_l,v_l)))
                 end if
                 !Well drilling decision and failures/successes
+                drill_old(i_l)=1
                 if (n_l==1) then !no well
-                    call RANDOM_NUMBER(u_d)
+                    call random_value( seed_new, u_d )
                     if (u_d<CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))) then !decides to drill
-                        call RANDOM_NUMBER(u_s)
+                        drill_old(i_l)=2
+                        call random_value( seed_new, u_s )
                         if (u_s<PI_s_v(ind,n_l,P,v_l)) then !successful attempt
                             n_initial(i_l,1)=n_l+1
                         else !unsuccessful attempt
@@ -162,18 +167,19 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
                         n_initial(i_l,1)=n_l
                     end if
                 elseif (n_l==2) then !one well
-                    call RANDOM_NUMBER(u_d)
+                    call random_value( seed_new, u_d )
                     if (u_d<CCP(ind,n_l,P,A,unobs_types_i(i_l,v_l))) then !decides to drill
-                        call RANDOM_NUMBER(u_s)
+                        drill_old(i_l)=2
+                        call random_value( seed_new, u_s )
                         if (u_s<PI_s_v(ind,n_l,P,v_l)) then !successful attempt
-                            call RANDOM_NUMBER(u_f)
+                            call random_value( seed_new, u_f )
                             if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l))) then !failure of the previous well
                                 n_initial(i_l,1)=n_l
                             else
                                 n_initial(i_l,1)=n_l+1
                             end if
                         else !unsuccessful attempt
-                            call RANDOM_NUMBER(u_f)
+                            call random_value( seed_new, u_f )
                             if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l))) then !failure of the previous well PI_fm(:)
                                 n_initial(i_l,1)=n_l-1
                             else
@@ -181,7 +187,7 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
                             end if
                         end if
                     else !decides not to drill
-                        call RANDOM_NUMBER(u_f)
+                        call random_value( seed_new, u_f )
                         if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l))) then !failure of the previous well
                             n_initial(i_l,1)=n_l-1
                         else
@@ -189,7 +195,7 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
                         end if 
                     end if 
                 elseif(n_l==3) then !two wells
-                    call RANDOM_NUMBER(u_f)
+                    call random_value( seed_new, u_f )
                     if (u_f<PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l))**2) then !failure of the two wells
                         n_initial(i_l,1)=n_l-2
                     elseif (u_f>(1.0d0-PI_fm(N_all-1,m_l,unobs_types_i(i_l,v_l)))**2) then !failure of none
@@ -224,11 +230,15 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
         !Compute beliefs
         if (t_l>burn_t+1) then
             F=0.0d0
-            do P_l=2,P_max; do ind=1,2*P_l-1; do n_l=1,3; do n_l2=1,3;do u_l=1,unobs_types
+            do P_l=2,P_max; do ind=1,2*P_l-1; do n_l=1,3; do n_l2=1,1;do u_l=1,unobs_types
                     if (n_l==1 .and. n_l2==3) then
                         F(ind,:,n_l,n_l2,P_l,u_l)=-9.0d0
-                    elseif ((sum(beliefs_c(ind,:,n_l,n_l2,P_l,u_l)))==0) then
+                    elseif ((sum(beliefs_c(ind,:,n_l,n_l2,P_l,u_l)))==0) then !beliefs_c(ind,:,n_l,n_l2,P_l,3)
                         F(ind,1:2*P_l-1,n_l,n_l2,P_l,u_l)=-9.0d0
+                        !if (P_l>=3)then
+                        !    print*,sum(beliefs_c(1,:,n_l,n_l2,P_l,:))
+                        !    print*,''
+                        !end if
                     else
                         F(ind,:,n_l,n_l2,P_l,u_l)=dble(beliefs_c(ind,:,n_l,n_l2,P_l,u_l))/dble(sum(beliefs_c(ind,:,n_l,n_l2,P_l,u_l)))
                         iterations(ind,n_l,n_l2,P_l,u_l)=iterations(ind,n_l,n_l2,P_l,u_l)+sum(beliefs_c(ind,:,n_l,n_l2,P_l,u_l))
@@ -242,11 +252,19 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
             if (t_l>T-(its+1)) then
                 total_N(t_l-(T-(its+1)))=sum(n_initial(1:plots_v(v_l),1))-plots_v(v_l)
             end if
-            it=0       
+            it=0
+            P_l=3
+            n_l=1
+            n_l2=1
+            u_l=1
+            ind=3
+            
+            !write(12,'(I10,<2*P_l-1>F10.5)'),t_l-burn_t-1,F_new(ind,1:2*P_l-1,n_l,n_l2,P_l,u_l)
+            
         end if
         it=it+1
     end do
-
+    !close(12)
     !close(9)
     !close(13)
     !print*,'end panel'
@@ -254,17 +272,27 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
 
     ! In case I don't have observations for a given state, I consider that the transition pr 
     ! is the same for all possible future states
-    do P_l=2,P_max; do ind=1,2*P_l-1; do n_l=1,3; do n_l2=1,min(n_l+1,3); do u_l=1,unobs_types
+    it=0
+    it2=0
+    do P_l=1,P_max; do ind=1,2*P_l-1; do n_l=1,3; do n_l2=1,1; do u_l=1,unobs_types
+        it2=it2+1
         it_min=300000
         if (iterations(ind,n_l,n_l2,P_l,u_l)==0) then
-            F_new(ind,1:2*P_l-1,n_l,n_l2,P_l,u_l)=1.0d0/(2.0d0*dble(P_l)-1.0d0)
+            it=it+1
+            F_new(ind,1:2*P_l-1,n_l,n_l2,P_l,u_l)=1.0d0/dble(2*P_l-1)
         end if
         if (isnan(F_new(ind,1,n_l,n_l2,P_l,u_l))) then
             print*,'error in generate beliefs'
         end if
         F_new(ind,1:2*P_l-1,n_l,n_l2,P_l,u_l)=F_new(ind,1:2*P_l-1,n_l,n_l2,P_l,u_l)/sum(F_new(ind,1:2*P_l-1,n_l,n_l2,P_l,u_l))
-        !print*,sum(F_new(ind,:,n_l,n_l2,P_l))
+        !print*,sum(F_new(1,:,3,1,6,3))
     end do;end do;end do;end do; end do
+    F_new(:,:,:,2,:,:)=F_new(:,:,:,1,:,:)
+    F_new(:,:,:,3,:,:)=F_new(:,:,:,1,:,:)
+    F_new(:,:,1,3,:,:)=0.0d0
+    !if (v_l==1) then
+    !    print*,'missing beliefs',it,'out of',int(it2)
+    !end if
     
     !Beliefs for plots with no neighbors are degenerate: they know what the future will look like cond on their own outcomes
     P_l=1
@@ -279,10 +307,14 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
     
     !print*,'av drilling',sum(CCP_av)/dble(its),'private_output',private_output,'social_output',social_output,'in village',v_l
     
-
-    do ind=1,2*P_max-1; do n_l=1,3; do P_l=1,P_max; do a_l=1,types_a; do u_l=1,unobs_types
-        Pr_u_x(ind,n_l,P_l,a_l,u_l)=dble(counter_u(ind,n_l,P_l,a_l,u_l))/dble(sum(counter_u(:,:,:,:,u_l)))
-    end do;end do;end do;end do;end do
+    joint_pr=0.0d0
+     do P_l=3,P_max; do a_l=1,types_a; do u_l=1,unobs_types
+         if (sum(counter_u(:,:,:,:,P_l,a_l,u_l))==0.0d0)then
+             joint_pr(:,:,:,:,P_l,a_l,u_l)=0.0d0
+        else
+            joint_pr(:,:,:,:,P_l,a_l,u_l)=dble(counter_u(:,:,:,:,P_l,a_l,u_l))/dble(sum(counter_u(:,:,:,:,P_l,a_l,u_l)))
+        end if    
+     end do;end do;end do
     
     !OPEN(UNIT=12, FILE="wells.txt")
     !    write(12,'(F5.3)'),total_N/dble(plots_v(v_l))
@@ -297,5 +329,49 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
     !    print*,'N other',ind-1
     !    print*,u_l,dble(sum(counter_u(ind,:,:,:,u_l)))/dble(sum(counter_u(:,:,:,:,u_l)))
     !end do;end do
-end subroutine
+    end subroutine
+
     
+    subroutine random_value ( seed, r )
+
+!*****************************************************************************80
+!
+!! RANDOM_VALUE generates a random value R.
+!
+!  Discussion:
+!
+!    This is not a good random number generator.  It is a SIMPLE one.
+!    It illustrates a model which works by accepting an integer seed value
+!    as input, performing some simple operation on the seed, and then
+!    producing a "random" real value using some simple transformation.
+!
+!  Licensing:
+!
+!    This code is distributed under the GNU LGPL license. 
+!
+!  Modified:
+!
+!    03 September 2012
+!
+!  Author:
+!
+!    John Burkardt
+!
+!  Parameters:
+!
+!    Input/output, integer ( kind = 4 ) SEED, a seed for the random 
+!    number generator.
+!
+!    Output, real ( kind = 8 ) R, the random value.
+!
+  implicit none
+
+  real ( kind = 8 ) r
+  integer ( kind = 4 ) seed
+
+  seed = mod ( seed, 65536 )
+  seed = mod ( ( 3125 * seed ), 65536 )
+  r = real ( seed, kind = 8 ) / 65536.0D+00
+
+  return
+end

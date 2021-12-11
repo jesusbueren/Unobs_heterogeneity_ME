@@ -29,7 +29,7 @@ subroutine expected_productivity(params,a,Ef_v,v_l,u_l)
                     Ef(p_l,m_l,2)=Ef(p_l,m_l,2)+(theta_p*q(k_l,1)**beta*a**gamma_p)*PI_k(p_l,k_l,m_l,u_l)
                 end if
             end do;end do
-            do p_l=1,2*P;do k_l=1,K;do k_l2=1,K
+            do p_l=2,2*P;do k_l=1,K;do k_l2=1,K
                 if (cost_p>0.0d0) then
                     a_chosen=min((cost_p/theta_p/(1.0d0-beta_p))**(-1.0d0/beta_p)*(q(k_l,1)+q(k_l2,1)),a)
                     Ef(p_l,m_l,3)=Ef(p_l,m_l,3)+(theta_p*(q(k_l,1)+q(k_l2,1))**beta_p*a_chosen**gamma_p-cost_p*a_chosen) &
