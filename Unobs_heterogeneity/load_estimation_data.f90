@@ -44,6 +44,5 @@ subroutine load_estimation_data
         modal_N(t_l,i_l)=maxloc(Pr_N_data(:,t_l,i_l),1)-(n_data(t_l,i_l)-1) 
     end do;end do
     N_bar=dble(sum(modal_N,1))/dble(T_sim)
-    
-    
+
 end subroutine

@@ -8,7 +8,7 @@ subroutine compute_eq_F_CCP(params,F,CCP_mid,V_fct,V_social,n_initial,v_l,mean_N
     double precision,dimension(2*P_max-1,3,P_max,types_a,unobs_types),intent(inout)::V_fct,V_social
     integer,intent(in)::v_l    
     double precision,intent(out)::mean_N,social_output,private_output
-    double precision,dimension(3,3,2*P_max-1,2,P_max,types_a,unobs_types),intent(out)::joint_pr
+    double precision,dimension(2*P_max-1,2*P_max-1,3,P_max,types_a,unobs_types),intent(out)::joint_pr
     double precision,dimension(2*P_max-1,2,P_max,types_a,unobs_types)::CCP_old,CCP,CCP2
     
     double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Ef_v !Ef_v: expected productivity
