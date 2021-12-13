@@ -84,7 +84,7 @@ use cadastral_maps
     double precision,dimension(types_a,2)::moment_own_nxa_data
     
     !Unobsverded heterogeneity from beliefs
-    double precision,dimension(2*P_max-1,3,P_max,types_a,villages,unobs_types)::Pr_u_X
+    double precision,dimension(2*P_max-1,2*P_max-1,3,P_max,types_a,villages,unobs_types)::Pr_u_X
     
     double precision:: max_mle=99999999.0d0
     

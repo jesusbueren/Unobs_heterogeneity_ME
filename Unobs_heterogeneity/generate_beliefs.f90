@@ -8,14 +8,14 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
     double precision,dimension(2*P_max-1,2*P_max-1,3,3,P_max,unobs_types),intent(out)::F_new
     integer,intent(in)::v_l
     integer(8),dimension(2*P_max-1,3,3,P_max,unobs_types),intent(out)::iterations
-    double precision,dimension(2*P_max-1,2*P_max-1,3,P_max,types_a,unobs_types),intent(out)::joint_pr
-    integer(8),dimension(2*P_max-1,2*P_max-1,3,P_max,types_a,unobs_types)::counter_u
-    integer(8),parameter::T=40000
+    double precision,dimension(2*P_max-1,2*P_max-1,3,P_max,unobs_types),intent(out)::joint_pr
+    integer(8),dimension(2*P_max-1,2*P_max-1,3,P_max,unobs_types)::counter_u
+    integer(8),parameter::T=150000
     integer(8),dimension(plots_in_map,3)::state,state_old
     integer(8),dimension(plots_in_map)::drill_old
     integer(8)::i_l,j_l,t_l,ind,N_all,n_l,P,A,P_l,n_l2,it,m_l,it_min,a_l,u_l,ind2,N_all2,i
     double precision::u_d,u_s,u_f,u_m,it2
-    integer(8),parameter:: its=39000
+    integer(8),parameter:: its=149000
     double precision,dimension(its)::NPV,total_N,NPV_PV,CCP_av
     double precision,intent(out)::mean_N,social_output,private_output
     integer(8),dimension(2*P_max-1,2*P_max-1,3,3,P_max,unobs_types)::beliefs_c
@@ -103,7 +103,7 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
                     beliefs_c(state_old(i_l,3),state(i_l,3),state_old(i_l,1),1,P,unobs_types_i(i_l,v_l))=&
                     beliefs_c(state_old(i_l,3),state(i_l,3),state_old(i_l,1),1,P,unobs_types_i(i_l,v_l))+1
                     !Compute joint distribution state variables and unobserved heterogeneity type
-                    counter_u(state_old(i_l,3),state(i_l,3),state_old(i_l,1),P,A,unobs_types_i(i_l,v_l))=counter_u(state_old(i_l,3),state(i_l,3),state_old(i_l,1),P,A,unobs_types_i(i_l,v_l))+1
+                    counter_u(state_old(i_l,3),state(i_l,3),state_old(i_l,1),P,unobs_types_i(i_l,v_l))=counter_u(state_old(i_l,3),state(i_l,3),state_old(i_l,1),P,unobs_types_i(i_l,v_l))+1
                 end if
                 !Compute NPV
                 if (t_l>T-(its+1)) then  
@@ -308,13 +308,13 @@ subroutine generate_beliefs(CCP,V_fct,V_social,Ef_v,n_initial,F_new,v_l,iteratio
     !print*,'av drilling',sum(CCP_av)/dble(its),'private_output',private_output,'social_output',social_output,'in village',v_l
     
     joint_pr=0.0d0
-     do P_l=3,P_max; do a_l=1,types_a; do u_l=1,unobs_types
-         if (sum(counter_u(:,:,:,P_l,a_l,u_l))==0.0d0)then
-             joint_pr(:,:,:,P_l,a_l,u_l)=0.0d0
+     do P_l=3,P_max; do u_l=1,unobs_types
+         if (sum(counter_u(:,:,:,P_l,u_l))==0.0d0)then
+             joint_pr(:,:,:,P_l,u_l)=0.0d0
         else
-            joint_pr(:,:,:,P_l,a_l,u_l)=dble(counter_u(:,:,:,P_l,a_l,u_l))/dble(sum(counter_u(:,:,:,P_l,a_l,u_l)))
+            joint_pr(:,:,:,P_l,u_l)=dble(counter_u(:,:,:,P_l,u_l))/dble(sum(counter_u(:,:,:,P_l,u_l)))
         end if    
-     end do;end do;end do
+     end do;end do
     
     !OPEN(UNIT=12, FILE="wells.txt")
     !    write(12,'(F5.3)'),total_N/dble(plots_v(v_l))

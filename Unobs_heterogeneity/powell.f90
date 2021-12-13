@@ -8,12 +8,12 @@
 	REAL(DP), INTENT(IN) :: ftol
 	REAL(DP), INTENT(OUT) :: fret
 	INTERFACE
-		FUNCTION log_likelihood(p)
+		FUNCTION log_likelihood2(p)
 		USE nrtype
 		IMPLICIT NONE
 		REAL(DP), DIMENSION(4), INTENT(IN) :: p
-		REAL(DP) :: log_likelihood
-		END FUNCTION log_likelihood
+		REAL(DP) :: log_likelihood2
+		END FUNCTION log_likelihood2
 	END INTERFACE
 	INTEGER(I4B), PARAMETER :: ITMAX=200
 	REAL(DP), PARAMETER :: TINY=1.0e-25_dp
@@ -21,7 +21,7 @@
 	REAL(DP) :: del,fp,fptt,t
 	REAL(DP), DIMENSION(size(p)) :: pt,ptt,xit
 	n=assert_eq(size(p),size(xi,1),size(xi,2),'powell')
-	fret=log_likelihood(p)
+	fret=log_likelihood2(p)
 	pt(:)=p(:)
 	iter=0
 	do
@@ -44,7 +44,7 @@
 		ptt(:)=2.0_dp*p(:)-pt(:)
 		xit(:)=p(:)-pt(:)
 		pt(:)=p(:)
-		fptt=log_likelihood(ptt)
+		fptt=log_likelihood2(ptt)
 		if (fptt >= fp) cycle
 		t=2.0_dp*(fp-2.0_dp*fret+fptt)*(fp-fret-del)**2-del*(fp-fptt)**2
 		if (t >= 0.0) cycle

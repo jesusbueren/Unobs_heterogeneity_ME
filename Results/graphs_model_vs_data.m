@@ -249,7 +249,7 @@ beta=0.98
 counterfactuals=reshape(counterfactuals(1:variables*nkk*villages),variables,nkk,villages)
 
 
- v_l=8
+ v_l=1
 % A=mean(counterfactuals(4,:,:),3)
 % B=mean(counterfactuals(5,:,:),3)
 A=counterfactuals(4,:,v_l)

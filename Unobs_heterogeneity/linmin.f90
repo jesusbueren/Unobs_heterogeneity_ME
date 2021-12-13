@@ -9,16 +9,16 @@ CONTAINS
 	REAL(DP), INTENT(IN) :: x
 	REAL(DP) :: f1dim
 	INTERFACE
-		FUNCTION log_likelihood(x)
+		FUNCTION log_likelihood2(x)
 		USE nrtype
 		REAL(DP), DIMENSION(4), INTENT(IN) :: x
-		REAL(DP) :: log_likelihood
-		END FUNCTION log_likelihood
+		REAL(DP) :: log_likelihood2
+		END FUNCTION log_likelihood2
 	END INTERFACE
 	REAL(DP), DIMENSION(:), ALLOCATABLE :: xt
 	allocate(xt(ncom))
 	xt(:)=pcom(:)+x*xicom(:)
-	f1dim=log_likelihood(xt)
+	f1dim=log_likelihood2(xt)
 	deallocate(xt)
 	END FUNCTION f1dim
 END MODULE f1dim_mod
